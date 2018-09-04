@@ -263,39 +263,12 @@ public class Season {
         println("Federations table");
         int index = 0;
         for (OrdenRatingItem item : orden_rating) {
-            print(String.format("%d) %-11s", index + 1, int_to_orden(index)));
+            print(String.format("%d) %-11s", index + 1, Nation.fromId(index).getName()));
             Arrays.stream(item.seasons).forEach(d -> print(String.format("%7.2f", d)));
             println();
             ++index;
         }
         println();
-    }
-
-    private String int_to_orden(int i) {
-        // TODO: refactor to enum
-        switch (i) {
-            case 0:
-                return "Almagest";
-            case 1:
-                return "Bellerofon";
-            case 2:
-                return "Galileo";
-            case 3:
-                return "Kameleopard";
-            case 4:
-                return "Oberon-22";
-            default:
-                throw new IndexOutOfBoundsException();
-        }
-    }
-
-    private int orden_to_int(String order_name) {
-        for (int i = 0; i < 5; i++) {
-            if (int_to_orden(i).equals(order_name)) {
-                return i;
-            }
-        }
-        throw new IndexOutOfBoundsException();
     }
 
     private void make_season_ordens_pos() {
@@ -316,7 +289,7 @@ public class Season {
         println();
         for (int i = 0; i < orden_pos.length; ++i) {
             int ordenId = orden_pos[i];
-            println(String.format("%d) %-11s %7.2f", i + 1, int_to_orden(ordenId), sums[ordenId]));
+            println(String.format("%d) %-11s %7.2f", i + 1, Nation.fromId(ordenId).getName(), sums[ordenId]));
         }
         readln();
     }
@@ -478,7 +451,7 @@ public class Season {
         readln();
         println();
         println("Knight " + kn[cl_winner].name + " " + kn[cl_winner].surname + " is the winner of the Champions League!");
-        println(kn[cl_winner].orden + "\'s triumph!");
+        println(kn[cl_winner].getOrden().getName() + "\'s triumph!");
         println();
 
 
@@ -515,13 +488,13 @@ public class Season {
     }
 
     private void play_national(int id) {
-        String orden = int_to_orden(id);
+        Nation orden = Nation.fromId(id);
 
         int[] gr = IntStream.range(0, ORDEN_SIZE)
                 .map(i -> id * ORDEN_SIZE + i)
                 .toArray();
 
-        play_group(gr, "Cup of " + orden, 0, 1);
+        play_group(gr, "Cup of " + orden.getName(), 0, 1);
         println();
 
         for (int i = 0; i < 6; i++) {
@@ -804,18 +777,18 @@ public class Season {
                 kn[id1].levelup();
             }
             elo.update(id1, id2, 1, 0);
-            orden_rating[orden_to_int(kn[id1].orden)].seasons[0] = orden_rating[orden_to_int(kn[id1].orden)].seasons[0] + points;
+            orden_rating[kn[id1].getOrden().getId()].seasons[0] = orden_rating[kn[id1].getOrden().getId()].seasons[0] + points;
         } else if (res.rw2 > res.rw1) {
             kn[id2].exp = kn[id2].exp + kn[id1].level;
             if (kn[id2].exp >= kn[id2].level * kn[id2].level * LEVEL_UP_COEFFICIENT) {
                 kn[id2].levelup();
             }
             elo.update(id1, id2, 0, 1);
-            orden_rating[orden_to_int(kn[id2].orden)].seasons[0] = orden_rating[orden_to_int(kn[id2].orden)].seasons[0] + points;
+            orden_rating[kn[id2].getOrden().getId()].seasons[0] = orden_rating[kn[id2].getOrden().getId()].seasons[0] + points;
         } else {
             elo.update(id1, id2, 0.5, 0.5);
-            orden_rating[orden_to_int(kn[id1].orden)].seasons[0] = orden_rating[orden_to_int(kn[id1].orden)].seasons[0] + points / 2;
-            orden_rating[orden_to_int(kn[id2].orden)].seasons[0] = orden_rating[orden_to_int(kn[id2].orden)].seasons[0] + points / 2;
+            orden_rating[kn[id1].getOrden().getId()].seasons[0] = orden_rating[kn[id1].getOrden().getId()].seasons[0] + points / 2;
+            orden_rating[kn[id2].getOrden().getId()].seasons[0] = orden_rating[kn[id2].getOrden().getId()].seasons[0] + points / 2;
         }
 
         return res;
@@ -888,13 +861,13 @@ public class Season {
             if (kn[id1].exp >= kn[id1].level * kn[id1].level * LEVEL_UP_COEFFICIENT) {
                 kn[id1].levelup();
             }
-            orden_rating[orden_to_int(kn[id1].orden)].seasons[0] = orden_rating[orden_to_int(kn[id1].orden)].seasons[0] + points;
+            orden_rating[kn[id1].getOrden().getId()].seasons[0] = orden_rating[kn[id1].getOrden().getId()].seasons[0] + points;
         } else if (res.rw2 > res.rw1) {
             kn[id2].exp = kn[id2].exp + kn[id1].level;
             if (kn[id2].exp >= kn[id2].level * kn[id2].level * LEVEL_UP_COEFFICIENT) {
                 kn[id2].levelup();
             }
-            orden_rating[orden_to_int(kn[id2].orden)].seasons[0] = orden_rating[orden_to_int(kn[id2].orden)].seasons[0] + points;
+            orden_rating[kn[id2].getOrden().getId()].seasons[0] = orden_rating[kn[id2].getOrden().getId()].seasons[0] + points;
         }
 
         if (res.rw1 > res.rw2 && res.rw1 - res.rw2 >= 2) {
@@ -1084,7 +1057,7 @@ public class Season {
                 done = true;
                 for (int i = 0; i < len; ++i) {
                     if (i % 2 == 0) {
-                        if (kn[temp[i]].orden.equals(kn[temp[i + 1]].orden)) {
+                        if (kn[temp[i]].getOrden() == kn[temp[i + 1]].getOrden()) {
                             done = false;
                             break;
                         }
@@ -1400,9 +1373,9 @@ public class Season {
 
         readln();
 
-        println(kn[wc].orden + " knight " + kn[wc].titul + kn[wc].name + " " + kn[wc].surname + " is the World Champion!!!");
+        println(kn[wc].getOrden().getName() + " knight " + kn[wc].titul + kn[wc].name + " " + kn[wc].surname + " is the World Champion!!!");
         println("It is the best day in the history of " + kn[wc].town + "!");
-        println("Everyone from " + kn[wc].orden + " are celebrating!");
+        println("Everyone from " + kn[wc].getOrden().getName() + " are celebrating!");
         println("Grand Master " + kn[wc].name + " " + kn[wc].surname + " is now in the history!");
 
         kn[wc].addTrophy("WC", year);
@@ -1468,10 +1441,10 @@ public class Season {
     private Team makeNationalTeam(int ordenId) {
         Team res = new Team();
         res.id = new int[3];
-        res.name = int_to_orden(ordenId);
+        res.name = Nation.fromId(ordenId).getName();
         int k = 0;
         for (int i = 0; i < 30; ++i) {
-            if (elo.items[i].player.orden.equals(int_to_orden(ordenId))) {
+            if (elo.items[i].player.getOrden().getId() == ordenId) {
                 res.id[k] = elo.items[i].player.id;
                 k += 1;
             }

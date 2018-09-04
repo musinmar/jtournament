@@ -19,7 +19,7 @@ public class Player {
     public String name;
     public String surname;
     public String town;
-    public String orden;
+    private Nation orden;
     public String titul;
 
     public int age = 1;
@@ -45,6 +45,14 @@ public class Player {
     public Player() {
     }
 
+    public Nation getOrden() {
+        return orden;
+    }
+
+    public void setOrden(Nation orden) {
+        this.orden = orden;
+    }
+
     public String getPlayerName() {
         String ret = titul + name + ' ' + surname;
         if (generation > 1) {
@@ -54,7 +62,7 @@ public class Player {
     }
 
     public String getNameWithOrden() {
-        return titul + name + " " + surname + " (" + orden.charAt(0) + ")";
+        return titul + name + " " + surname + " (" + orden.getName().charAt(0) + ")";
     }
 
     public void restartCareer(boolean randomizeDeckKind) {
@@ -171,7 +179,7 @@ public class Player {
         writer.println(name);
         writer.println(surname);
         writer.println(titul);
-        writer.println(orden);
+        writer.println(orden.getName());
         writer.println(town);
         writer.println(age);
         writer.println(generation);
@@ -198,7 +206,8 @@ public class Player {
         surname = sc.next();
         sc.nextLine();
         titul = sc.nextLine();
-        orden = sc.next();
+        String ordenName = sc.next();
+        this.orden = Nation.fromName(ordenName);
         town = sc.next();
         age = sc.nextInt();
         generation = sc.nextInt();
