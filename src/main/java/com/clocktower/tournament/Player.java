@@ -19,7 +19,7 @@ public class Player {
     public String name;
     public String surname;
     public String town;
-    private Nation orden;
+    private Nation nation;
     public String titul;
 
     public int age = 1;
@@ -45,12 +45,12 @@ public class Player {
     public Player() {
     }
 
-    public Nation getOrden() {
-        return orden;
+    public Nation getNation() {
+        return nation;
     }
 
-    public void setOrden(Nation orden) {
-        this.orden = orden;
+    public void setNation(Nation nation) {
+        this.nation = nation;
     }
 
     public String getPlayerName() {
@@ -61,8 +61,8 @@ public class Player {
         return ret;
     }
 
-    public String getNameWithOrden() {
-        return titul + name + " " + surname + " (" + orden.getName().charAt(0) + ")";
+    public String getNameWithNation() {
+        return titul + name + " " + surname + " (" + nation.getName().charAt(0) + ")";
     }
 
     public void restartCareer(boolean randomizeDeckKind) {
@@ -179,7 +179,7 @@ public class Player {
         writer.println(name);
         writer.println(surname);
         writer.println(titul);
-        writer.println(orden.getName());
+        writer.println(nation.getName());
         writer.println(town);
         writer.println(age);
         writer.println(generation);
@@ -206,8 +206,8 @@ public class Player {
         surname = sc.next();
         sc.nextLine();
         titul = sc.nextLine();
-        String ordenName = sc.next();
-        this.orden = Nation.fromName(ordenName);
+        String nationName = sc.next();
+        this.nation = Nation.fromName(nationName);
         town = sc.next();
         age = sc.nextInt();
         generation = sc.nextInt();
