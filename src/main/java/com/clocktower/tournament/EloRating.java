@@ -18,20 +18,22 @@ public class EloRating {
     }
 
     public EloRating() {
-        for (int i = 0; i < items.length; i++) {
-            items[i] = new EloRatingItem();
-        }
     }
 
-    public void init(Player[] knights) {
-        for (int i = 0; i < knights.length; i++) {
-            items[i].player = knights[i];
-            items[i].opg = items[i].os;
-        }
+    public void init(Player[] players) {
+        items = Arrays.stream(players)
+                .map(p -> {
+                    EloRatingItem item = new EloRatingItem();
+                    item.player = p;
+                    return item;
+                })
+                .toArray(EloRatingItem[]::new);
 
-        for (int i = 0; i < 30; ++i) {
-            resetPlayer(i);
-        }
+        Arrays.stream(items)
+                .forEach(item -> {
+                    resetPlayer(item.player);
+                    item.opg = item.os;
+                });
 
         sort();
     }
@@ -46,7 +48,10 @@ public class EloRating {
     }
 
     public void load(Scanner sc, Player[] players) {
-        for (int i = 0; i < 30; i++) {
+        int playerCount = players.length;
+        items = new EloRatingItem[playerCount];
+        for (int i = 0; i < playerCount; i++) {
+            items[i] = new EloRatingItem();
             int k = sc.nextInt();
             items[i].player = players[k];
             items[i].opg = sc.nextDouble();
@@ -120,9 +125,10 @@ public class EloRating {
         }
     }
 
-    public void resetPlayer(int id) {
-        int i = findItem(id);
-        items[i].os = 500 + (items[i].player.level - 5) * 50;
+    public void resetPlayer(Player player) {
+        int i = findItem(player);
+        //items[i].os = 500 + (items[i].player.level - 5) * 50;
+        items[i].os = 500;
     }
 
     private int findItem(int id) {
@@ -132,6 +138,15 @@ public class EloRating {
             }
         }
         throw new IllegalArgumentException("Player with such ID is not found");
+    }
+
+    private int findItem(Player player) {
+        for (int i = 0; i < items.length; i++) {
+            if (items[i].player == player) {
+                return i;
+            }
+        }
+        throw new IllegalArgumentException("Player is not found");
     }
 
     private double ratingDif(double rat1, double rat2, double res) {

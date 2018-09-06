@@ -1083,9 +1083,9 @@ public class Season {
         }
 
         if (year % 2 == 0) {
-            elo.items[1].player.decDeck();
-            elo.items[1].player.decDeck();
-            println(elo.items[1].player.getPlayerName() + " has decreased his skill.");
+            elo.items[0].player.decDeck();
+            elo.items[0].player.decDeck();
+            println(elo.items[0].player.getPlayerName() + " has decreased his skill.");
             println();
             readln();
         }
@@ -1196,7 +1196,7 @@ public class Season {
         println("Knight " + kn[id].getPlayerName() + " has retired at the age of " + kn[id].age);
         kn[id].restartCareer(true);
         kn[id].age = 0;
-        elo.resetPlayer(id);
+        elo.resetPlayer(kn[id]);
         elo.sort();
 
         if (kn[id].titul.equals("Lord ")) {
