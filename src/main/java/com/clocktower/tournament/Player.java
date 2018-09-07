@@ -2,6 +2,7 @@ package com.clocktower.tournament;
 
 import com.clocktower.tournament.domain.Nation;
 import com.clocktower.tournament.domain.Title;
+import com.clocktower.tournament.utils.IntToRomanConverter;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import static com.clocktower.tournament.Logger.println;
-import static com.clocktower.tournament.RandomUtils.random;
+import static com.clocktower.tournament.utils.RandomUtils.random;
 
 public class Player {
     public static final int RANDOM_DECK_CHANGES = 3;
@@ -19,9 +20,9 @@ public class Player {
 
     public int id;
 
-    public String name;
-    public String surname;
-    public String town;
+    private String name;
+    private String surname;
+    private String town;
     private Nation nation;
     private Title title;
 
@@ -48,6 +49,30 @@ public class Player {
     public Player() {
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    public String getTown() {
+        return town;
+    }
+
+    public void setTown(String town) {
+        this.town = town;
+    }
+
     public Nation getNation() {
         return nation;
     }
@@ -64,8 +89,12 @@ public class Player {
         this.title = title;
     }
 
+    public String getSimplePlayerName() {
+        return name + " " + surname;
+    }
+
     public String getPlayerName() {
-        String ret = title.getPrefix() + name + ' ' + surname;
+        String ret = title.getPrefix() + getSimplePlayerName();
         if (generation > 1) {
             ret += ' ' + IntToRomanConverter.convert(generation);
         }
@@ -73,7 +102,7 @@ public class Player {
     }
 
     public String getNameWithNation() {
-        return title.getPrefix() + name + " " + surname + " (" + nation.getName().charAt(0) + ")";
+        return title.getPrefix() + getSimplePlayerName() + " (" + nation.getName().charAt(0) + ")";
     }
 
     public void restartCareer(boolean randomizeDeckKind) {

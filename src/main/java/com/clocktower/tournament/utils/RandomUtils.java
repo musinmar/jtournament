@@ -1,4 +1,4 @@
-package com.clocktower.tournament;
+package com.clocktower.tournament.utils;
 
 public class RandomUtils {
     public static int random(int endExclusive) {

@@ -2,7 +2,7 @@ package com.clocktower.tournament;
 
 import org.junit.jupiter.api.Test;
 
-import static com.clocktower.tournament.IntToRomanConverter.convert;
+import static com.clocktower.tournament.utils.IntToRomanConverter.convert;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class IntToRomanConverterTest {

@@ -20,7 +20,7 @@ import static com.clocktower.tournament.Logger.print;
 import static com.clocktower.tournament.Logger.println;
 import static com.clocktower.tournament.Logger.readln;
 import static com.clocktower.tournament.Player.LEVEL_UP_COEFFICIENT;
-import static com.clocktower.tournament.RandomUtils.random;
+import static com.clocktower.tournament.utils.RandomUtils.random;
 import static com.clocktower.tournament.domain.Title.COMMON;
 import static com.clocktower.tournament.domain.Title.LORD;
 import static com.clocktower.tournament.domain.Title.SIR;
@@ -166,8 +166,7 @@ public class Season {
     }
 
     private void initNewGame() {
-        DefaultData.initDefaultPlayers(kn);
-        DefaultData.initDecks(kn);
+        kn = DefaultData.initDefaultPlayers();
 
         elo.init(kn);
 
@@ -445,7 +444,7 @@ public class Season {
         }
         readln();
         println();
-        println("Knight " + kn[fc_winner].name + " " + kn[fc_winner].surname + " is the winner of the Federation Cup!");
+        println("Knight " + kn[fc_winner].getPlayerName() + " is the winner of the Federation Cup!");
         println();
 
         println("Champions League - FINAL");
@@ -460,7 +459,7 @@ public class Season {
         }
         readln();
         println();
-        println("Knight " + kn[cl_winner].name + " " + kn[cl_winner].surname + " is the winner of the Champions League!");
+        println("Knight " + kn[cl_winner].getPlayerName() + " is the winner of the Champions League!");
         println(kn[cl_winner].getNation().getName() + "\'s triumph!");
         println();
 
@@ -1138,9 +1137,9 @@ public class Season {
         if (r.r2 > r.r1) {
             kn[worstSir].setTitle(COMMON);
             kn[bestCommon].setTitle(SIR);
-            println("Knight " + kn[bestCommon].name + " " + kn[bestCommon].surname + " has gained the Sir title!");
+            println("Knight " + kn[bestCommon].getSimplePlayerName() + " has gained the Sir title!");
         } else {
-            println("Knight " + kn[worstSir].name + " " + kn[worstSir].surname + " has defended his Sir title!");
+            println("Knight " + kn[worstSir].getSimplePlayerName() + " has defended his Sir title!");
         }
         readln();
 
@@ -1154,9 +1153,9 @@ public class Season {
         if (r.r2 > r.r1) {
             kn[worstLord].setTitle(SIR);
             kn[bestSir].setTitle(LORD);
-            println("Knight " + kn[bestSir].name + " " + kn[bestSir].surname + " has gained the Lord title!");
+            println("Knight " + kn[bestSir].getSimplePlayerName() + " has gained the Lord title!");
         } else {
-            println("Knight " + kn[worstLord].name + " " + kn[worstLord].surname + " has defended his Lord title!");
+            println("Knight " + kn[worstLord].getSimplePlayerName() + " has defended his Lord title!");
         }
         readln();
         println();
@@ -1374,9 +1373,9 @@ public class Season {
         readln();
 
         println(kn[wc].getNation().getName() + " knight " + kn[wc].getPlayerName() + " is the World Champion!!!");
-        println("It is the best day in the history of " + kn[wc].town + "!");
+        println("It is the best day in the history of " + kn[wc].getTown() + "!");
         println("Everyone from " + kn[wc].getNation().getName() + " are celebrating!");
-        println("Grand Master " + kn[wc].name + " " + kn[wc].surname + " is now in the history!");
+        println("Grand Master " + kn[wc].getSimplePlayerName() + " is now in the history!");
 
         kn[wc].addTrophy("WC", year);
 
