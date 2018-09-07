@@ -28,18 +28,18 @@ public class Player {
 
     public int age = 1;
     public int generation = 0;
+    public int level;
+    public int persistentLevel;
+    public int exp = 0;
 
     public List<String> dost = new ArrayList<>();
 
-    public int at;
-    public int def;
-    public int s;
-    public int l;
-    public int v;
+    private int at;
+    private int def;
+    private int s;
+    private int l;
+    private int v;
 
-    public int persistentLevel;
-    public int level;
-    public int exp = 0;
 
     // TODO: create class for deck kind
     public int[] deckKind = new int[2];
@@ -87,6 +87,26 @@ public class Player {
 
     public void setTitle(Title title) {
         this.title = title;
+    }
+
+    public void setAt(int at) {
+        this.at = at;
+    }
+
+    public void setDef(int def) {
+        this.def = def;
+    }
+
+    public void setS(int s) {
+        this.s = s;
+    }
+
+    public void setL(int l) {
+        this.l = l;
+    }
+
+    public void setV(int v) {
+        this.v = v;
     }
 
     public String getSimplePlayerName() {
