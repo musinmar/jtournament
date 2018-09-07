@@ -2,14 +2,16 @@ package com.clocktower.tournament;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 import static java.util.Comparator.comparingDouble;
+import static java.util.stream.Collectors.toList;
 
 public class EloRating {
     private static final double k_factor = 20;
 
-    public EloRatingItem[] items = new EloRatingItem[30];
+    private List<EloRatingItem> itemsList;
 
     public static class EloRatingItem {
         public Player player;
@@ -21,98 +23,94 @@ public class EloRating {
     }
 
     public void init(Player[] players) {
-        items = Arrays.stream(players)
+
+        itemsList = Arrays.stream(players)
                 .map(p -> {
                     EloRatingItem item = new EloRatingItem();
                     item.player = p;
                     return item;
                 })
-                .toArray(EloRatingItem[]::new);
+                .collect(toList());
 
-        Arrays.stream(items)
-                .forEach(item -> {
-                    resetPlayer(item.player);
-                    item.opg = item.os;
-                });
-
-        sort();
+        itemsList.forEach(item -> {
+            resetPlayer(item.player);
+            item.opg = item.os;
+        });
     }
 
     public void save(PrintWriter writer) {
-        Arrays.stream(items)
-                .forEach(item -> {
-                    writer.println(item.player.id);
-                    writer.println(item.opg);
-                    writer.println(item.os);
-                });
+        itemsList.forEach(item -> {
+            writer.println(item.player.id);
+            writer.println(item.opg);
+            writer.println(item.os);
+        });
     }
 
     public void load(Scanner sc, Player[] players) {
         int playerCount = players.length;
-        items = new EloRatingItem[playerCount];
+        itemsList = Arrays.stream(players)
+                .map(p -> {
+                    EloRatingItem item = new EloRatingItem();
+                    item.player = p;
+                    return item;
+                })
+                .collect(toList());
+
         for (int i = 0; i < playerCount; i++) {
-            items[i] = new EloRatingItem();
             int k = sc.nextInt();
-            items[i].player = players[k];
-            items[i].opg = sc.nextDouble();
-            items[i].os = sc.nextDouble();
+            EloRatingItem item = itemsList.get(k);
+            item.opg = sc.nextDouble();
+            item.os = sc.nextDouble();
         }
+    }
+
+    public List<Player> getPlayersByRating() {
+        return itemsList.stream()
+                .sorted(comparingDouble((EloRatingItem item) -> item.os).reversed())
+                .map(item -> item.player)
+                .collect(toList());
     }
 
     public void update(int id1, int id2, double r1, double r2) {
-        int sl1 = findItem(id1);
-        int sl2 = findItem(id2);
-        double rat1 = items[sl1].os;
-        double rat2 = items[sl2].os;
-        items[sl1].os = items[sl1].os + ratingDif(rat1, rat2, r1);
-        items[sl2].os = items[sl2].os + ratingDif(rat2, rat1, r2);
+        EloRatingItem item1 = itemsList.get(id1);
+        EloRatingItem item2 = itemsList.get(id2);
+        double rat1 = item1.os;
+        double rat2 = item2.os;
+        item1.os += ratingDif(rat1, rat2, r1);
+        item2.os += ratingDif(rat2, rat1, r2);
     }
 
     public int playerIsBetterThan(int id1, int id2) {
-        int sl1 = findItem(id1);
-        int sl2 = findItem(id2);
-        return sl2 - sl1;
+        return (int) Math.signum(itemsList.get(id1).os - itemsList.get(id2).os);
     }
 
     public void sortPlayers(int[] players) {
-        int len = players.length;
-        int[] sorted = new int[len];
-        int k = 0;
-        for (int i = 0; i < 30; ++i) {
-            for (int j = 0; j < len; ++j) {
-                if (items[i].player.id == players[j]) {
-                    sorted[k] = players[j];
-                    k = k + 1;
-                    break;
-                }
-
-            }
-            if (k >= len) {
-                break;
-            }
-        }
-
-        for (int i = 0; i < len; ++i) {
-            players[i] = sorted[i];
-        }
-    }
-
-    public void sort() {
-        Arrays.sort(items, comparingDouble((EloRatingItem item) -> item.os).reversed());
+        int[] sortedPlayers = Arrays.stream(players)
+                .boxed()
+                .sorted(comparingDouble((Integer id) -> itemsList.get(id).os).reversed())
+                .mapToInt(i -> i)
+                .toArray();
+        System.arraycopy(sortedPlayers, 0, players, 0, players.length);
     }
 
     public void print(PrintWriter writer, boolean withDifs) {
-        int maxNameLength = Arrays.stream(items)
+        int maxNameLength = itemsList.stream()
                 .map(item -> item.player.getPlayerName())
                 .mapToInt(String::length)
                 .max()
                 .orElse(0);
 
         String formatString = "%-2d: %-" + (maxNameLength + 1) + "s %-7.2f";
-        for (int i = 0; i < 30; i++) {
-            writer.print(String.format(formatString, (i + 1), items[i].player.getPlayerName(), items[i].os));
+
+        List<EloRatingItem> sortedItems = itemsList.stream()
+                .sorted(comparingDouble((EloRatingItem item) -> item.os).reversed())
+                .collect(toList());
+
+        for (int i = 0; i < sortedItems.size(); i++) {
+            EloRatingItem item = sortedItems.get(i);
+            writer.print(String.format(formatString, (i + 1), item.player.getPlayerName(), item.os));
             if (withDifs) {
-                writer.println(String.format("   %+5.2f", items[i].os - items[i].opg));
+                writer.println(String.format("   %+5.2f", item.os - item.opg));
             } else {
                 writer.println();
             }
@@ -120,33 +118,13 @@ public class EloRating {
     }
 
     public void advanceYear() {
-        for (int i = 0; i < 30; ++i) {
-            items[i].opg = items[i].os;
-        }
+        itemsList.forEach(item -> item.opg = item.os);
     }
 
     public void resetPlayer(Player player) {
-        int i = findItem(player);
+        EloRatingItem item = itemsList.get(player.id);
         //items[i].os = 500 + (items[i].player.level - 5) * 50;
-        items[i].os = 500;
-    }
-
-    private int findItem(int id) {
-        for (int i = 0; i < items.length; i++) {
-            if (items[i].player.id == id) {
-                return i;
-            }
-        }
-        throw new IllegalArgumentException("Player with such ID is not found");
-    }
-
-    private int findItem(Player player) {
-        for (int i = 0; i < items.length; i++) {
-            if (items[i].player == player) {
-                return i;
-            }
-        }
-        throw new IllegalArgumentException("Player is not found");
+        item.os = 500;
     }
 
     private double ratingDif(double rat1, double rat2, double res) {

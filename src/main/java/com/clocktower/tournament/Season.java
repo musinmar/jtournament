@@ -1,5 +1,6 @@
 package com.clocktower.tournament;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.IOException;
@@ -8,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 import java.util.function.Consumer;
@@ -18,6 +20,8 @@ import static com.clocktower.tournament.Player.LEVEL_UP_COEFFICIENT;
 import static com.clocktower.tournament.RandomUtils.random;
 import static java.util.Collections.reverseOrder;
 import static java.util.Comparator.comparingDouble;
+import static java.util.Comparator.comparingInt;
+import static java.util.stream.Collectors.toList;
 
 public class Season {
 
@@ -97,7 +101,6 @@ public class Season {
 
         playTournaments();
         //playLeagues();
-        elo.sort();
 
 //        {if (year - 4) mod 8 = 0 then begin
 //        playWorldChampionship();
@@ -115,8 +118,6 @@ public class Season {
         if ((year - 1) % 2 == 0) {
             playNationalWorldCup();
         }
-
-        elo.sort();
 
         saveToFile(filename(FILE_NAME_RATING_CHANGE, true),
                 writer -> elo.print(writer, true));
@@ -164,8 +165,11 @@ public class Season {
 
         elo.init(kn);
 
+        List<Player> playersByLevel = Arrays.stream(kn)
+                .sorted(comparingInt((Player p) -> p.level).reversed())
+                .collect(toList());
         for (int i = 0; i < PLAYER_COUNT; i++) {
-            leagues[i] = elo.items[i].player.id;
+            leagues[i] = playersByLevel.get(i).id;
         }
 
         year = 1;
@@ -1083,62 +1087,54 @@ public class Season {
         }
 
         if (year % 2 == 0) {
-            elo.items[0].player.decDeck();
-            elo.items[0].player.decDeck();
-            println(elo.items[0].player.getPlayerName() + " has decreased his skill.");
+            Player bestPlayer = elo.getPlayersByRating().get(0);
+            bestPlayer.decDeck();
+            bestPlayer.decDeck();
+            println(bestPlayer.getPlayerName() + " has decreased his skill.");
             println();
             readln();
         }
     }
 
     private void play_titul_playoffs() {
-        int worst_lord = -1;
-        int best_sir = -1;
-        int worst_sir = -1;
-        int best_common = -1;
+        List<Player> playersByRating = elo.getPlayersByRating();
+        List<Player> playersByRatingReversed = Lists.reverse(playersByRating);
 
-        for (int i = 30 - 1; i >= 0; --i) {
-            if (elo.items[i].player.titul.equals("Lord ")) {
-                worst_lord = elo.items[i].player.id;
-                break;
-            }
-        }
+        int worstLord = playersByRatingReversed.stream()
+                .filter(p -> p.titul.equals("Lord "))
+                .map(p -> p.id)
+                .findFirst().orElseThrow(RuntimeException::new);
 
-        for (int i = 30 - 1; i >= 0; --i) {
-            if (elo.items[i].player.titul.equals("Sir ")) {
-                worst_sir = elo.items[i].player.id;
-                break;
-            }
-        }
+        int worstSir = playersByRatingReversed.stream()
+                .filter(p -> p.titul.equals("Sir "))
+                .map(p -> p.id)
+                .findFirst().orElseThrow(RuntimeException::new);
 
-        for (int i = 0; i < 30; ++i) {
-            if (elo.items[i].player.titul.equals("Sir ")) {
-                best_sir = elo.items[i].player.id;
-                break;
-            }
-        }
+        int bestSir = playersByRating.stream()
+                .filter(p -> p.titul.equals("Sir "))
+                .map(p -> p.id)
+                .findFirst().orElseThrow(RuntimeException::new);
 
-        for (int i = 0; i < 30; ++i) {
-            if (elo.items[i].player.titul.equals("")) {
-                best_common = elo.items[i].player.id;
-                break;
-            }
-        }
+        int bestCommon = playersByRating.stream()
+                .filter(p -> p.titul.equals(""))
+                .map(p -> p.id)
+                .findFirst().orElseThrow(RuntimeException::new);
+
 
         println("Titul playoffs  - Season " + year);
         println();
 
         println("Sir play off");
         println();
-        TajmResult r = play_series(worst_sir, best_common, 3, 0);
+        TajmResult r = play_series(worstSir, bestCommon, 3, 0);
         //boj_t(worst_sir, best_common, r1, r2, t, 0);
 
         if (r.r2 > r.r1) {
-            kn[worst_sir].titul = "";
-            kn[best_common].titul = "Sir ";
-            println("Knight " + kn[best_common].name + " " + kn[best_common].surname + " has gained the Sir title!");
+            kn[worstSir].titul = "";
+            kn[bestCommon].titul = "Sir ";
+            println("Knight " + kn[bestCommon].name + " " + kn[bestCommon].surname + " has gained the Sir title!");
         } else {
-            println("Knight " + kn[worst_sir].name + " " + kn[worst_sir].surname + " has defended his Sir title!");
+            println("Knight " + kn[worstSir].name + " " + kn[worstSir].surname + " has defended his Sir title!");
         }
         readln();
 
@@ -1147,14 +1143,14 @@ public class Season {
         println("Lord play off");
         println();
         //boj_t(worst_lord, best_sir, r1, r2, t, 0);
-        r = play_series(worst_lord, best_sir, 3, 0);
+        r = play_series(worstLord, bestSir, 3, 0);
 
         if (r.r2 > r.r1) {
-            kn[worst_lord].titul = "Sir ";
-            kn[best_sir].titul = "Lord ";
-            println("Knight " + kn[best_sir].name + " " + kn[best_sir].surname + " has gained the Lord title!");
+            kn[worstLord].titul = "Sir ";
+            kn[bestSir].titul = "Lord ";
+            println("Knight " + kn[bestSir].name + " " + kn[bestSir].surname + " has gained the Lord title!");
         } else {
-            println("Knight " + kn[worst_lord].name + " " + kn[worst_lord].surname + " has defended his Lord title!");
+            println("Knight " + kn[worstLord].name + " " + kn[worstLord].surname + " has defended his Lord title!");
         }
         readln();
         println();
@@ -1197,25 +1193,22 @@ public class Season {
         kn[id].restartCareer(true);
         kn[id].age = 0;
         elo.resetPlayer(kn[id]);
-        elo.sort();
 
         if (kn[id].titul.equals("Lord ")) {
-            for (int i = 0; i < 30; ++i) {
-                if (elo.items[i].player.titul.equals("Sir ")) {
-                    elo.items[i].player.titul = "Lord ";
-                    break;
-                }
-            }
+            List<Player> playersByRating = elo.getPlayersByRating();
+            Player bestSir = playersByRating.stream()
+                    .filter(p -> p.titul.equals("Sir "))
+                    .findFirst().orElseThrow(RuntimeException::new);
+            bestSir.titul = "Lord ";
             kn[id].titul = "Sir ";
         }
 
         if (kn[id].titul.equals("Sir ")) {
-            for (int i = 0; i < 30; ++i) {
-                if (elo.items[i].player.titul.equals("")) {
-                    elo.items[i].player.titul = "Sir ";
-                    break;
-                }
-            }
+            List<Player> playersByRating = elo.getPlayersByRating();
+            Player bestCommon = playersByRating.stream()
+                    .filter(p -> p.titul.equals(""))
+                    .findFirst().orElseThrow(RuntimeException::new);
+            bestCommon.titul = "Sir ";
             kn[id].titul = "";
         }
 
@@ -1239,14 +1232,15 @@ public class Season {
         int[] buf8 = new int[8];
         int[] buf16 = new int[16];
 
+        List<Player> playersByRating = elo.getPlayersByRating();
         for (int i = 22; i < 30; ++i) {
-            ro1[i - 22] = elo.items[i].player.id;
+            ro1[i - 22] = playersByRating.get(i).id;
         }
         for (int i = 8; i < 22; ++i) {
-            ro2[i - 6] = elo.items[i].player.id;
+            ro2[i - 6] = playersByRating.get(i).id;
         }
         for (int i = 0; i < 8; ++i) {
-            gr[i + 8] = elo.items[i].player.id;
+            gr[i + 8] = playersByRating.get(i).id;
         }
 
         println();
@@ -1440,18 +1434,15 @@ public class Season {
 
     private Team makeNationalTeam(int nationId) {
         Team res = new Team();
-        res.id = new int[3];
         res.name = Nation.fromId(nationId).getName();
-        int k = 0;
-        for (int i = 0; i < 30; ++i) {
-            if (elo.items[i].player.getNation().getId() == nationId) {
-                res.id[k] = elo.items[i].player.id;
-                k += 1;
-            }
-            if (k > 2) {
-                break;
-            }
-        }
+
+        List<Player> playersByRating = elo.getPlayersByRating();
+        res.id = playersByRating.stream()
+                .filter(p -> p.getNation().getId() == nationId)
+                .limit(3)
+                .mapToInt(p -> p.id)
+                .toArray();
+
         return res;
     }
 
