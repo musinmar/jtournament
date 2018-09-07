@@ -19,12 +19,12 @@ import java.util.stream.IntStream;
 import static com.clocktower.tournament.Logger.print;
 import static com.clocktower.tournament.Logger.println;
 import static com.clocktower.tournament.Logger.readln;
-import static com.clocktower.tournament.Player.LEVEL_UP_COEFFICIENT;
-import static com.clocktower.tournament.utils.RandomUtils.random;
 import static com.clocktower.tournament.domain.Title.COMMON;
 import static com.clocktower.tournament.domain.Title.LORD;
 import static com.clocktower.tournament.domain.Title.SIR;
+import static com.clocktower.tournament.utils.RandomUtils.random;
 import static java.util.Collections.reverseOrder;
+import static java.util.Comparator.comparing;
 import static java.util.Comparator.comparingDouble;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
@@ -41,6 +41,7 @@ public class Season {
     private static final String FILE_NAME_ELO = "elo";
     private static final String FILE_NAME_RATING = "rating";
     private static final String FILE_NAME_RATING_CHANGE = "rating change";
+    private static final String FILE_NAME_LEVELS = "levels";
 
     private int year;
     private final String FOLDER = "season";
@@ -144,15 +145,8 @@ public class Season {
         writeFederationsTable();
         save();
 
-// assign(t, filename(FILE_NAME_LEVELS, true));
-// rewrite(t);
-// for i:=1 to 30 do
-//  begin
-//   str(kn[i].level,s1);
-//   writeln(t,kn[i].titul,kn[i].name,' ',kn[i].surname,' ',s1);
-//  end;
-// close(t);
-//
+        printLevelsToFile();
+
 // assign(t, filename(FILE_NAME_DOST, true));
 // rewrite(t);
 // for i:=1 to 30 do
@@ -781,17 +775,11 @@ public class Season {
         println("( " + res.rw1 + ":" + res.rw2 + " )");
 
         if (res.rw1 > res.rw2) {
-            kn[id1].exp = kn[id1].exp + kn[id2].level;
-            if (kn[id1].exp >= kn[id1].level * kn[id1].level * LEVEL_UP_COEFFICIENT) {
-                kn[id1].levelup();
-            }
+            kn[id1].addExp(kn[id2].level);
             elo.update(id1, id2, 1, 0);
             nation_rating[kn[id1].getNation().getId()].seasons[0] = nation_rating[kn[id1].getNation().getId()].seasons[0] + points;
         } else if (res.rw2 > res.rw1) {
-            kn[id2].exp = kn[id2].exp + kn[id1].level;
-            if (kn[id2].exp >= kn[id2].level * kn[id2].level * LEVEL_UP_COEFFICIENT) {
-                kn[id2].levelup();
-            }
+            kn[id2].addExp(kn[id1].level);
             elo.update(id1, id2, 0, 1);
             nation_rating[kn[id2].getNation().getId()].seasons[0] = nation_rating[kn[id2].getNation().getId()].seasons[0] + points;
         } else {
@@ -866,16 +854,10 @@ public class Season {
         println("( " + res.rw1 + ":" + res.rw2 + " )");
 
         if (res.rw1 > res.rw2) {
-            kn[id1].exp = kn[id1].exp + kn[id2].level;
-            if (kn[id1].exp >= kn[id1].level * kn[id1].level * LEVEL_UP_COEFFICIENT) {
-                kn[id1].levelup();
-            }
+            kn[id1].addExp(kn[id2].level);
             nation_rating[kn[id1].getNation().getId()].seasons[0] = nation_rating[kn[id1].getNation().getId()].seasons[0] + points;
         } else if (res.rw2 > res.rw1) {
-            kn[id2].exp = kn[id2].exp + kn[id1].level;
-            if (kn[id2].exp >= kn[id2].level * kn[id2].level * LEVEL_UP_COEFFICIENT) {
-                kn[id2].levelup();
-            }
+            kn[id2].addExp(kn[id1].level);
             nation_rating[kn[id2].getNation().getId()].seasons[0] = nation_rating[kn[id2].getNation().getId()].seasons[0] + points;
         }
 
@@ -1577,5 +1559,27 @@ public class Season {
         for (int i = 0; i < count; ++i) {
             dest[fromDest + i] = dummy[i];
         }
+    }
+
+    private void printLevelsToFile() {
+        saveToFile(filename(FILE_NAME_LEVELS, true),
+                writer -> {
+                    List<Player> playersByLevel = Arrays.stream(kn)
+                            .sorted(comparing((Player p) -> p.level).reversed())
+                            .collect(toList());
+
+                    int maxNameLength = playersByLevel.stream()
+                            .map(Player::getPlayerName)
+                            .mapToInt(String::length)
+                            .max()
+                            .orElse(0);
+
+                    String formatString = "%-2d: %-" + (maxNameLength + 1) + "s %-3d";
+
+                    for (int i = 0; i < playersByLevel.size(); i++) {
+                        Player p = playersByLevel.get(i);
+                        writer.println(String.format(formatString, (i + 1), p.getPlayerName(), p.level));
+                    }
+                });
     }
 }

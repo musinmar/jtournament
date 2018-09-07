@@ -30,7 +30,7 @@ public class Player {
     public int generation = 0;
     public int level;
     public int persistentLevel;
-    public int exp = 0;
+    private int exp = 0;
 
     public List<String> dost = new ArrayList<>();
 
@@ -182,16 +182,24 @@ public class Player {
         return deckKind;
     }
 
-    public void levelup() {
+    public void addExp(int newExp) {
+        exp += newExp;
+        while (exp >= getExpForLevelUp()) {
+            levelUp();
+        }
+    }
+
+    private int getExpForLevelUp() {
+        return level * level * LEVEL_UP_COEFFICIENT;
+    }
+
+    private void levelUp() {
         println(getPlayerName() + " has gained level!");
         for (int i = 0; i < POINTS_PER_LEVEL; i++) {
             incDeck();
         }
-        exp = exp - level * level * LEVEL_UP_COEFFICIENT;
+        exp -= getExpForLevelUp();
         level += 1;
-        if (exp >= level * level * LEVEL_UP_COEFFICIENT) {
-            levelup();
-        }
     }
 
     public void incDeck() {
