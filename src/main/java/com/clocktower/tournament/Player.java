@@ -26,8 +26,8 @@ public class Player {
     private Nation nation;
     private Title title;
 
-    public int age = 1;
-    public int generation = 0;
+    private int age = 1;
+    private int generation = 0;
     private int level;
     private int persistentLevel;
     private int exp = 0;
@@ -97,6 +97,10 @@ public class Player {
         return level;
     }
 
+    public int getAge() {
+        return age;
+    }
+
     public void setAt(int at) {
         this.at = at;
     }
@@ -131,6 +135,10 @@ public class Player {
 
     public String getNameWithNation() {
         return title.getPrefix() + getSimplePlayerName() + " (" + nation.getName().charAt(0) + ")";
+    }
+
+    public void advanceAge() {
+        age += 1;
     }
 
     public void restartCareer(boolean randomizeDeckKind) {

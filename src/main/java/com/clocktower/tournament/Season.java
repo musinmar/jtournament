@@ -129,6 +129,7 @@ public class Season {
         saveToFile(filename(FILE_NAME_RATING_CHANGE, true),
                 writer -> elo.print(writer, true));
 
+        advancePlayersAge();
         if (year % 2 == 0) {
             retireRandomPlayer();
         }
@@ -141,11 +142,11 @@ public class Season {
         saveToFile(filename(FILE_NAME_RATING, true),
                 writer -> elo.print(writer, false));
 
+        printStatsToFile();
+
         year += 1;
         writeFederationsTable();
         save();
-
-        printStatsToFile();
 
 // assign(t, filename(FILE_NAME_DOST, true));
 // rewrite(t);
@@ -1057,6 +1058,10 @@ public class Season {
         }
     }
 
+    private void advancePlayersAge() {
+        Arrays.stream(kn).forEach(Player::advanceAge);
+    }
+
     private void end_of_season_adjust() {
         nation_rating[nation_pos[0]].seasons[0] = nation_rating[nation_pos[0]].seasons[0] / 5;
         nation_rating[nation_pos[1]].seasons[0] = nation_rating[nation_pos[1]].seasons[0] / 5;
@@ -1066,10 +1071,6 @@ public class Season {
 
         for (int i = 0; i < 30; ++i) {
             kn[i].applyRandomDeckChanges();
-        }
-
-        for (int i = 0; i < 30; ++i) {
-            kn[i].age += 1;
         }
 
         if (year % 2 == 0) {
@@ -1146,7 +1147,7 @@ public class Season {
         double totalWeight = 0;
         double[] weights = new double[PLAYER_COUNT];
         for (int i = 0; i < 30; ++i) {
-            weights[i] = Math.exp(kn[i].age / 20.0);
+            weights[i] = Math.exp(kn[i].getAge() / 20.0);
             //print("Weight " + i + 1 + ": ");
             //println(weights[i]:5:2);
             totalWeight = totalWeight + weights[i];
@@ -1175,9 +1176,8 @@ public class Season {
     private void retireRandomPlayer() {
         int id = selectPlayerToRetire();
 
-        println("Knight " + kn[id].getPlayerName() + " has retired at the age of " + kn[id].age);
+        println("Knight %s has retired at the age of %d", kn[id].getPlayerName(), kn[id].getAge());
         kn[id].restartCareer(true);
-        kn[id].age = 0;
         elo.resetPlayer(kn[id]);
 
         if (kn[id].getTitle() == LORD) {
@@ -1579,7 +1579,7 @@ public class Season {
 
     private void printLevelsToFile(PrintWriter writer) {
         List<Player> playersByLevel = Arrays.stream(kn)
-                .sorted(comparing(Player::getLevel).reversed())
+                .sorted(comparingInt(Player::getLevel).reversed())
                 .collect(toList());
 
         int maxNameLength = getMaxNameLength(playersByLevel);
@@ -1594,7 +1594,7 @@ public class Season {
 
     private void printAgesToFile(PrintWriter writer) {
         List<Player> playersByAge = Arrays.stream(kn)
-                .sorted(comparing((Player p) -> p.age).reversed())
+                .sorted(comparingInt(Player::getAge).reversed())
                 .collect(toList());
 
         int maxNameLength = getMaxNameLength(playersByAge);
@@ -1603,7 +1603,7 @@ public class Season {
         writer.println("Ages");
         for (int i = 0; i < playersByAge.size(); i++) {
             Player p = playersByAge.get(i);
-            writer.println(String.format(formatString, (i + 1), p.getPlayerName(), p.age));
+            writer.println(String.format(formatString, (i + 1), p.getPlayerName(), p.getAge()));
         }
     }
 }

@@ -14,6 +14,7 @@ public class DefaultData {
     public static Player[] initDefaultPlayers() {
         Player[] kn = new Player[30];
         for (int i = 0; i < kn.length; i++) {
+            kn[i] = new Player();
             kn[i].id = i;
         }
 

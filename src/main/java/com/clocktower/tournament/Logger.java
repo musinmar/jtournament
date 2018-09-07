@@ -18,6 +18,11 @@ public class Logger {
         }
     }
 
+    public static void println(String formatString, Object... args) {
+        String s = String.format(formatString, args);
+        println(s);
+    }
+
     public static void println(String x) {
         System.out.println(x);
         if (currentWriter != null) {
