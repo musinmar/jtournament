@@ -1,5 +1,6 @@
 package com.clocktower.tournament;
 
+import com.clocktower.tournament.domain.DeckType;
 import com.clocktower.tournament.domain.Nation;
 import com.clocktower.tournament.domain.Title;
 import com.clocktower.tournament.utils.IntToRomanConverter;
@@ -40,9 +41,7 @@ public class Player {
     private int l;
     private int v;
 
-
-    // TODO: create class for deck kind
-    public int[] deckKind = new int[2];
+    private DeckType deckType;
     // TODO: create class for deck
     public int[] deck = new int[20];
 
@@ -121,6 +120,10 @@ public class Player {
         this.v = v;
     }
 
+    public void setDeckType(DeckType deckType) {
+        this.deckType = deckType;
+    }
+
     public String getSimplePlayerName() {
         return name + " " + surname;
     }
@@ -171,31 +174,14 @@ public class Player {
         deck[19] = 5;
 
         if (randomizeDeckKind) {
-            deckKind = generateRandomDeckKind();
-            println("New deck settings: " + deckKind[0] + ", " + deckKind[1]);
+            deckType = DeckType.createRandom();
+            println("New deck type: " + deckType);
         }
 
         int k = level * POINTS_PER_LEVEL;
         for (int i = 0; i < k; i++) {
             incDeck();
         }
-    }
-
-    static int[] generateRandomDeckKind() {
-        int[] deckKind = new int[2];
-        int r = random(36) + 1;
-
-        int k = 0;
-        for (int i = 8; i >= 1; i--) {
-            if (k + i >= r) {
-                deckKind[0] = 9 - i;
-                deckKind[1] = 9 - i + (r - k);
-                break;
-            } else {
-                k = k + i;
-            }
-        }
-        return deckKind;
     }
 
     public void addExp(int newExp) {
@@ -219,20 +205,8 @@ public class Player {
     }
 
     public void incDeck() {
-        int r = generateRandomDeckPosition(deckKind);
+        int r = deckType.generateRandomDeckPosition();
         increaseDeckAtPosition(deck, r);
-    }
-
-    private static int generateRandomDeckPosition(int[] deckKind) {
-        int r = random(10);
-        if (r < deckKind[0]) {
-            r = random(7);
-        } else if (r < deckKind[1]) {
-            r = random(6) + 7;
-        } else {
-            r = random(7) + 13;
-        }
-        return r;
     }
 
     static void increaseDeckAtPosition(int[] deck, int pos) {
@@ -279,7 +253,8 @@ public class Player {
         writer.println(dost.size());
         dost.forEach(writer::println);
 
-        Arrays.stream(deckKind).forEach(writer::println);
+        writer.println(deckType.getV1());
+        writer.println(deckType.getV2());
 
         Arrays.stream(deck).forEach(writer::println);
     }
@@ -312,8 +287,9 @@ public class Player {
             dost.add(s);
         }
 
-        deckKind[0] = sc.nextInt();
-        deckKind[1] = sc.nextInt();
+        int deckTypeV1 = sc.nextInt();
+        int deckTypeV2 = sc.nextInt();
+        deckType = new DeckType(deckTypeV1, deckTypeV2);
 
         for (int i = 0; i < 20; i++) {
             deck[i] = sc.nextInt();

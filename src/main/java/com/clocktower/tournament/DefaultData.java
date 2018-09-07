@@ -1,5 +1,7 @@
 package com.clocktower.tournament;
 
+import com.clocktower.tournament.domain.DeckType;
+
 import static com.clocktower.tournament.domain.Nation.ALMAGEST;
 import static com.clocktower.tournament.domain.Nation.BELLEROFON;
 import static com.clocktower.tournament.domain.Nation.GALILEO;
@@ -384,95 +386,36 @@ public class DefaultData {
     }
 
     private static void initDecks(Player[] kn) {
-        kn[dec(1)].deckKind[0] = 1;
-        kn[dec(1)].deckKind[1] = 8;
-
-        kn[dec(2)].deckKind[0] = 1;
-        kn[dec(2)].deckKind[1] = 2;
-
-        kn[dec(3)].deckKind[0] = 2;
-        kn[dec(3)].deckKind[1] = 9;
-
-        kn[dec(4)].deckKind[0] = 4;
-        kn[dec(4)].deckKind[1] = 5;
-
-        kn[dec(5)].deckKind[0] = 6;
-        kn[dec(5)].deckKind[1] = 9;
-
-        kn[dec(6)].deckKind[0] = 2;
-        kn[dec(6)].deckKind[1] = 4;
-
-        kn[dec(7)].deckKind[0] = 4;
-        kn[dec(7)].deckKind[1] = 9;
-
-        kn[dec(8)].deckKind[0] = 6;
-        kn[dec(8)].deckKind[1] = 8;
-
-        kn[dec(9)].deckKind[0] = 5;
-        kn[dec(9)].deckKind[1] = 8;
-
-        kn[dec(10)].deckKind[0] = 3;
-        kn[dec(10)].deckKind[1] = 5;
-
-        kn[dec(11)].deckKind[0] = 3;
-        kn[dec(11)].deckKind[1] = 6;
-
-        kn[dec(12)].deckKind[0] = 2;
-        kn[dec(12)].deckKind[1] = 3;
-
-        kn[dec(13)].deckKind[0] = 3;
-        kn[dec(13)].deckKind[1] = 4;
-
-        kn[dec(14)].deckKind[0] = 4;
-        kn[dec(14)].deckKind[1] = 7;
-
-        kn[dec(15)].deckKind[0] = 1;
-        kn[dec(15)].deckKind[1] = 3;
-
-        kn[dec(16)].deckKind[0] = 1;
-        kn[dec(16)].deckKind[1] = 5;
-
-        kn[dec(17)].deckKind[0] = 4;
-        kn[dec(17)].deckKind[1] = 8;
-
-        kn[dec(18)].deckKind[0] = 5;
-        kn[dec(18)].deckKind[1] = 7;
-
-        kn[dec(19)].deckKind[0] = 2;
-        kn[dec(19)].deckKind[1] = 7;
-
-        kn[dec(20)].deckKind[0] = 6;
-        kn[dec(20)].deckKind[1] = 7;
-
-        kn[dec(21)].deckKind[0] = 1;
-        kn[dec(21)].deckKind[1] = 6;
-
-        kn[dec(22)].deckKind[0] = 1;
-        kn[dec(22)].deckKind[1] = 4;
-
-        kn[dec(23)].deckKind[0] = 4;
-        kn[dec(23)].deckKind[1] = 6;
-
-        kn[dec(24)].deckKind[0] = 5;
-        kn[dec(24)].deckKind[1] = 9;
-
-        kn[dec(25)].deckKind[0] = 3;
-        kn[dec(25)].deckKind[1] = 8;
-
-        kn[dec(26)].deckKind[0] = 2;
-        kn[dec(26)].deckKind[1] = 8;
-
-        kn[dec(27)].deckKind[0] = 2;
-        kn[dec(27)].deckKind[1] = 5;
-
-        kn[dec(28)].deckKind[0] = 7;
-        kn[dec(28)].deckKind[1] = 9;
-
-        kn[dec(29)].deckKind[0] = 2;
-        kn[dec(29)].deckKind[1] = 6;
-
-        kn[dec(30)].deckKind[0] = 5;
-        kn[dec(30)].deckKind[1] = 6;
+        kn[dec(1)].setDeckType(new DeckType(1, 8));
+        kn[dec(2)].setDeckType(new DeckType(1, 2));
+        kn[dec(3)].setDeckType(new DeckType(2, 9));
+        kn[dec(4)].setDeckType(new DeckType(4, 5));
+        kn[dec(5)].setDeckType(new DeckType(6, 9));
+        kn[dec(6)].setDeckType(new DeckType(2, 4));
+        kn[dec(7)].setDeckType(new DeckType(4, 9));
+        kn[dec(8)].setDeckType(new DeckType(6, 8));
+        kn[dec(9)].setDeckType(new DeckType(5, 8));
+        kn[dec(10)].setDeckType(new DeckType(3, 5));
+        kn[dec(11)].setDeckType(new DeckType(3, 6));
+        kn[dec(12)].setDeckType(new DeckType(2, 3));
+        kn[dec(13)].setDeckType(new DeckType(3, 4));
+        kn[dec(14)].setDeckType(new DeckType(4, 7));
+        kn[dec(15)].setDeckType(new DeckType(1, 3));
+        kn[dec(16)].setDeckType(new DeckType(1, 5));
+        kn[dec(17)].setDeckType(new DeckType(4, 8));
+        kn[dec(18)].setDeckType(new DeckType(5, 7));
+        kn[dec(19)].setDeckType(new DeckType(2, 7));
+        kn[dec(20)].setDeckType(new DeckType(6, 7));
+        kn[dec(21)].setDeckType(new DeckType(1, 6));
+        kn[dec(22)].setDeckType(new DeckType(1, 4));
+        kn[dec(23)].setDeckType(new DeckType(4, 6));
+        kn[dec(24)].setDeckType(new DeckType(5, 9));
+        kn[dec(25)].setDeckType(new DeckType(3, 8));
+        kn[dec(26)].setDeckType(new DeckType(2, 8));
+        kn[dec(27)].setDeckType(new DeckType(2, 5));
+        kn[dec(28)].setDeckType(new DeckType(7, 9));
+        kn[dec(29)].setDeckType(new DeckType(2, 6));
+        kn[dec(30)].setDeckType(new DeckType(5, 6));
     }
 
     private static int dec(int v) {

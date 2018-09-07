@@ -2,38 +2,11 @@ package com.clocktower.tournament;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-import java.util.stream.IntStream;
-
 import static com.clocktower.tournament.Player.increaseDeckAtPosition;
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.groupingBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PlayerTest {
-    //@Test
-    void testGenerateRandomDeckKind() {
-        Map<Integer, Long> counts = IntStream.range(0, 100000)
-                .mapToObj(i -> Player.generateRandomDeckKind())
-                .collect(groupingBy(PlayerTest::getId, counting()));
-        System.out.println(counts);
-    }
-
-    private static int getId(int[] deckKind) {
-        int c = 1;
-        for (int i = 1; i <= 8; ++i) {
-            for (int j = i + 1; j <= 9; ++j) {
-                if (deckKind[0] == i && deckKind[1] == j) {
-                    return c;
-                } else {
-                    ++c;
-                }
-            }
-        }
-        throw new IllegalArgumentException("Invalid deck kind");
-    }
-
     @Test
     void testIncreaseDeckAtPosition() {
         int[] deck;
