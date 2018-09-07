@@ -1455,6 +1455,22 @@ public class Season {
         println(String.format("National World Cup - Season %d", year));
         println();
 
+        println("Participants");
+        println();
+        for (int i = 0; i < teams.length; i++) {
+            Team team = teams[nation_pos[i]];
+            println(team.name);
+            for (int j = 0; j < team.id.length; j++) {
+                print(String.format("%d: %s", j + 1, kn[team.id[j]].getPlayerName()));
+                if (j == 0) {
+                    println(" - Captain");
+                } else {
+                    println();
+                }
+            }
+            println();
+        }
+
         int[] sf = new int[4];
         sf[0] = nation_pos[0];
         sf[2] = nation_pos[1];
