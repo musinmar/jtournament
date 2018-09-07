@@ -1,6 +1,13 @@
 package com.clocktower.tournament;
 
-import static com.clocktower.tournament.Nation.*;
+import static com.clocktower.tournament.domain.Nation.ALMAGEST;
+import static com.clocktower.tournament.domain.Nation.BELLEROFON;
+import static com.clocktower.tournament.domain.Nation.GALILEO;
+import static com.clocktower.tournament.domain.Nation.KAMELEOPARD;
+import static com.clocktower.tournament.domain.Nation.OBERON_22;
+import static com.clocktower.tournament.domain.Title.COMMON;
+import static com.clocktower.tournament.domain.Title.LORD;
+import static com.clocktower.tournament.domain.Title.SIR;
 
 public class DefaultData {
 
@@ -11,7 +18,7 @@ public class DefaultData {
 
         kn[dec(1)].name = "Fler";
         kn[dec(1)].surname = "Rokky";
-        kn[dec(1)].titul = "Lord ";
+        kn[dec(1)].setTitle(LORD);
         kn[dec(1)].setNation(ALMAGEST);
         kn[dec(1)].town = "Aldorum";
         kn[dec(1)].at = 6;
@@ -23,7 +30,7 @@ public class DefaultData {
 
         kn[dec(2)].name = "Johnny";
         kn[dec(2)].surname = "Wolf";
-        kn[dec(2)].titul = "Sir ";
+        kn[dec(2)].setTitle(SIR);
         kn[dec(2)].setNation(ALMAGEST);
         kn[dec(2)].town = "Murahir";
         kn[dec(2)].at = 4;
@@ -35,7 +42,7 @@ public class DefaultData {
 
         kn[dec(3)].name = "Dick";
         kn[dec(3)].surname = "Rendell";
-        kn[dec(3)].titul = "";
+        kn[dec(3)].setTitle(COMMON);
         kn[dec(3)].setNation(ALMAGEST);
         kn[dec(3)].town = "Linagor";
         kn[dec(3)].at = 5;
@@ -47,7 +54,7 @@ public class DefaultData {
 
         kn[dec(4)].name = "Bert";
         kn[dec(4)].surname = "Basky";
-        kn[dec(4)].titul = "";
+        kn[dec(4)].setTitle(COMMON);
         kn[dec(4)].setNation(ALMAGEST);
         kn[dec(4)].town = "Medlur";
         kn[dec(4)].at = 8;
@@ -59,7 +66,7 @@ public class DefaultData {
 
         kn[dec(5)].name = "Nick";
         kn[dec(5)].surname = "Toffer";
-        kn[dec(5)].titul = "";
+        kn[dec(5)].setTitle(COMMON);
         kn[dec(5)].setNation(ALMAGEST);
         kn[dec(5)].town = "Telmir";
         kn[dec(5)].at = 7;
@@ -71,7 +78,7 @@ public class DefaultData {
 
         kn[dec(6)].name = "Steve";
         kn[dec(6)].surname = "Ashenbach";
-        kn[dec(6)].titul = "";
+        kn[dec(6)].setTitle(COMMON);
         kn[dec(6)].setNation(ALMAGEST);
         kn[dec(6)].town = "Turon";
         kn[dec(6)].at = 4;
@@ -83,7 +90,7 @@ public class DefaultData {
 
         kn[dec(7)].name = "Den";
         kn[dec(7)].surname = "Shadow";
-        kn[dec(7)].titul = "Sir ";
+        kn[dec(7)].setTitle(SIR);
         kn[dec(7)].setNation(BELLEROFON);
         kn[dec(7)].town = "Linagor";
         kn[dec(7)].at = 5;
@@ -95,7 +102,7 @@ public class DefaultData {
 
         kn[dec(8)].name = "Glen";
         kn[dec(8)].surname = "Zutter";
-        kn[dec(8)].titul = "Sir ";
+        kn[dec(8)].setTitle(SIR);
         kn[dec(8)].setNation(BELLEROFON);
         kn[dec(8)].town = "Linagor";
         kn[dec(8)].at = 5;
@@ -107,7 +114,7 @@ public class DefaultData {
 
         kn[dec(9)].name = "Willy";
         kn[dec(9)].surname = "Parker";
-        kn[dec(9)].titul = "";
+        kn[dec(9)].setTitle(COMMON);
         kn[dec(9)].setNation(BELLEROFON);
         kn[dec(9)].town = "Ohrun";
         kn[dec(9)].at = 7;
@@ -119,7 +126,7 @@ public class DefaultData {
 
         kn[dec(10)].name = "Sindy";
         kn[dec(10)].surname = "Merick";
-        kn[dec(10)].titul = "";
+        kn[dec(10)].setTitle(COMMON);
         kn[dec(10)].setNation(BELLEROFON);
         kn[dec(10)].town = "Turon";
         kn[dec(10)].at = 8;
@@ -131,7 +138,7 @@ public class DefaultData {
 
         kn[dec(11)].name = "Arly";
         kn[dec(11)].surname = "Chiko";
-        kn[dec(11)].titul = "";
+        kn[dec(11)].setTitle(COMMON);
         kn[dec(11)].setNation(BELLEROFON);
         kn[dec(11)].town = "Reldor";
         kn[dec(11)].at = 3;
@@ -143,7 +150,7 @@ public class DefaultData {
 
         kn[dec(12)].name = "Archy";
         kn[dec(12)].surname = "Soks";
-        kn[dec(12)].titul = "";
+        kn[dec(12)].setTitle(COMMON);
         kn[dec(12)].setNation(BELLEROFON);
         kn[dec(12)].town = "Turon";
         kn[dec(12)].at = 1;
@@ -155,7 +162,7 @@ public class DefaultData {
 
         kn[dec(13)].name = "Michael";
         kn[dec(13)].surname = "Holl";
-        kn[dec(13)].titul = "Lord ";
+        kn[dec(13)].setTitle(LORD);
         kn[dec(13)].setNation(GALILEO);
         kn[dec(13)].town = "Ejmoril";
         kn[dec(13)].at = 1;
@@ -167,7 +174,7 @@ public class DefaultData {
 
         kn[dec(14)].name = "Antony";
         kn[dec(14)].surname = "Baks";
-        kn[dec(14)].titul = "";
+        kn[dec(14)].setTitle(COMMON);
         kn[dec(14)].setNation(GALILEO);
         kn[dec(14)].town = "Rajzer";
         kn[dec(14)].at = 6;
@@ -179,7 +186,7 @@ public class DefaultData {
 
         kn[dec(15)].name = "Sally";
         kn[dec(15)].surname = "Hunter";
-        kn[dec(15)].titul = "";
+        kn[dec(15)].setTitle(COMMON);
         kn[dec(15)].setNation(GALILEO);
         kn[dec(15)].town = "Telmir";
         kn[dec(15)].at = 8;
@@ -191,7 +198,7 @@ public class DefaultData {
 
         kn[dec(16)].name = "Phil";
         kn[dec(16)].surname = "Kukky";
-        kn[dec(16)].titul = "";
+        kn[dec(16)].setTitle(COMMON);
         kn[dec(16)].setNation(GALILEO);
         kn[dec(16)].town = "Shiragon";
         kn[dec(16)].at = 3;
@@ -203,7 +210,7 @@ public class DefaultData {
 
         kn[dec(17)].name = "Jack";
         kn[dec(17)].surname = "Richy";
-        kn[dec(17)].titul = "";
+        kn[dec(17)].setTitle(COMMON);
         kn[dec(17)].setNation(GALILEO);
         kn[dec(17)].town = "Siligun";
         kn[dec(17)].at = 1;
@@ -215,7 +222,7 @@ public class DefaultData {
 
         kn[dec(18)].name = "Paola";
         kn[dec(18)].surname = "Fozzi";
-        kn[dec(18)].titul = "";
+        kn[dec(18)].setTitle(COMMON);
         kn[dec(18)].setNation(GALILEO);
         kn[dec(18)].town = "Ejmoril";
         kn[dec(18)].at = 8;
@@ -227,7 +234,7 @@ public class DefaultData {
 
         kn[dec(19)].name = "Chen";
         kn[dec(19)].surname = "Fletcher";
-        kn[dec(19)].titul = "Lord ";
+        kn[dec(19)].setTitle(LORD);
         kn[dec(19)].setNation(KAMELEOPARD);
         kn[dec(19)].town = "Irif";
         kn[dec(19)].at = 7;
@@ -239,7 +246,7 @@ public class DefaultData {
 
         kn[dec(20)].name = "Tanya";
         kn[dec(20)].surname = "Dzhoko";
-        kn[dec(20)].titul = "Sir ";
+        kn[dec(20)].setTitle(SIR);
         kn[dec(20)].setNation(KAMELEOPARD);
         kn[dec(20)].town = "Reldor";
         kn[dec(20)].at = 6;
@@ -251,7 +258,7 @@ public class DefaultData {
 
         kn[dec(21)].name = "Bob";
         kn[dec(21)].surname = "Drou";
-        kn[dec(21)].titul = "";
+        kn[dec(21)].setTitle(COMMON);
         kn[dec(21)].setNation(KAMELEOPARD);
         kn[dec(21)].town = "Irif";
         kn[dec(21)].at = 4;
@@ -263,7 +270,7 @@ public class DefaultData {
 
         kn[dec(22)].name = "Klod";
         kn[dec(22)].surname = "Gosh";
-        kn[dec(22)].titul = "";
+        kn[dec(22)].setTitle(COMMON);
         kn[dec(22)].setNation(KAMELEOPARD);
         kn[dec(22)].town = "Dilion";
         kn[dec(22)].at = 7;
@@ -275,7 +282,7 @@ public class DefaultData {
 
         kn[dec(23)].name = "Mary";
         kn[dec(23)].surname = "Kullidg";
-        kn[dec(23)].titul = "";
+        kn[dec(23)].setTitle(COMMON);
         kn[dec(23)].setNation(KAMELEOPARD);
         kn[dec(23)].town = "Gor";
         kn[dec(23)].at = 9;
@@ -287,7 +294,7 @@ public class DefaultData {
 
         kn[dec(24)].name = "Jeff";
         kn[dec(24)].surname = "Ringo";
-        kn[dec(24)].titul = "";
+        kn[dec(24)].setTitle(COMMON);
         kn[dec(24)].setNation(KAMELEOPARD);
         kn[dec(24)].town = "Irif";
         kn[dec(24)].at = 2;
@@ -299,7 +306,7 @@ public class DefaultData {
 
         kn[dec(25)].name = "Leo";
         kn[dec(25)].surname = "Leng";
-        kn[dec(25)].titul = "Lord ";
+        kn[dec(25)].setTitle(LORD);
         kn[dec(25)].setNation(OBERON_22);
         kn[dec(25)].town = "Julmar";
         kn[dec(25)].at = 3;
@@ -311,7 +318,7 @@ public class DefaultData {
 
         kn[dec(26)].name = "May";
         kn[dec(26)].surname = "Klaps";
-        kn[dec(26)].titul = "Sir ";
+        kn[dec(26)].setTitle(SIR);
         kn[dec(26)].setNation(OBERON_22);
         kn[dec(26)].town = "Alior";
         kn[dec(26)].at = 7;
@@ -323,7 +330,7 @@ public class DefaultData {
 
         kn[dec(27)].name = "Pat";
         kn[dec(27)].surname = "Kent";
-        kn[dec(27)].titul = "";
+        kn[dec(27)].setTitle(COMMON);
         kn[dec(27)].setNation(OBERON_22);
         kn[dec(27)].town = "Dilion";
         kn[dec(27)].at = 4;
@@ -335,7 +342,7 @@ public class DefaultData {
 
         kn[dec(28)].name = "Mikky";
         kn[dec(28)].surname = "Shuf";
-        kn[dec(28)].titul = "Sir ";
+        kn[dec(28)].setTitle(SIR);
         kn[dec(28)].setNation(OBERON_22);
         kn[dec(28)].town = "Alior";
         kn[dec(28)].at = 6;
@@ -347,7 +354,7 @@ public class DefaultData {
 
         kn[dec(29)].name = "Jho";
         kn[dec(29)].surname = "Gugi";
-        kn[dec(29)].titul = "";
+        kn[dec(29)].setTitle(COMMON);
         kn[dec(29)].setNation(OBERON_22);
         kn[dec(29)].town = "Alior";
         kn[dec(29)].at = 2;
@@ -359,7 +366,7 @@ public class DefaultData {
 
         kn[dec(30)].name = "Dino";
         kn[dec(30)].surname = "Nensy";
-        kn[dec(30)].titul = "";
+        kn[dec(30)].setTitle(COMMON);
         kn[dec(30)].setNation(OBERON_22);
         kn[dec(30)].town = "Itejro";
         kn[dec(30)].at = 5;

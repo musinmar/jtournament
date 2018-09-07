@@ -1,5 +1,6 @@
 package com.clocktower.tournament;
 
+import com.clocktower.tournament.domain.Nation;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

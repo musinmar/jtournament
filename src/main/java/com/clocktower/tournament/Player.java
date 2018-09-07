@@ -1,5 +1,8 @@
 package com.clocktower.tournament;
 
+import com.clocktower.tournament.domain.Nation;
+import com.clocktower.tournament.domain.Title;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +23,7 @@ public class Player {
     public String surname;
     public String town;
     private Nation nation;
-    public String titul;
+    private Title title;
 
     public int age = 1;
     public int generation = 0;
@@ -53,8 +56,16 @@ public class Player {
         this.nation = nation;
     }
 
+    public Title getTitle() {
+        return title;
+    }
+
+    public void setTitle(Title title) {
+        this.title = title;
+    }
+
     public String getPlayerName() {
-        String ret = titul + name + ' ' + surname;
+        String ret = title.getPrefix() + name + ' ' + surname;
         if (generation > 1) {
             ret += ' ' + IntToRomanConverter.convert(generation);
         }
@@ -62,7 +73,7 @@ public class Player {
     }
 
     public String getNameWithNation() {
-        return titul + name + " " + surname + " (" + nation.getName().charAt(0) + ")";
+        return title.getPrefix() + name + " " + surname + " (" + nation.getName().charAt(0) + ")";
     }
 
     public void restartCareer(boolean randomizeDeckKind) {
@@ -178,7 +189,7 @@ public class Player {
         writer.println(id);
         writer.println(name);
         writer.println(surname);
-        writer.println(titul);
+        writer.println(title.getPrefix());
         writer.println(nation.getName());
         writer.println(town);
         writer.println(age);
@@ -205,7 +216,8 @@ public class Player {
         name = sc.next();
         surname = sc.next();
         sc.nextLine();
-        titul = sc.nextLine();
+        String titleLabel = sc.nextLine();
+        title = Title.fromName(titleLabel.trim());
         String nationName = sc.next();
         this.nation = Nation.fromName(nationName);
         town = sc.next();

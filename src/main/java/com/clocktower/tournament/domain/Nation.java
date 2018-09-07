@@ -1,9 +1,8 @@
-package com.clocktower.tournament;
+package com.clocktower.tournament.domain;
 
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 public enum Nation {
     ALMAGEST("Almagest"),
@@ -19,10 +18,9 @@ public enum Nation {
     }
 
     public static Nation fromName(String name) {
-        Optional<Nation> faction = Arrays.stream(values())
+        return Arrays.stream(values())
                 .filter(v -> v.getName().equals(name))
-                .findAny();
-        return faction.orElseThrow(IllegalArgumentException::new);
+                .findAny().orElseThrow(IllegalArgumentException::new);
     }
 
     public static Nation fromId(int id) {

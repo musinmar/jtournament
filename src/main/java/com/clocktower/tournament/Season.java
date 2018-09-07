@@ -1,5 +1,6 @@
 package com.clocktower.tournament;
 
+import com.clocktower.tournament.domain.Nation;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -15,9 +16,14 @@ import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
-import static com.clocktower.tournament.Logger.*;
+import static com.clocktower.tournament.Logger.print;
+import static com.clocktower.tournament.Logger.println;
+import static com.clocktower.tournament.Logger.readln;
 import static com.clocktower.tournament.Player.LEVEL_UP_COEFFICIENT;
 import static com.clocktower.tournament.RandomUtils.random;
+import static com.clocktower.tournament.domain.Title.COMMON;
+import static com.clocktower.tournament.domain.Title.LORD;
+import static com.clocktower.tournament.domain.Title.SIR;
 import static java.util.Collections.reverseOrder;
 import static java.util.Comparator.comparingDouble;
 import static java.util.Comparator.comparingInt;
@@ -1101,22 +1107,22 @@ public class Season {
         List<Player> playersByRatingReversed = Lists.reverse(playersByRating);
 
         int worstLord = playersByRatingReversed.stream()
-                .filter(p -> p.titul.equals("Lord "))
+                .filter(p -> p.getTitle() == LORD)
                 .map(p -> p.id)
                 .findFirst().orElseThrow(RuntimeException::new);
 
         int worstSir = playersByRatingReversed.stream()
-                .filter(p -> p.titul.equals("Sir "))
+                .filter(p -> p.getTitle() == SIR)
                 .map(p -> p.id)
                 .findFirst().orElseThrow(RuntimeException::new);
 
         int bestSir = playersByRating.stream()
-                .filter(p -> p.titul.equals("Sir "))
+                .filter(p -> p.getTitle() == SIR)
                 .map(p -> p.id)
                 .findFirst().orElseThrow(RuntimeException::new);
 
         int bestCommon = playersByRating.stream()
-                .filter(p -> p.titul.equals(""))
+                .filter(p -> p.getTitle() == COMMON)
                 .map(p -> p.id)
                 .findFirst().orElseThrow(RuntimeException::new);
 
@@ -1130,8 +1136,8 @@ public class Season {
         //boj_t(worst_sir, best_common, r1, r2, t, 0);
 
         if (r.r2 > r.r1) {
-            kn[worstSir].titul = "";
-            kn[bestCommon].titul = "Sir ";
+            kn[worstSir].setTitle(COMMON);
+            kn[bestCommon].setTitle(SIR);
             println("Knight " + kn[bestCommon].name + " " + kn[bestCommon].surname + " has gained the Sir title!");
         } else {
             println("Knight " + kn[worstSir].name + " " + kn[worstSir].surname + " has defended his Sir title!");
@@ -1146,8 +1152,8 @@ public class Season {
         r = play_series(worstLord, bestSir, 3, 0);
 
         if (r.r2 > r.r1) {
-            kn[worstLord].titul = "Sir ";
-            kn[bestSir].titul = "Lord ";
+            kn[worstLord].setTitle(SIR);
+            kn[bestSir].setTitle(LORD);
             println("Knight " + kn[bestSir].name + " " + kn[bestSir].surname + " has gained the Lord title!");
         } else {
             println("Knight " + kn[worstLord].name + " " + kn[worstLord].surname + " has defended his Lord title!");
@@ -1194,22 +1200,22 @@ public class Season {
         kn[id].age = 0;
         elo.resetPlayer(kn[id]);
 
-        if (kn[id].titul.equals("Lord ")) {
+        if (kn[id].getTitle() == LORD) {
             List<Player> playersByRating = elo.getPlayersByRating();
             Player bestSir = playersByRating.stream()
-                    .filter(p -> p.titul.equals("Sir "))
+                    .filter(p -> p.getTitle() == SIR)
                     .findFirst().orElseThrow(RuntimeException::new);
-            bestSir.titul = "Lord ";
-            kn[id].titul = "Sir ";
+            bestSir.setTitle(LORD);
+            kn[id].setTitle(SIR);
         }
 
-        if (kn[id].titul.equals("Sir ")) {
+        if (kn[id].getTitle() == SIR) {
             List<Player> playersByRating = elo.getPlayersByRating();
             Player bestCommon = playersByRating.stream()
-                    .filter(p -> p.titul.equals(""))
+                    .filter(p -> p.getTitle() == COMMON)
                     .findFirst().orElseThrow(RuntimeException::new);
-            bestCommon.titul = "Sir ";
-            kn[id].titul = "";
+            bestCommon.setTitle(SIR);
+            kn[id].setTitle(COMMON);
         }
 
         println();
@@ -1367,7 +1373,7 @@ public class Season {
 
         readln();
 
-        println(kn[wc].getNation().getName() + " knight " + kn[wc].titul + kn[wc].name + " " + kn[wc].surname + " is the World Champion!!!");
+        println(kn[wc].getNation().getName() + " knight " + kn[wc].getPlayerName() + " is the World Champion!!!");
         println("It is the best day in the history of " + kn[wc].town + "!");
         println("Everyone from " + kn[wc].getNation().getName() + " are celebrating!");
         println("Grand Master " + kn[wc].name + " " + kn[wc].surname + " is now in the history!");
