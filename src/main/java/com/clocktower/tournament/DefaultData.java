@@ -24,7 +24,7 @@ public class DefaultData {
         kn[dec(1)].setTown("Aldorum");
         kn[dec(1)].setAt(6);
         kn[dec(1)].setDef(4);
-        kn[dec(1)].level = 9;
+        kn[dec(1)].setPersistentLevel(9);
         kn[dec(1)].setS(15);
         kn[dec(1)].setL(14);
         kn[dec(1)].setV(13);
@@ -36,7 +36,7 @@ public class DefaultData {
         kn[dec(2)].setTown("Murahir");
         kn[dec(2)].setAt(4);
         kn[dec(2)].setDef(6);
-        kn[dec(2)].level = 8;
+        kn[dec(2)].setPersistentLevel(8);
         kn[dec(2)].setS(14);
         kn[dec(2)].setL(15);
         kn[dec(2)].setV(12);
@@ -48,7 +48,7 @@ public class DefaultData {
         kn[dec(3)].setTown("Linagor");
         kn[dec(3)].setAt(5);
         kn[dec(3)].setDef(5);
-        kn[dec(3)].level = 4;
+        kn[dec(3)].setPersistentLevel(4);
         kn[dec(3)].setS(11);
         kn[dec(3)].setL(12);
         kn[dec(3)].setV(14);
@@ -60,7 +60,7 @@ public class DefaultData {
         kn[dec(4)].setTown("Medlur");
         kn[dec(4)].setAt(8);
         kn[dec(4)].setDef(2);
-        kn[dec(4)].level = 5;
+        kn[dec(4)].setPersistentLevel(5);
         kn[dec(4)].setS(14);
         kn[dec(4)].setL(12);
         kn[dec(4)].setV(12);
@@ -72,7 +72,7 @@ public class DefaultData {
         kn[dec(5)].setTown("Telmir");
         kn[dec(5)].setAt(7);
         kn[dec(5)].setDef(3);
-        kn[dec(5)].level = 3;
+        kn[dec(5)].setPersistentLevel(3);
         kn[dec(5)].setS(12);
         kn[dec(5)].setL(12);
         kn[dec(5)].setV(12);
@@ -84,7 +84,7 @@ public class DefaultData {
         kn[dec(6)].setTown("Turon");
         kn[dec(6)].setAt(4);
         kn[dec(6)].setDef(6);
-        kn[dec(6)].level = 2;
+        kn[dec(6)].setPersistentLevel(2);
         kn[dec(6)].setS(12);
         kn[dec(6)].setL(11);
         kn[dec(6)].setV(12);
@@ -96,7 +96,7 @@ public class DefaultData {
         kn[dec(7)].setTown("Linagor");
         kn[dec(7)].setAt(5);
         kn[dec(7)].setDef(5);
-        kn[dec(7)].level = 8;
+        kn[dec(7)].setPersistentLevel(8);
         kn[dec(7)].setS(14);
         kn[dec(7)].setL(13);
         kn[dec(7)].setV(14);
@@ -108,7 +108,7 @@ public class DefaultData {
         kn[dec(8)].setTown("Linagor");
         kn[dec(8)].setAt(5);
         kn[dec(8)].setDef(5);
-        kn[dec(8)].level = 7;
+        kn[dec(8)].setPersistentLevel(7);
         kn[dec(8)].setS(13);
         kn[dec(8)].setL(14);
         kn[dec(8)].setV(13);
@@ -120,7 +120,7 @@ public class DefaultData {
         kn[dec(9)].setTown("Ohrun");
         kn[dec(9)].setAt(7);
         kn[dec(9)].setDef(3);
-        kn[dec(9)].level = 5;
+        kn[dec(9)].setPersistentLevel(5);
         kn[dec(9)].setS(12);
         kn[dec(9)].setL(13);
         kn[dec(9)].setV(13);
@@ -132,7 +132,7 @@ public class DefaultData {
         kn[dec(10)].setTown("Turon");
         kn[dec(10)].setAt(8);
         kn[dec(10)].setDef(2);
-        kn[dec(10)].level = 5;
+        kn[dec(10)].setPersistentLevel(5);
         kn[dec(10)].setS(15);
         kn[dec(10)].setL(11);
         kn[dec(10)].setV(12);
@@ -144,7 +144,7 @@ public class DefaultData {
         kn[dec(11)].setTown("Reldor");
         kn[dec(11)].setAt(3);
         kn[dec(11)].setDef(7);
-        kn[dec(11)].level = 4;
+        kn[dec(11)].setPersistentLevel(4);
         kn[dec(11)].setS(13);
         kn[dec(11)].setL(12);
         kn[dec(11)].setV(12);
@@ -156,7 +156,7 @@ public class DefaultData {
         kn[dec(12)].setTown("Turon");
         kn[dec(12)].setAt(1);
         kn[dec(12)].setDef(9);
-        kn[dec(12)].level = 3;
+        kn[dec(12)].setPersistentLevel(3);
         kn[dec(12)].setS(11);
         kn[dec(12)].setL(14);
         kn[dec(12)].setV(11);
@@ -168,7 +168,7 @@ public class DefaultData {
         kn[dec(13)].setTown("Ejmoril");
         kn[dec(13)].setAt(1);
         kn[dec(13)].setDef(9);
-        kn[dec(13)].level = 10;
+        kn[dec(13)].setPersistentLevel(10);
         kn[dec(13)].setS(13);
         kn[dec(13)].setL(17);
         kn[dec(13)].setV(14);
@@ -180,7 +180,7 @@ public class DefaultData {
         kn[dec(14)].setTown("Rajzer");
         kn[dec(14)].setAt(6);
         kn[dec(14)].setDef(4);
-        kn[dec(14)].level = 6;
+        kn[dec(14)].setPersistentLevel(6);
         kn[dec(14)].setS(15);
         kn[dec(14)].setL(13);
         kn[dec(14)].setV(11);
@@ -192,7 +192,7 @@ public class DefaultData {
         kn[dec(15)].setTown("Telmir");
         kn[dec(15)].setAt(8);
         kn[dec(15)].setDef(2);
-        kn[dec(15)].level = 5;
+        kn[dec(15)].setPersistentLevel(5);
         kn[dec(15)].setS(13);
         kn[dec(15)].setL(13);
         kn[dec(15)].setV(11);
@@ -204,7 +204,7 @@ public class DefaultData {
         kn[dec(16)].setTown("Shiragon");
         kn[dec(16)].setAt(3);
         kn[dec(16)].setDef(7);
-        kn[dec(16)].level = 3;
+        kn[dec(16)].setPersistentLevel(3);
         kn[dec(16)].setS(11);
         kn[dec(16)].setL(11);
         kn[dec(16)].setV(14);
@@ -216,7 +216,7 @@ public class DefaultData {
         kn[dec(17)].setTown("Siligun");
         kn[dec(17)].setAt(1);
         kn[dec(17)].setDef(9);
-        kn[dec(17)].level = 1;
+        kn[dec(17)].setPersistentLevel(1);
         kn[dec(17)].setS(12);
         kn[dec(17)].setL(11);
         kn[dec(17)].setV(11);
@@ -228,7 +228,7 @@ public class DefaultData {
         kn[dec(18)].setTown("Ejmoril");
         kn[dec(18)].setAt(8);
         kn[dec(18)].setDef(2);
-        kn[dec(18)].level = 1;
+        kn[dec(18)].setPersistentLevel(1);
         kn[dec(18)].setS(11);
         kn[dec(18)].setL(12);
         kn[dec(18)].setV(11);
@@ -240,7 +240,7 @@ public class DefaultData {
         kn[dec(19)].setTown("Irif");
         kn[dec(19)].setAt(7);
         kn[dec(19)].setDef(3);
-        kn[dec(19)].level = 10;
+        kn[dec(19)].setPersistentLevel(10);
         kn[dec(19)].setS(13);
         kn[dec(19)].setL(17);
         kn[dec(19)].setV(13);
@@ -252,7 +252,7 @@ public class DefaultData {
         kn[dec(20)].setTown("Reldor");
         kn[dec(20)].setAt(6);
         kn[dec(20)].setDef(4);
-        kn[dec(20)].level = 8;
+        kn[dec(20)].setPersistentLevel(8);
         kn[dec(20)].setS(12);
         kn[dec(20)].setL(15);
         kn[dec(20)].setV(14);
@@ -264,7 +264,7 @@ public class DefaultData {
         kn[dec(21)].setTown("Irif");
         kn[dec(21)].setAt(4);
         kn[dec(21)].setDef(6);
-        kn[dec(21)].level = 6;
+        kn[dec(21)].setPersistentLevel(6);
         kn[dec(21)].setS(15);
         kn[dec(21)].setL(11);
         kn[dec(21)].setV(13);
@@ -276,7 +276,7 @@ public class DefaultData {
         kn[dec(22)].setTown("Dilion");
         kn[dec(22)].setAt(7);
         kn[dec(22)].setDef(3);
-        kn[dec(22)].level = 6;
+        kn[dec(22)].setPersistentLevel(6);
         kn[dec(22)].setS(13);
         kn[dec(22)].setL(13);
         kn[dec(22)].setV(13);
@@ -288,7 +288,7 @@ public class DefaultData {
         kn[dec(23)].setTown("Gor");
         kn[dec(23)].setAt(9);
         kn[dec(23)].setDef(1);
-        kn[dec(23)].level = 4;
+        kn[dec(23)].setPersistentLevel(4);
         kn[dec(23)].setS(14);
         kn[dec(23)].setL(11);
         kn[dec(23)].setV(11);
@@ -300,7 +300,7 @@ public class DefaultData {
         kn[dec(24)].setTown("Irif");
         kn[dec(24)].setAt(2);
         kn[dec(24)].setDef(8);
-        kn[dec(24)].level = 3;
+        kn[dec(24)].setPersistentLevel(3);
         kn[dec(24)].setS(12);
         kn[dec(24)].setL(13);
         kn[dec(24)].setV(11);
@@ -312,7 +312,7 @@ public class DefaultData {
         kn[dec(25)].setTown("Julmar");
         kn[dec(25)].setAt(3);
         kn[dec(25)].setDef(7);
-        kn[dec(25)].level = 9;
+        kn[dec(25)].setPersistentLevel(9);
         kn[dec(25)].setS(17);
         kn[dec(25)].setL(12);
         kn[dec(25)].setV(13);
@@ -324,7 +324,7 @@ public class DefaultData {
         kn[dec(26)].setTown("Alior");
         kn[dec(26)].setAt(7);
         kn[dec(26)].setDef(3);
-        kn[dec(26)].level = 7;
+        kn[dec(26)].setPersistentLevel(7);
         kn[dec(26)].setS(13);
         kn[dec(26)].setL(15);
         kn[dec(26)].setV(12);
@@ -336,7 +336,7 @@ public class DefaultData {
         kn[dec(27)].setTown("Dilion");
         kn[dec(27)].setAt(4);
         kn[dec(27)].setDef(6);
-        kn[dec(27)].level = 7;
+        kn[dec(27)].setPersistentLevel(7);
         kn[dec(27)].setS(15);
         kn[dec(27)].setL(12);
         kn[dec(27)].setV(13);
@@ -348,7 +348,7 @@ public class DefaultData {
         kn[dec(28)].setTown("Alior");
         kn[dec(28)].setAt(6);
         kn[dec(28)].setDef(4);
-        kn[dec(28)].level = 7;
+        kn[dec(28)].setPersistentLevel(7);
         kn[dec(28)].setS(12);
         kn[dec(28)].setL(12);
         kn[dec(28)].setV(16);
@@ -360,7 +360,7 @@ public class DefaultData {
         kn[dec(29)].setTown("Alior");
         kn[dec(29)].setAt(2);
         kn[dec(29)].setDef(8);
-        kn[dec(29)].level = 2;
+        kn[dec(29)].setPersistentLevel(2);
         kn[dec(29)].setS(13);
         kn[dec(29)].setL(11);
         kn[dec(29)].setV(11);
@@ -372,14 +372,10 @@ public class DefaultData {
         kn[dec(30)].setTown("Itejro");
         kn[dec(30)].setAt(5);
         kn[dec(30)].setDef(5);
-        kn[dec(30)].level = 2;
+        kn[dec(30)].setPersistentLevel(2);
         kn[dec(30)].setS(11);
         kn[dec(30)].setL(12);
         kn[dec(30)].setV(12);
-
-        for (Player player : kn) {
-            player.persistentLevel = player.level;
-        }
 
         initDecks(kn);
 

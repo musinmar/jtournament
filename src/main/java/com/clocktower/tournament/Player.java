@@ -14,9 +14,9 @@ import static com.clocktower.tournament.Logger.println;
 import static com.clocktower.tournament.utils.RandomUtils.random;
 
 public class Player {
-    public static final int RANDOM_DECK_CHANGES = 3;
-    public static final int LEVEL_UP_COEFFICIENT = 3;
-    public static final int POINTS_PER_LEVEL = 4;
+    private static final int RANDOM_DECK_CHANGES = 3;
+    private static final int LEVEL_UP_COEFFICIENT = 3;
+    private static final int POINTS_PER_LEVEL = 4;
 
     public int id;
 
@@ -28,8 +28,8 @@ public class Player {
 
     public int age = 1;
     public int generation = 0;
-    public int level;
-    public int persistentLevel;
+    private int level;
+    private int persistentLevel;
     private int exp = 0;
 
     public List<String> dost = new ArrayList<>();
@@ -89,6 +89,14 @@ public class Player {
         this.title = title;
     }
 
+    public void setPersistentLevel(int persistentLevel) {
+        this.persistentLevel = persistentLevel;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
     public void setAt(int at) {
         this.at = at;
     }
@@ -127,7 +135,7 @@ public class Player {
 
     public void restartCareer(boolean randomizeDeckKind) {
         age = 1;
-        generation = generation + 1;
+        generation += 1;
         dost.clear();
         exp = 0;
 

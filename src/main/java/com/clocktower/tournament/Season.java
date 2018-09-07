@@ -41,7 +41,7 @@ public class Season {
     private static final String FILE_NAME_ELO = "elo";
     private static final String FILE_NAME_RATING = "rating";
     private static final String FILE_NAME_RATING_CHANGE = "rating change";
-    private static final String FILE_NAME_LEVELS = "levels";
+    private static final String FILE_NAME_STATS = "stats";
 
     private int year;
     private final String FOLDER = "season";
@@ -145,7 +145,7 @@ public class Season {
         writeFederationsTable();
         save();
 
-        printLevelsToFile();
+        printStatsToFile();
 
 // assign(t, filename(FILE_NAME_DOST, true));
 // rewrite(t);
@@ -165,7 +165,7 @@ public class Season {
         elo.init(kn);
 
         List<Player> playersByLevel = Arrays.stream(kn)
-                .sorted(comparingInt((Player p) -> p.level).reversed())
+                .sorted(comparingInt(Player::getLevel).reversed())
                 .collect(toList());
         for (int i = 0; i < PLAYER_COUNT; i++) {
             leagues[i] = playersByLevel.get(i).id;
@@ -182,7 +182,6 @@ public class Season {
         }
 
         for (Player player : kn) {
-            player.persistentLevel = player.level;
             player.restartCareer(false);
         }
 
@@ -775,11 +774,11 @@ public class Season {
         println("( " + res.rw1 + ":" + res.rw2 + " )");
 
         if (res.rw1 > res.rw2) {
-            kn[id1].addExp(kn[id2].level);
+            kn[id1].addExp(kn[id2].getLevel());
             elo.update(id1, id2, 1, 0);
             nation_rating[kn[id1].getNation().getId()].seasons[0] = nation_rating[kn[id1].getNation().getId()].seasons[0] + points;
         } else if (res.rw2 > res.rw1) {
-            kn[id2].addExp(kn[id1].level);
+            kn[id2].addExp(kn[id1].getLevel());
             elo.update(id1, id2, 0, 1);
             nation_rating[kn[id2].getNation().getId()].seasons[0] = nation_rating[kn[id2].getNation().getId()].seasons[0] + points;
         } else {
@@ -854,10 +853,10 @@ public class Season {
         println("( " + res.rw1 + ":" + res.rw2 + " )");
 
         if (res.rw1 > res.rw2) {
-            kn[id1].addExp(kn[id2].level);
+            kn[id1].addExp(kn[id2].getLevel());
             nation_rating[kn[id1].getNation().getId()].seasons[0] = nation_rating[kn[id1].getNation().getId()].seasons[0] + points;
         } else if (res.rw2 > res.rw1) {
-            kn[id2].addExp(kn[id1].level);
+            kn[id2].addExp(kn[id1].getLevel());
             nation_rating[kn[id2].getNation().getId()].seasons[0] = nation_rating[kn[id2].getNation().getId()].seasons[0] + points;
         }
 
@@ -1561,25 +1560,50 @@ public class Season {
         }
     }
 
-    private void printLevelsToFile() {
-        saveToFile(filename(FILE_NAME_LEVELS, true),
+    private void printStatsToFile() {
+        saveToFile(filename(FILE_NAME_STATS, true),
                 writer -> {
-                    List<Player> playersByLevel = Arrays.stream(kn)
-                            .sorted(comparing((Player p) -> p.level).reversed())
-                            .collect(toList());
-
-                    int maxNameLength = playersByLevel.stream()
-                            .map(Player::getPlayerName)
-                            .mapToInt(String::length)
-                            .max()
-                            .orElse(0);
-
-                    String formatString = "%-2d: %-" + (maxNameLength + 1) + "s %-3d";
-
-                    for (int i = 0; i < playersByLevel.size(); i++) {
-                        Player p = playersByLevel.get(i);
-                        writer.println(String.format(formatString, (i + 1), p.getPlayerName(), p.level));
-                    }
+                    printLevelsToFile(writer);
+                    writer.println();
+                    printAgesToFile(writer);
                 });
+    }
+
+    private static int getMaxNameLength(List<Player> players) {
+        return players.stream()
+                .map(Player::getPlayerName)
+                .mapToInt(String::length)
+                .max()
+                .orElse(0);
+    }
+
+    private void printLevelsToFile(PrintWriter writer) {
+        List<Player> playersByLevel = Arrays.stream(kn)
+                .sorted(comparing(Player::getLevel).reversed())
+                .collect(toList());
+
+        int maxNameLength = getMaxNameLength(playersByLevel);
+        String formatString = "%-2d: %-" + (maxNameLength + 1) + "s %-3d";
+
+        writer.println("Levels");
+        for (int i = 0; i < playersByLevel.size(); i++) {
+            Player p = playersByLevel.get(i);
+            writer.println(String.format(formatString, (i + 1), p.getPlayerName(), p.getLevel()));
+        }
+    }
+
+    private void printAgesToFile(PrintWriter writer) {
+        List<Player> playersByAge = Arrays.stream(kn)
+                .sorted(comparing((Player p) -> p.age).reversed())
+                .collect(toList());
+
+        int maxNameLength = getMaxNameLength(playersByAge);
+        String formatString = "%-2d: %-" + (maxNameLength + 1) + "s %-3d";
+
+        writer.println("Ages");
+        for (int i = 0; i < playersByAge.size(); i++) {
+            Player p = playersByAge.get(i);
+            writer.println(String.format(formatString, (i + 1), p.getPlayerName(), p.age));
+        }
     }
 }
