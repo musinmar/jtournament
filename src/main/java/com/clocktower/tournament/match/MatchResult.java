@@ -3,10 +3,8 @@ package com.clocktower.tournament.match;
 public class MatchResult {
     public int id1;
     public int id2;
-    public int rw1;
-    public int rw2;
-    public int gw1;
-    public int gw2;
+    public final SimpleResult rounds = new SimpleResult();
+    public final SimpleResult games = new SimpleResult();
 
     public MatchResult(int id1, int id2) {
         this.id1 = id1;
@@ -14,15 +12,25 @@ public class MatchResult {
     }
 
     public void addRoundResult(SimpleResult r) {
-        gw1 += r.r1;
-        gw2 += r.r2;
+        games.r1 += r.r1;
+        games.r2 += r.r2;
         if (r.r1 > r.r2) {
-            rw1 += 2;
+            rounds.r1 += 2;
         } else if (r.r2 > r.r1) {
-            rw2 += 2;
+            rounds.r2 += 2;
         } else {
-            rw1 += 1;
-            rw2 += 1;
+            rounds.r1 += 1;
+            rounds.r2 += 1;
         }
+    }
+
+    public void addSubMatchResult(SimpleResult r) {
+        if (r.r1 > r.r2) {
+            rounds.r1 += 1;
+        } else {
+            rounds.r2 += 1;
+        }
+        games.r1 += r.r1;
+        games.r2 += r.r2;
     }
 }

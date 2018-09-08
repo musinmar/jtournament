@@ -519,7 +519,7 @@ public class Season {
 
         for (int i = 0; i < len / 2; ++i) {
             MatchResult mr = boj_t(players[i * 2], players[i * 2 + 1], points);
-            if (mr.rw1 > mr.rw2) {
+            if (mr.rounds.r1 > mr.rounds.r2) {
                 winners[i] = players[i * 2];
                 loosers[i] = players[i * 2 + 1];
             } else {
@@ -552,7 +552,7 @@ public class Season {
         while (r.r1 != wins && r.r2 != wins) {
             MatchResult mr = boj_t(id1, id2, points);
             readln();
-            if (mr.rw1 > mr.rw2) {
+            if (mr.rounds.r1 > mr.rounds.r2) {
                 r.r1 += 1;
             } else {
                 r.r2 += 1;
@@ -703,28 +703,12 @@ public class Season {
 
     private void play_group_match(GroupResult[] results, int id1, int id2, int points) {
         MatchResult mres = bojgr_t(results[id1].id, results[id2].id, points);
-
-//        if (mres.rw1 == 3 || mres.rw1 == 4) {
-//            mres.rw1 = 3;
-//        } else if (mres.rw1 == 2) {
-//            mres.rw1 = 1;
-//        } else {
-//            mres.rw1 = 0;
-//        }
-//        if (mres.rw2 == 3 || mres.rw2 == 4) {
-//            mres.rw2 = 3;
-//        } else if (mres.rw2 == 2) {
-//            mres.rw2 = 1;
-//        } else {
-//            mres.rw2 = 0;
-//        }
-
-        results[id1].rounds_won += mres.rw1;
-        results[id1].games_won += mres.gw1;
-        results[id1].games_lost += mres.gw2;
-        results[id2].rounds_won += mres.rw2;
-        results[id2].games_won += mres.gw2;
-        results[id2].games_lost += mres.gw1;
+        results[id1].rounds_won += mres.rounds.r1;
+        results[id1].games_won += mres.games.r1;
+        results[id1].games_lost += mres.games.r2;
+        results[id2].rounds_won += mres.rounds.r2;
+        results[id2].games_won += mres.games.r2;
+        results[id2].games_lost += mres.games.r1;
         readln();
     }
 
@@ -741,13 +725,13 @@ public class Season {
         print("/ " + l + " ");
         res.addRoundResult(l);
 
-        println("( " + res.rw1 + ":" + res.rw2 + " )");
+        println("( " + res.rounds + " )");
 
-        if (res.rw1 > res.rw2) {
+        if (res.rounds.r1 > res.rounds.r2) {
             kn[id1].addExp(kn[id2].getLevel());
             elo.update(id1, id2, 1, 0);
             nation_rating[kn[id1].getNation().getId()].seasons[0] = nation_rating[kn[id1].getNation().getId()].seasons[0] + points;
-        } else if (res.rw2 > res.rw1) {
+        } else if (res.rounds.r2 > res.rounds.r1) {
             kn[id2].addExp(kn[id1].getLevel());
             elo.update(id1, id2, 0, 1);
             nation_rating[kn[id2].getNation().getId()].seasons[0] = nation_rating[kn[id2].getNation().getId()].seasons[0] + points;
@@ -774,35 +758,35 @@ public class Season {
         print("/ " + l + " ");
         res.addRoundResult(l);
 
-        if (res.rw1 == res.rw2) {
+        if (res.rounds.r1 == res.rounds.r2) {
             l = playGameRound(kn[id1], kn[id2], ADDITIONAL_TIME_LENGTH);
             print("/ e.t. " + l + " ");
             res.addRoundResult(l);
         }
 
-        if (res.rw1 == res.rw2) {
+        if (res.rounds.r1 == res.rounds.r2) {
             l = playGamePenalties(kn[id1], kn[id2]);
             print("/ pen. " + l + " ");
             res.addRoundResult(l);
         }
 
-        println("( " + res.rw1 + ":" + res.rw2 + " )");
+        println("( " + res.rounds + " )");
 
-        if (res.rw1 > res.rw2) {
+        if (res.rounds.r1 > res.rounds.r2) {
             kn[id1].addExp(kn[id2].getLevel());
             nation_rating[kn[id1].getNation().getId()].seasons[0] = nation_rating[kn[id1].getNation().getId()].seasons[0] + points;
-        } else if (res.rw2 > res.rw1) {
+        } else if (res.rounds.r2 > res.rounds.r1) {
             kn[id2].addExp(kn[id1].getLevel());
             nation_rating[kn[id2].getNation().getId()].seasons[0] = nation_rating[kn[id2].getNation().getId()].seasons[0] + points;
         }
 
-        if (res.rw1 > res.rw2 && res.rw1 - res.rw2 >= 2) {
+        if (res.rounds.r1 > res.rounds.r2 && res.rounds.r1 - res.rounds.r2 >= 2) {
             elo.update(id1, id2, 1, 0);
-        } else if (res.rw2 > res.rw1 && res.rw2 - res.rw1 >= 2) {
+        } else if (res.rounds.r2 > res.rounds.r1 && res.rounds.r2 - res.rounds.r1 >= 2) {
             elo.update(id1, id2, 0, 1);
-        } else if (res.rw1 > res.rw2) {
+        } else if (res.rounds.r1 > res.rounds.r2) {
             elo.update(id1, id2, 0.6, 0.4);
-        } else if (res.rw2 > res.rw1) {
+        } else if (res.rounds.r2 > res.rounds.r1) {
             elo.update(id1, id2, 0.4, 0.6);
         } else {
             elo.update(id1, id2, 0.5, 0.5);
@@ -1316,7 +1300,7 @@ public class Season {
 
         // Quaterfinal
         MatchResult mr = playTeamMatch(teams[nation_pos[3]], teams[nation_pos[4]]);
-        if (mr.rw1 > mr.rw2) {
+        if (mr.rounds.r1 > mr.rounds.r2) {
             sf[1] = nation_pos[3];
         } else {
             sf[1] = nation_pos[4];
@@ -1325,13 +1309,13 @@ public class Season {
         // Semifinals
         int[] f = new int[2];
         mr = playTeamMatch(teams[sf[0]], teams[sf[1]]);
-        if (mr.rw1 > mr.rw2) {
+        if (mr.rounds.r1 > mr.rounds.r2) {
             f[0] = sf[0];
         } else {
             f[0] = sf[1];
         }
         mr = playTeamMatch(teams[sf[2]], teams[sf[3]]);
-        if (mr.rw1 > mr.rw2) {
+        if (mr.rounds.r1 > mr.rounds.r2) {
             f[1] = sf[2];
         } else {
             f[1] = sf[3];
@@ -1340,7 +1324,7 @@ public class Season {
         // Final
         mr = playTeamMatch(teams[f[0]], teams[f[1]]);
         int winner;
-        if (mr.rw1 > mr.rw2) {
+        if (mr.rounds.r1 > mr.rounds.r2) {
             winner = f[0];
         } else {
             winner = f[1];
@@ -1369,21 +1353,15 @@ public class Season {
         for (int j = 0; j <= 2; ++j) {
             for (int i = 0; i <= 2; ++i) {
                 MatchResult mres = boj_t(buf1[i], buf2[i], 0);
-                if (mres.rw1 > mres.rw2) {
-                    res.rw1 += 1;
-                } else {
-                    res.rw2 += 1;
-                }
-                res.gw1 = res.gw1 + mres.rw1;
-                res.gw2 = res.gw2 + mres.rw2;
+                res.addSubMatchResult(mres.rounds);
                 readln();
 
-                if (res.rw1 == 5 || res.rw2 == 5) {
+                if (res.rounds.r1 == 5 || res.rounds.r2 == 5) {
                     break;
                 }
             }
 
-            if (res.rw1 == 5 || res.rw2 == 5) {
+            if (res.rounds.r1 == 5 || res.rounds.r2 == 5) {
                 break;
             }
 
@@ -1394,7 +1372,7 @@ public class Season {
             buf2[2] = b;
         }
 
-        println(String.format("%s vs %s - %d:%d (%d:%d)", team1.name, team2.name, res.rw1, res.rw2, res.gw1, res.gw2));
+        println(String.format("%s vs %s - %d:%d (%d:%d)", team1.name, team2.name, res.rounds.r1, res.rounds.r2, res.games.r1, res.games.r2));
         println();
         readln();
 
