@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
@@ -24,7 +25,6 @@ import static com.clocktower.tournament.domain.Title.LORD;
 import static com.clocktower.tournament.domain.Title.SIR;
 import static com.clocktower.tournament.utils.RandomUtils.random;
 import static java.util.Collections.reverseOrder;
-import static java.util.Comparator.comparing;
 import static java.util.Comparator.comparingDouble;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
@@ -458,8 +458,8 @@ public class Season {
         println();
 
 
-        kn[fc_winner].addTrophy("FC", year);
-        kn[cl_winner].addTrophy("CL", year);
+        kn[fc_winner].addTrophy("Federations Cup", year);
+        kn[cl_winner].addTrophy("Champions League", year);
     }
 
     private int get_player_from(int rank, int pos) {
@@ -497,12 +497,14 @@ public class Season {
                 .map(i -> id * NATION_SIZE + i)
                 .toArray();
 
-        play_group(gr, "Cup of " + nation.getName(), 0, 1);
+        String name = "Cup of " + nation.getName();
+        play_group(gr, name, 0, 1);
         println();
 
         for (int i = 0; i < 6; i++) {
             nations[id][i] = gr[i];
         }
+        kn[gr[0]].addTrophy(name, year);
     }
 
     private void play_group_round(int[] players, int points, int rounds) {
@@ -1176,26 +1178,36 @@ public class Season {
     private void retireRandomPlayer() {
         int id = selectPlayerToRetire();
 
-        println("Knight %s has retired at the age of %d", kn[id].getPlayerName(), kn[id].getAge());
-        kn[id].restartCareer(true);
-        elo.resetPlayer(kn[id]);
+        Player retiredPlayer = kn[id];
+        println("Knight %s has retired at the age of %d", retiredPlayer.getPlayerName(), retiredPlayer.getAge());
+        Map<String, Long> trophies = retiredPlayer.getTrophiesByType();
+        if (!trophies.isEmpty()) {
+            println("Knight's achievements are:");
+            for (Map.Entry<String, Long> entry : trophies.entrySet()) {
+                println(entry.getKey() + ": " + entry.getValue());
+            }
+            println();
+        }
 
-        if (kn[id].getTitle() == LORD) {
+        retiredPlayer.restartCareer(true);
+        elo.resetPlayer(retiredPlayer);
+
+        if (retiredPlayer.getTitle() == LORD) {
             List<Player> playersByRating = elo.getPlayersByRating();
             Player bestSir = playersByRating.stream()
                     .filter(p -> p.getTitle() == SIR)
                     .findFirst().orElseThrow(RuntimeException::new);
             bestSir.setTitle(LORD);
-            kn[id].setTitle(SIR);
+            retiredPlayer.setTitle(SIR);
         }
 
-        if (kn[id].getTitle() == SIR) {
+        if (retiredPlayer.getTitle() == SIR) {
             List<Player> playersByRating = elo.getPlayersByRating();
             Player bestCommon = playersByRating.stream()
                     .filter(p -> p.getTitle() == COMMON)
                     .findFirst().orElseThrow(RuntimeException::new);
             bestCommon.setTitle(SIR);
-            kn[id].setTitle(COMMON);
+            retiredPlayer.setTitle(COMMON);
         }
 
         println();
@@ -1358,7 +1370,7 @@ public class Season {
         println("Everyone from " + kn[wc].getNation().getName() + " are celebrating!");
         println("Grand Master " + kn[wc].getSimplePlayerName() + " is now in the history!");
 
-        kn[wc].addTrophy("WC", year);
+        kn[wc].addTrophy("World Cup", year);
 
         readln();
     }
@@ -1387,7 +1399,7 @@ public class Season {
         int lastp = league.length - 1;
         if (points != 1) {
             println(name + " - relegation match");
-            TajmResult r = play_series(league[lastp - 1], league[lastp], 2, 0);
+            TajmResult r = play_series(league[lastp - 1], league[lastp], 3, 0);
             if (r.r2 > r.r1) {
                 int j = league[lastp];
                 league[lastp] = league[lastp - 1];
@@ -1415,7 +1427,7 @@ public class Season {
 
         println();
 
-        kn[league[0]].addTrophy(Character.toString(name.charAt(name.length() - 1)), year);
+        kn[league[0]].addTrophy(name, year);
     }
 
     private Team makeNationalTeam(int nationId) {
@@ -1497,6 +1509,10 @@ public class Season {
         println(String.format("%s is the winner of the National World Cup %d", teams[winner].name, year));
         println();
         readln();
+
+        for (int i : teams[winner].id) {
+            kn[i].addTrophy("National World Cup", year);
+        }
     }
 
     private MatchResult playTeamMatch(Team team1, Team team2) {
@@ -1563,9 +1579,11 @@ public class Season {
     private void printStatsToFile() {
         saveToFile(filename(FILE_NAME_STATS, true),
                 writer -> {
-                    printLevelsToFile(writer);
+                    writeLevels(writer);
                     writer.println();
-                    printAgesToFile(writer);
+                    writeAges(writer);
+                    writer.println();
+                    writeTrophies(writer);
                 });
     }
 
@@ -1577,7 +1595,7 @@ public class Season {
                 .orElse(0);
     }
 
-    private void printLevelsToFile(PrintWriter writer) {
+    private void writeLevels(PrintWriter writer) {
         List<Player> playersByLevel = Arrays.stream(kn)
                 .sorted(comparingInt(Player::getLevel).reversed())
                 .collect(toList());
@@ -1592,7 +1610,7 @@ public class Season {
         }
     }
 
-    private void printAgesToFile(PrintWriter writer) {
+    private void writeAges(PrintWriter writer) {
         List<Player> playersByAge = Arrays.stream(kn)
                 .sorted(comparingInt(Player::getAge).reversed())
                 .collect(toList());
@@ -1604,6 +1622,22 @@ public class Season {
         for (int i = 0; i < playersByAge.size(); i++) {
             Player p = playersByAge.get(i);
             writer.println(String.format(formatString, (i + 1), p.getPlayerName(), p.getAge()));
+        }
+    }
+
+    private void writeTrophies(PrintWriter writer) {
+        writer.println("Trophies");
+
+        for (Player player : kn) {
+            Map<String, Long> trophies = player.getTrophiesByType();
+            if (trophies.isEmpty()) {
+                continue;
+            }
+            writer.println();
+            writer.println(player.getPlayerName());
+            for (Map.Entry<String, Long> entry : trophies.entrySet()) {
+                writer.println(entry.getKey() + ": " + entry.getValue());
+            }
         }
     }
 }

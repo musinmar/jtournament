@@ -3,16 +3,20 @@ package com.clocktower.tournament;
 import com.clocktower.tournament.domain.DeckType;
 import com.clocktower.tournament.domain.Nation;
 import com.clocktower.tournament.domain.Title;
+import com.clocktower.tournament.domain.Trophy;
 import com.clocktower.tournament.utils.IntToRomanConverter;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import static com.clocktower.tournament.Logger.println;
 import static com.clocktower.tournament.utils.RandomUtils.random;
+import static java.util.stream.Collectors.counting;
 
 public class Player {
     private static final int RANDOM_DECK_CHANGES = 3;
@@ -33,7 +37,7 @@ public class Player {
     private int persistentLevel;
     private int exp = 0;
 
-    public List<String> dost = new ArrayList<>();
+    private List<Trophy> trophies = new ArrayList<>();
 
     private int at;
     private int def;
@@ -147,7 +151,7 @@ public class Player {
     public void restartCareer(boolean randomizeDeckKind) {
         age = 1;
         generation += 1;
-        dost.clear();
+        trophies.clear();
         exp = 0;
 
         level = persistentLevel;
@@ -222,8 +226,8 @@ public class Player {
         writer.println(v);
         writer.println(exp);
 
-        writer.println(dost.size());
-        dost.forEach(writer::println);
+        writer.println(trophies.size());
+        trophies.forEach(writer::println);
 
         writer.println(deckType.getV1());
         writer.println(deckType.getV2());
@@ -256,7 +260,7 @@ public class Player {
         sc.nextLine();
         for (int i = 0; i < k; i++) {
             String s = sc.nextLine();
-            dost.add(s);
+            trophies.add(Trophy.valueOf(s));
         }
 
         int deckTypeV1 = sc.nextInt();
@@ -269,7 +273,12 @@ public class Player {
     }
 
     public void addTrophy(String trophy, int year) {
-        dost.add(trophy + " " + year);
+        trophies.add(new Trophy(trophy, year));
+    }
+
+    public Map<String, Long> getTrophiesByType() {
+        return trophies.stream()
+                .collect(Collectors.groupingBy(Trophy::getName, counting()));
     }
 
     public void increaseDeck() {
