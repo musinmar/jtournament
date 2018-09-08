@@ -729,15 +729,7 @@ public class Season {
 
         updateElo(kn[id1], kn[id2], res);
         updateExp(kn[id1], kn[id2], res);
-
-        if (res.rounds.r1 > res.rounds.r2) {
-            nation_rating[kn[id1].getNation().getId()].seasons[0] = nation_rating[kn[id1].getNation().getId()].seasons[0] + points;
-        } else if (res.rounds.r2 > res.rounds.r1) {
-            nation_rating[kn[id2].getNation().getId()].seasons[0] = nation_rating[kn[id2].getNation().getId()].seasons[0] + points;
-        } else {
-            nation_rating[kn[id1].getNation().getId()].seasons[0] = nation_rating[kn[id1].getNation().getId()].seasons[0] + points / 2;
-            nation_rating[kn[id2].getNation().getId()].seasons[0] = nation_rating[kn[id2].getNation().getId()].seasons[0] + points / 2;
-        }
+        updateNationRatings(kn[id1], kn[id2], res, points);
 
         return res;
     }
@@ -769,14 +761,9 @@ public class Season {
 
         println("( " + res.rounds + " )");
 
-        if (res.rounds.r1 > res.rounds.r2) {
-            nation_rating[kn[id1].getNation().getId()].seasons[0] = nation_rating[kn[id1].getNation().getId()].seasons[0] + points;
-        } else if (res.rounds.r2 > res.rounds.r1) {
-            nation_rating[kn[id2].getNation().getId()].seasons[0] = nation_rating[kn[id2].getNation().getId()].seasons[0] + points;
-        }
-
         updateElo(kn[id1], kn[id2], res);
         updateExp(kn[id1], kn[id2], res);
+        updateNationRatings(kn[id1], kn[id2], res, points);
 
         return res;
     }
@@ -791,6 +778,17 @@ public class Season {
             p1.addExp(p2.getLevel());
         } else if (mr.rounds.r2 > mr.rounds.r1) {
             p2.addExp(p1.getLevel());
+        }
+    }
+    
+    private void updateNationRatings(Player p1, Player p2, MatchResult mr, int points) {
+        if (mr.rounds.r1 > mr.rounds.r2) {
+            nation_rating[p1.getNation().getId()].seasons[0] = nation_rating[p1.getNation().getId()].seasons[0] + points;
+        } else if (mr.rounds.r2 > mr.rounds.r1) {
+            nation_rating[p2.getNation().getId()].seasons[0] = nation_rating[p2.getNation().getId()].seasons[0] + points;
+        } else {
+            nation_rating[p1.getNation().getId()].seasons[0] = nation_rating[p1.getNation().getId()].seasons[0] + points / 2.0;
+            nation_rating[p2.getNation().getId()].seasons[0] = nation_rating[p2.getNation().getId()].seasons[0] + points / 2.0;
         }
     }
 
