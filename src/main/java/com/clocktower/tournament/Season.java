@@ -44,6 +44,9 @@ public class Season {
     private static final String FILE_NAME_RATING_CHANGE = "rating change";
     private static final String FILE_NAME_STATS = "stats";
 
+    private static final int NORMAL_TIME_LENGTH = 9;
+    private static final int ADDITIONAL_TIME_LENGTH = 7;
+
     private int year;
     private final String FOLDER = "season";
 
@@ -59,7 +62,7 @@ public class Season {
         public double[] seasons = new double[SEASON_COUNT];
     }
 
-    public static class TajmResult {
+    public static class SimpleResult {
         int r1;
         int r2;
     }
@@ -137,7 +140,7 @@ public class Season {
 
         elo.advanceYear();
 
-        play_titul_playoffs();
+        playTitlePlayoffs();
         end_of_season_adjust();
 
         saveToFile(filename(FILE_NAME_RATING, true),
@@ -430,7 +433,7 @@ public class Season {
         println("Federations Cup - FINAL");
         println("Final");
         println();
-        TajmResult r = play_series(fc_f[0], fc_f[1], 3, 1);
+        SimpleResult r = play_series(fc_f[0], fc_f[1], 3, 1);
         int fc_winner;
         if (r.r1 > r.r2) {
             fc_winner = fc_f[0];
@@ -543,7 +546,7 @@ public class Season {
     private void play_series_playoff_round(int[] players, int[] winners, int[] loosers, int wins, int points) {
         int len = players.length;
         for (int i = 0; i < len / 2; ++i) {
-            TajmResult r = play_series(players[i * 2], players[i * 2 + 1], wins, points);
+            SimpleResult r = play_series(players[i * 2], players[i * 2 + 1], wins, points);
             if (r.r1 > r.r2) {
                 winners[i] = players[i * 2];
                 loosers[i] = players[i * 2 + 1];
@@ -556,8 +559,8 @@ public class Season {
         println();
     }
 
-    private TajmResult play_series(int id1, int id2, int wins, int points) {
-        TajmResult r = new TajmResult();
+    private SimpleResult play_series(int id1, int id2, int wins, int points) {
+        SimpleResult r = new SimpleResult();
         while (r.r1 != wins && r.r2 != wins) {
             MatchResult mr = boj_t(id1, id2, points);
             readln();
@@ -749,7 +752,7 @@ public class Season {
         println(kn[id1].getNameWithNation() + " vs " + kn[id2].getNameWithNation());
 
         // TODO: incapsulate
-        TajmResult l = tajm(id1, id2, 9);
+        SimpleResult l = playTime(kn[id1], kn[id2], NORMAL_TIME_LENGTH);
         res.gw1 += l.r1;
         res.gw2 += l.r2;
         print(l.r1 + ":" + l.r2 + " ");
@@ -762,7 +765,7 @@ public class Season {
             res.rw2 += 1;
         }
 
-        l = tajm(id1, id2, 9);
+        l = playTime(kn[id1], kn[id2], NORMAL_TIME_LENGTH);
         res.gw1 += l.r1;
         res.gw2 += l.r2;
         print("/ " + l.r1 + ":" + l.r2 + " ");
@@ -806,7 +809,7 @@ public class Season {
         println(kn[id1].getNameWithNation() + " vs " + kn[id2].getNameWithNation());
 
         // TODO: incapsulate
-        TajmResult l = tajm(id1, id2, 9);
+        SimpleResult l = playTime(kn[id1], kn[id2], NORMAL_TIME_LENGTH);
         res.gw1 += l.r1;
         res.gw2 += l.r2;
         print(l.r1 + ":" + l.r2 + " ");
@@ -819,7 +822,7 @@ public class Season {
             res.rw2 += 1;
         }
 
-        l = tajm(id1, id2, 9);
+        l = playTime(kn[id1], kn[id2], NORMAL_TIME_LENGTH);
         res.gw1 += l.r1;
         res.gw2 += l.r2;
         print("/ " + l.r1 + ":" + l.r2 + " ");
@@ -834,7 +837,7 @@ public class Season {
 
 
         if (res.rw1 == res.rw2) {
-            l = tajm(id1, id2, 7);
+            l = playTime(kn[id1], kn[id2], ADDITIONAL_TIME_LENGTH);
             print("/ e.t. " + l.r1 + ":" + l.r2 + " ");
 
             res.gw1 += l.r1;
@@ -879,40 +882,24 @@ public class Season {
         return res;
     }
 
-    private TajmResult tajm(int id1, int id2, int len) {
-        // TODO: refactor to something more reasonable
+    private static SimpleResult playTime(Player p1, Player p2, int len) {
+        int[] d1 = ArrayUtils.clone(p1.deck);
+        int[] d2 = ArrayUtils.clone(p2.deck);
+        ArrayUtils.shuffle(d1);
+        ArrayUtils.shuffle(d2);
 
-        int[] t1 = new int[20];
-        int[] t2 = new int[20];
-        for (int i = 0; i < 20; i++) {
-            t1[i] = i;
-            t2[i] = i;
-        }
-
-        TajmResult r = new TajmResult();
-
+        SimpleResult r = new SimpleResult();
         for (int i = 0; i < len; i++) {
-            int l1 = random(20 - i);
-            int l2 = random(20 - i);
-
-            if (kn[id1].deck[t1[l1]] > kn[id2].deck[t2[l2]]) {
-                r.r1 += 1;
-            } else if (kn[id1].deck[t1[l1]] < kn[id2].deck[t2[l2]]) {
-                r.r2 += 1;
-            }
-
-            for (int j = l1; j < 20 - i - 1; ++j) {
-                t1[j] = t1[j + 1];
-            }
-            for (int j = l2; j < 20 - i - 1; ++j) {
-                t2[j] = t2[j + 1];
+            if (d1[i] > d2[i]) {
+                ++r.r1;
+            } else if (d1[i] < d2[i]) {
+                ++r.r2;
             }
         }
-
         return r;
     }
 
-    private TajmResult penalty(int id1, int id2) {
+    private SimpleResult penalty(int id1, int id2) {
         int[] t1 = new int[20];
         int[] t2 = new int[20];
         for (int i = 0; i < 20; i++) {
@@ -920,7 +907,7 @@ public class Season {
             t2[i] = i;
         }
 
-        TajmResult r = new TajmResult();
+        SimpleResult r = new SimpleResult();
 
         for (int i = 1; i <= 3; ++i) {
             int k1 = 0;
@@ -1086,7 +1073,7 @@ public class Season {
         }
     }
 
-    private void play_titul_playoffs() {
+    private void playTitlePlayoffs() {
         List<Player> playersByRating = elo.getPlayersByRating();
         List<Player> playersByRatingReversed = Lists.reverse(playersByRating);
 
@@ -1116,7 +1103,7 @@ public class Season {
 
         println("Sir play off");
         println();
-        TajmResult r = play_series(worstSir, bestCommon, 3, 0);
+        SimpleResult r = play_series(worstSir, bestCommon, 3, 0);
         //boj_t(worst_sir, best_common, r1, r2, t, 0);
 
         if (r.r2 > r.r1) {
@@ -1124,7 +1111,7 @@ public class Season {
             kn[bestCommon].setTitle(SIR);
             println("Knight " + kn[bestCommon].getSimplePlayerName() + " has gained the Sir title!");
         } else {
-            println("Knight " + kn[worstSir].getSimplePlayerName() + " has defended his Sir title!");
+            println("Knight " + kn[worstSir].getSimplePlayerName() + " has defended the Sir title!");
         }
         readln();
 
@@ -1140,7 +1127,7 @@ public class Season {
             kn[bestSir].setTitle(LORD);
             println("Knight " + kn[bestSir].getSimplePlayerName() + " has gained the Lord title!");
         } else {
-            println("Knight " + kn[worstLord].getSimplePlayerName() + " has defended his Lord title!");
+            println("Knight " + kn[worstLord].getSimplePlayerName() + " has defended the Lord title!");
         }
         readln();
         println();
@@ -1355,7 +1342,7 @@ public class Season {
         println("Final");
         println();
 
-        TajmResult r = play_series(f[0], f[1], 4, 0);
+        SimpleResult r = play_series(f[0], f[1], 4, 0);
         int wc;
         if (r.r1 > r.r2) {
             wc = f[0];
@@ -1400,7 +1387,7 @@ public class Season {
         int lastp = league.length - 1;
         if (points != 1) {
             println(name + " - relegation match");
-            TajmResult r = play_series(league[lastp - 1], league[lastp], 3, 0);
+            SimpleResult r = play_series(league[lastp - 1], league[lastp], 3, 0);
             if (r.r2 > r.r1) {
                 int j = league[lastp];
                 league[lastp] = league[lastp - 1];
@@ -1409,7 +1396,7 @@ public class Season {
         }
 
         println(name + " - final match");
-        TajmResult r = play_series(league[0], league[1], 3, 0);
+        SimpleResult r = play_series(league[0], league[1], 3, 0);
         if (r.r2 > r.r1) {
             int j = league[0];
             league[0] = league[1];
