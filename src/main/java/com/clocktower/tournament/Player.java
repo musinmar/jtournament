@@ -180,7 +180,7 @@ public class Player {
 
         int k = level * POINTS_PER_LEVEL;
         for (int i = 0; i < k; i++) {
-            incDeck();
+            increaseDeck();
         }
     }
 
@@ -198,38 +198,10 @@ public class Player {
     private void levelUp() {
         println(getPlayerName() + " has gained level!");
         for (int i = 0; i < POINTS_PER_LEVEL; i++) {
-            incDeck();
+            increaseDeck();
         }
         exp -= getExpForLevelUp();
         level += 1;
-    }
-
-    public void incDeck() {
-        int r = deckType.generateRandomDeckPosition();
-        increaseDeckAtPosition(deck, r);
-    }
-
-    static void increaseDeckAtPosition(int[] deck, int pos) {
-        // TODO: can just sort array after increase
-
-        int size = deck.length;
-        if (pos < 0 || pos >= size) {
-            throw new IndexOutOfBoundsException();
-        }
-
-        if (pos == size - 1) {
-            ++deck[pos];
-        } else {
-            int k = pos + 1;
-            while ((k < size) && (deck[k] == deck[pos])) {
-                ++k;
-            }
-            if (k >= size) {
-                ++deck[size - 1];
-            } else {
-                ++deck[k - 1];
-            }
-        }
     }
 
     public void save(PrintWriter writer) {
@@ -300,28 +272,26 @@ public class Player {
         dost.add(trophy + " " + year);
     }
 
+    public void increaseDeck() {
+        int r = deckType.generateRandomDeckPosition();
+        changeDeckAtPosition(deck, r, 1);
+    }
+
+    public void decreaseDeck() {
+        int k = deckType.generateRandomDeckPosition();
+        changeDeckAtPosition(deck, k, -1);
+    }
+
     public void applyRandomDeckChanges() {
         for (int i = 1; i <= RANDOM_DECK_CHANGES; ++i) {
-            int k = random(20);
+            int k = deckType.generateRandomDeckPosition();
             int change = random(2) * 2 - 1;
-            if (change > 0) {
-                while (k < 20 - 1 && deck[k] == deck[k + 1]) {
-                    ++k;
-                }
-            } else {
-                while (k > 0 && deck[k] == deck[k - 1]) {
-                    --k;
-                }
-            }
-            deck[k] = deck[k] + change;
+            changeDeckAtPosition(deck, k, change);
         }
     }
 
-    public void decDeck() {
-        int k = random(20);
-        while (k > 0 && deck[k] == deck[k - 1]) {
-            --k;
-        }
-        deck[k] -= 1;
+    static void changeDeckAtPosition(int[] deck, int pos, int dif) {
+        deck[pos] += dif;
+        Arrays.sort(deck);
     }
 }

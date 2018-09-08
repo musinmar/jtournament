@@ -1075,8 +1075,8 @@ public class Season {
 
         if (year % 2 == 0) {
             Player bestPlayer = elo.getPlayersByRating().get(0);
-            bestPlayer.decDeck();
-            bestPlayer.decDeck();
+            bestPlayer.decreaseDeck();
+            bestPlayer.decreaseDeck();
             println(bestPlayer.getPlayerName() + " has decreased his skill.");
             println();
             readln();

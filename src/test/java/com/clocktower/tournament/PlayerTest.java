@@ -2,47 +2,79 @@ package com.clocktower.tournament;
 
 import org.junit.jupiter.api.Test;
 
-import static com.clocktower.tournament.Player.increaseDeckAtPosition;
+import static com.clocktower.tournament.Player.changeDeckAtPosition;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PlayerTest {
     @Test
-    void testIncreaseDeckAtPosition() {
+    void testChangeDeckAtPositionIncrease() {
         int[] deck;
         deck = new int[]{0, 1, 1, 1, 2, 2};
-        increaseDeckAtPosition(deck, 0);
+        changeDeckAtPosition(deck, 0, 1);
         assertArrayEquals(new int[]{1, 1, 1, 1, 2, 2}, deck);
 
         deck = new int[]{0, 1, 1, 1, 2, 2};
-        increaseDeckAtPosition(deck, 1);
+        changeDeckAtPosition(deck, 1, 1);
         assertArrayEquals(new int[]{0, 1, 1, 2, 2, 2}, deck);
 
         deck = new int[]{0, 1, 1, 1, 2, 2};
-        increaseDeckAtPosition(deck, 2);
+        changeDeckAtPosition(deck, 2, 1);
         assertArrayEquals(new int[]{0, 1, 1, 2, 2, 2}, deck);
 
         deck = new int[]{0, 1, 1, 1, 2, 2};
-        increaseDeckAtPosition(deck, 3);
+        changeDeckAtPosition(deck, 3, 1);
         assertArrayEquals(new int[]{0, 1, 1, 2, 2, 2}, deck);
 
         deck = new int[]{0, 1, 1, 1, 2, 2};
-        increaseDeckAtPosition(deck, 4);
+        changeDeckAtPosition(deck, 4, 1);
         assertArrayEquals(new int[]{0, 1, 1, 1, 2, 3}, deck);
 
         deck = new int[]{0, 1, 1, 1, 2, 2};
-        increaseDeckAtPosition(deck, 5);
+        changeDeckAtPosition(deck, 5, 1);
         assertArrayEquals(new int[]{0, 1, 1, 1, 2, 3}, deck);
 
         deck = new int[]{0, 1, 2, 3, 4, 5};
-        increaseDeckAtPosition(deck, 3);
+        changeDeckAtPosition(deck, 3, 1);
         assertArrayEquals(new int[]{0, 1, 2, 4, 4, 5}, deck);
     }
 
     @Test
-    void testIncreaseDeckAtPosition2() {
+    void testChangeDeckAtPositionDecrease() {
+        int[] deck;
+        deck = new int[]{0, 1, 1, 1, 2, 2};
+        changeDeckAtPosition(deck, 0, -1);
+        assertArrayEquals(new int[]{-1, 1, 1, 1, 2, 2}, deck);
+
+        deck = new int[]{0, 1, 1, 1, 2, 2};
+        changeDeckAtPosition(deck, 1, -1);
+        assertArrayEquals(new int[]{0, 0, 1, 1, 2, 2}, deck);
+
+        deck = new int[]{0, 1, 1, 1, 2, 2};
+        changeDeckAtPosition(deck, 2, -1);
+        assertArrayEquals(new int[]{0, 0, 1, 1, 2, 2}, deck);
+
+        deck = new int[]{0, 1, 1, 1, 2, 2};
+        changeDeckAtPosition(deck, 3, -1);
+        assertArrayEquals(new int[]{0, 0, 1, 1, 2, 2}, deck);
+
+        deck = new int[]{0, 1, 1, 1, 2, 2};
+        changeDeckAtPosition(deck, 4, -1);
+        assertArrayEquals(new int[]{0, 1, 1, 1, 1, 2}, deck);
+
+        deck = new int[]{0, 1, 1, 1, 2, 2};
+        changeDeckAtPosition(deck, 5, -1);
+        assertArrayEquals(new int[]{0, 1, 1, 1, 1, 2}, deck);
+
+        deck = new int[]{0, 1, 2, 3, 4, 5};
+        changeDeckAtPosition(deck, 3, -1);
+        assertArrayEquals(new int[]{0, 1, 2, 2, 4, 5}, deck);
+    }
+
+    @Test
+    void testChangeDeckAtPositionFailed() {
         int[] deck = new int[]{0, 1, 1, 1, 2, 2};
-        assertThrows(IndexOutOfBoundsException.class, () -> increaseDeckAtPosition(deck, -1));
-        assertThrows(IndexOutOfBoundsException.class, () -> increaseDeckAtPosition(deck, 6));
+        assertThrows(IndexOutOfBoundsException.class, () -> changeDeckAtPosition(deck, -1, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> changeDeckAtPosition(deck, 6, 1));
     }
 }
