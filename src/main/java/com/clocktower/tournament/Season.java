@@ -13,12 +13,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.function.Consumer;
-import java.util.stream.IntStream;
 
 import static com.clocktower.tournament.Logger.print;
 import static com.clocktower.tournament.Logger.println;
@@ -54,7 +54,7 @@ public class Season {
     private EloRating elo = new EloRating();
 
     private NationRating nationRating = new NationRating();
-    private int[][] nations = new int[Nation.COUNT][NATION_SIZE];
+    private Map<Nation, int[]> nationalCupResults = new HashMap<>();
 
     private int[] leagues = new int[PLAYER_COUNT];
 
@@ -88,7 +88,7 @@ public class Season {
         Logger.setCurrentFilename(seasonLogFileName);
 
         nationRating.printNationTable();
-        nationRating.makeSeasonNationPos();
+        nationRating.calculateNationRankingsAndPrint();
         nationRating.advanceYear();
 
         playTournaments();
@@ -227,8 +227,8 @@ public class Season {
     }
 
     private void playTournaments() {
-        for (int i = 0; i < Nation.COUNT; i++) {
-            playNational(i);
+        for (Nation nation : Nation.values()) {
+            nationalCupResults.put(nation, playNationalCup(nation));
         }
 
         println("Champions League - Season " + year);
@@ -382,7 +382,8 @@ public class Season {
     }
 
     private int get_player_from(int rank, int pos) {
-        return nations[nationRating.nation_pos[rank - 1]][pos - 1];
+        Nation nation = nationRating.getRankedNation(rank - 1);
+        return nationalCupResults.get(nation)[pos - 1];
     }
 
     private void make_groups(int[] a) {
@@ -409,21 +410,18 @@ public class Season {
         //shuffle(a, true);
     }
 
-    private void playNational(int id) {
-        Nation nation = Nation.fromId(id);
-
-        int[] gr = IntStream.range(0, NATION_SIZE)
-                .map(i -> id * NATION_SIZE + i)
+    private int[] playNationalCup(Nation nation) {
+        int[] players = Arrays.stream(kn)
+                .filter(p -> p.getNation() == nation)
+                .mapToInt(p -> p.id)
                 .toArray();
 
         String name = "Cup of " + nation.getName();
-        play_group(gr, name, 0, 1);
+        play_group(players, name, 0, 1);
         println();
 
-        for (int i = 0; i < 6; i++) {
-            nations[id][i] = gr[i];
-        }
-        kn[gr[0]].addTrophy(name, year);
+        kn[players[0]].addTrophy(name, year);
+        return players;
     }
 
     private void play_group_round(int[] players, int points, int rounds) {
@@ -1152,13 +1150,13 @@ public class Season {
         kn[league[0]].addTrophy(name, year);
     }
 
-    private Team makeNationalTeam(int nationId) {
+    private Team makeNationalTeam(Nation nation) {
         Team res = new Team();
-        res.name = Nation.fromId(nationId).getName();
+        res.name = nation.getName();
 
         List<Player> playersByRating = elo.getPlayersByRating();
         res.id = playersByRating.stream()
-                .filter(p -> p.getNation().getId() == nationId)
+                .filter(p -> p.getNation() == nation)
                 .limit(3)
                 .mapToInt(p -> p.id)
                 .toArray();
@@ -1167,9 +1165,9 @@ public class Season {
     }
 
     private void playNationalWorldCup() {
-        Team[] teams = new Team[5];
-        for (int i = 0; i < 5; ++i) {
-            teams[i] = makeNationalTeam(i);
+        Map<Nation, Team> teams = new HashMap<>();
+        for (Nation nation : Nation.values()) {
+            teams.put(nation, makeNationalTeam(nation));
         }
 
         println(String.format("National World Cup - Season %d", year));
@@ -1177,8 +1175,8 @@ public class Season {
 
         println("Participants");
         println();
-        for (int i = 0; i < teams.length; i++) {
-            Team team = teams[nationRating.nation_pos[i]];
+        for (int i = 0; i < Nation.COUNT; i++) {
+            Team team = teams.get(nationRating.getRankedNation(i));
             println(team.name);
             for (int j = 0; j < team.id.length; j++) {
                 print(String.format("%d: %s", j + 1, kn[team.id[j]].getPlayerName()));
@@ -1191,28 +1189,28 @@ public class Season {
             println();
         }
 
-        int[] sf = new int[4];
-        sf[0] = nationRating.nation_pos[0];
-        sf[2] = nationRating.nation_pos[1];
-        sf[3] = nationRating.nation_pos[2];
+        Team[] sf = new Team[4];
+        sf[0] = teams.get(nationRating.getRankedNation(0));
+        sf[2] = teams.get(nationRating.getRankedNation(1));
+        sf[3] = teams.get(nationRating.getRankedNation(2));
 
         // Quaterfinal
-        MatchResult mr = playTeamMatch(teams[nationRating.nation_pos[3]], teams[nationRating.nation_pos[4]]);
+        MatchResult mr = playTeamMatch(teams.get(nationRating.getRankedNation(3)), teams.get(nationRating.getRankedNation(4)));
         if (mr.rounds.r1 > mr.rounds.r2) {
-            sf[1] = nationRating.nation_pos[3];
+            sf[1] = teams.get(nationRating.getRankedNation(3));
         } else {
-            sf[1] = nationRating.nation_pos[4];
+            sf[1] = teams.get(nationRating.getRankedNation(4));
         }
 
         // Semifinals
-        int[] f = new int[2];
-        mr = playTeamMatch(teams[sf[0]], teams[sf[1]]);
+        Team[] f = new Team[2];
+        mr = playTeamMatch(sf[0], sf[1]);
         if (mr.rounds.r1 > mr.rounds.r2) {
             f[0] = sf[0];
         } else {
             f[0] = sf[1];
         }
-        mr = playTeamMatch(teams[sf[2]], teams[sf[3]]);
+        mr = playTeamMatch(sf[2], sf[3]);
         if (mr.rounds.r1 > mr.rounds.r2) {
             f[1] = sf[2];
         } else {
@@ -1220,19 +1218,19 @@ public class Season {
         }
 
         // Final
-        mr = playTeamMatch(teams[f[0]], teams[f[1]]);
-        int winner;
+        mr = playTeamMatch(f[0], f[1]);
+        Team winner;
         if (mr.rounds.r1 > mr.rounds.r2) {
             winner = f[0];
         } else {
             winner = f[1];
         }
 
-        println(String.format("%s is the winner of the National World Cup %d", teams[winner].name, year));
+        println(String.format("%s is the winner of the National World Cup %d", winner.name, year));
         println();
         readln();
 
-        for (int i : teams[winner].id) {
+        for (int i : winner.id) {
             kn[i].addTrophy("National World Cup", year);
         }
     }

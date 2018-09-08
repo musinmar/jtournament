@@ -5,18 +5,20 @@ import com.clocktower.tournament.match.MatchResult;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 import static com.clocktower.tournament.Logger.print;
 import static com.clocktower.tournament.Logger.println;
 import static com.clocktower.tournament.Logger.readln;
 import static java.util.Comparator.comparingDouble;
+import static java.util.stream.Collectors.toList;
 
 public class NationRating {
     public static final int SEASON_COUNT = 4;
 
     public NationRatingItem[] nation_rating = new NationRatingItem[Nation.COUNT];
-    public int[] nation_pos = new int[Nation.COUNT];
+    private List<Nation> nationRanking;
 
     public static class NationRatingItem {
         public double[] seasons = new double[SEASON_COUNT];
@@ -24,6 +26,10 @@ public class NationRating {
 
     public NationRating() {
         Arrays.setAll(nation_rating, i -> new NationRatingItem());
+    }
+
+    public Nation getRankedNation(int rank) {
+        return nationRanking.get(rank);
     }
 
     public void initDefault() {
@@ -61,25 +67,22 @@ public class NationRating {
         }
     }
 
-    public void makeSeasonNationPos() {
+    public void calculateNationRankingsAndPrint() {
         double[] sums = Arrays.stream(nation_rating)
                 .mapToDouble(item -> {
                     return Arrays.stream(item.seasons).sum();
                 })
                 .toArray();
 
-        Arrays.setAll(nation_pos, i -> i);
-        nation_pos = Arrays.stream(nation_pos)
-                .boxed()
-                .sorted(comparingDouble((Integer i) -> sums[i]).reversed())
-                .mapToInt(i -> i)
-                .toArray();
+        nationRanking = Arrays.stream(Nation.values())
+                .sorted(comparingDouble((Nation nation) -> sums[nation.getId()]).reversed())
+                .collect(toList());
 
         println("Start of season federations ranking:");
         println();
-        for (int i = 0; i < nation_pos.length; ++i) {
-            int nationId = nation_pos[i];
-            println(String.format("%d) %-11s %7.2f", i + 1, Nation.fromId(nationId).getName(), sums[nationId]));
+        for (int i = 0; i < nationRanking.size(); ++i) {
+            Nation nation = nationRanking.get(i);
+            println(String.format("%d) %-11s %7.2f", i + 1, nation.getName(), sums[nation.getId()]));
         }
         readln();
     }
@@ -105,10 +108,10 @@ public class NationRating {
     }
 
     public void normalizeCurrentYearRating() {
-        nation_rating[nation_pos[0]].seasons[0] = nation_rating[nation_pos[0]].seasons[0] / 5;
-        nation_rating[nation_pos[1]].seasons[0] = nation_rating[nation_pos[1]].seasons[0] / 5;
-        nation_rating[nation_pos[2]].seasons[0] = nation_rating[nation_pos[2]].seasons[0] / 5;
-        nation_rating[nation_pos[3]].seasons[0] = nation_rating[nation_pos[3]].seasons[0] / 4;
-        nation_rating[nation_pos[4]].seasons[0] = nation_rating[nation_pos[4]].seasons[0] / 4;
+        nation_rating[nationRanking.get(0).getId()].seasons[0] /= 5;
+        nation_rating[nationRanking.get(1).getId()].seasons[0] /= 5;
+        nation_rating[nationRanking.get(2).getId()].seasons[0] /= 5;
+        nation_rating[nationRanking.get(3).getId()].seasons[0] /= 4;
+        nation_rating[nationRanking.get(4).getId()].seasons[0] /= 4;
     }
 }
