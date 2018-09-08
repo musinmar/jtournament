@@ -28,15 +28,13 @@ import static com.clocktower.tournament.domain.Title.LORD;
 import static com.clocktower.tournament.domain.Title.SIR;
 import static com.clocktower.tournament.utils.RandomUtils.random;
 import static java.util.Collections.reverseOrder;
-import static java.util.Comparator.comparingDouble;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 
 public class Season {
 
     private static final int PLAYER_COUNT = 30;
-    private static final int NATION_COUNT = 5;
-    private static final int SEASON_COUNT = 4;
+
     private static final int NATION_SIZE = 6;
 
     private static final String FILE_NAME_KNIGHTS = "knights";
@@ -54,15 +52,11 @@ public class Season {
 
     private Player[] kn = new Player[PLAYER_COUNT];
     private EloRating elo = new EloRating();
-    private NationRatingItem[] nation_rating = new NationRatingItem[NATION_COUNT];
-    private int[][] nations = new int[NATION_COUNT][NATION_SIZE];
-    private int[] nation_pos = new int[NATION_COUNT];
+
+    private NationRating nationRating = new NationRating();
+    private int[][] nations = new int[Nation.COUNT][NATION_SIZE];
 
     private int[] leagues = new int[PLAYER_COUNT];
-
-    public static class NationRatingItem {
-        public double[] seasons = new double[SEASON_COUNT];
-    }
 
     public static class GroupResult {
         int playerId;
@@ -77,7 +71,6 @@ public class Season {
     }
 
     public Season() {
-        Arrays.setAll(nation_rating, i -> new NationRatingItem());
     }
 
     public void init(boolean newGame) {
@@ -94,9 +87,9 @@ public class Season {
         String seasonLogFileName = filename("season", true);
         Logger.setCurrentFilename(seasonLogFileName);
 
-        writeFederationsTable();
-        makeSeasonNationPos();
-        eraseSeasonNationsData();
+        nationRating.printNationTable();
+        nationRating.makeSeasonNationPos();
+        nationRating.advanceYear();
 
         playTournaments();
         //playLeagues();
@@ -129,7 +122,7 @@ public class Season {
         elo.advanceYear();
 
         playTitlePlayoffs();
-        end_of_season_adjust();
+        performEndOfSeasonAdjustments();
 
         saveToFile(filename(FILE_NAME_RATING, true),
                 writer -> elo.print(writer, false));
@@ -137,17 +130,8 @@ public class Season {
         printStatsToFile();
 
         year += 1;
-        writeFederationsTable();
+        nationRating.printNationTable();
         save();
-
-// assign(t, filename(FILE_NAME_DOST, true));
-// rewrite(t);
-// for i:=1 to 30 do
-//  begin
-//   writeln(t,kn[i].titul,kn[i].name,' ',kn[i].surname);
-//   for j:=1 to kn[i].dost.Count do writeln(t, kn[i].dost[j - 1]);
-//  end;
-// close(t);
 
         Logger.closeCurrentFile();
     }
@@ -166,13 +150,7 @@ public class Season {
 
         year = 1;
 
-        for (int i = 0; i < SEASON_COUNT; i++) {
-            nation_rating[0].seasons[i] = 3.5;
-            nation_rating[1].seasons[i] = 3;
-            nation_rating[2].seasons[i] = 2.5;
-            nation_rating[3].seasons[i] = 4.5;
-            nation_rating[4].seasons[i] = 4;
-        }
+        nationRating.initDefault();
 
         for (Player player : kn) {
             player.restartCareer(false);
@@ -187,9 +165,7 @@ public class Season {
         });
         saveToFile(filename(FILE_NAME_SEASON, false), writer -> {
             writer.println(year);
-            Arrays.stream(nation_rating)
-                    .flatMapToDouble(nationRatingItem -> Arrays.stream(nationRatingItem.seasons))
-                    .forEach(writer::println);
+            nationRating.write(writer);
             Arrays.stream(leagues).forEach(writer::println);
         });
         saveToFile(filename(FILE_NAME_ELO, false), elo::save);
@@ -212,11 +188,7 @@ public class Season {
 
         readFromFile(filename(FILE_NAME_SEASON, false), sc -> {
             year = sc.nextInt();
-            for (int i = 0; i < NATION_COUNT; i++) {
-                for (int j = 0; j < SEASON_COUNT; j++) {
-                    nation_rating[i].seasons[j] = sc.nextDouble();
-                }
-            }
+            nationRating.read(sc);
             for (int i = 0; i < 30; i++) {
                 leagues[i] = sc.nextInt();
             }
@@ -254,53 +226,8 @@ public class Season {
         return folderPath.resolve(ret + ".txt").toAbsolutePath().toString();
     }
 
-    private void writeFederationsTable() {
-        println("Federations table");
-        int index = 0;
-        for (NationRatingItem item : nation_rating) {
-            print(String.format("%d) %-11s", index + 1, Nation.fromId(index).getName()));
-            Arrays.stream(item.seasons).forEach(d -> print(String.format("%7.2f", d)));
-            println();
-            ++index;
-        }
-        println();
-    }
-
-    private void makeSeasonNationPos() {
-        double[] sums = Arrays.stream(nation_rating)
-                .mapToDouble(item -> {
-                    return Arrays.stream(item.seasons).sum();
-                })
-                .toArray();
-
-        Arrays.setAll(nation_pos, i -> i);
-        nation_pos = Arrays.stream(nation_pos)
-                .boxed()
-                .sorted(comparingDouble((Integer i) -> sums[i]).reversed())
-                .mapToInt(i -> i)
-                .toArray();
-
-        println("Start of season federations ranking:");
-        println();
-        for (int i = 0; i < nation_pos.length; ++i) {
-            int nationId = nation_pos[i];
-            println(String.format("%d) %-11s %7.2f", i + 1, Nation.fromId(nationId).getName(), sums[nationId]));
-        }
-        readln();
-    }
-
-    private void eraseSeasonNationsData() {
-        // TODO: make more incapsulated
-        for (int i = 0; i < NATION_COUNT; ++i) {
-            for (int j = SEASON_COUNT - 1; j >= 1; --j) {
-                nation_rating[i].seasons[j] = nation_rating[i].seasons[j - 1];
-            }
-            nation_rating[i].seasons[0] = 0;
-        }
-    }
-
     private void playTournaments() {
-        for (int i = 0; i < NATION_COUNT; i++) {
+        for (int i = 0; i < Nation.COUNT; i++) {
             playNational(i);
         }
 
@@ -455,7 +382,7 @@ public class Season {
     }
 
     private int get_player_from(int rank, int pos) {
-        return nations[nation_pos[rank - 1]][pos - 1];
+        return nations[nationRating.nation_pos[rank - 1]][pos - 1];
     }
 
     private void make_groups(int[] a) {
@@ -751,7 +678,7 @@ public class Season {
 
         updateElo(p1, p2, res);
         updateExp(p1, p2, res);
-        updateNationRatings(p1, p2, res, points);
+        nationRating.updateNationRatings(p1, p2, res, points);
 
         return res;
     }
@@ -766,17 +693,6 @@ public class Season {
             p1.addExp(p2.getLevel());
         } else if (mr.rounds.r2 > mr.rounds.r1) {
             p2.addExp(p1.getLevel());
-        }
-    }
-    
-    private void updateNationRatings(Player p1, Player p2, MatchResult mr, int points) {
-        if (mr.rounds.r1 > mr.rounds.r2) {
-            nation_rating[p1.getNation().getId()].seasons[0] = nation_rating[p1.getNation().getId()].seasons[0] + points;
-        } else if (mr.rounds.r2 > mr.rounds.r1) {
-            nation_rating[p2.getNation().getId()].seasons[0] = nation_rating[p2.getNation().getId()].seasons[0] + points;
-        } else {
-            nation_rating[p1.getNation().getId()].seasons[0] = nation_rating[p1.getNation().getId()].seasons[0] + points / 2.0;
-            nation_rating[p2.getNation().getId()].seasons[0] = nation_rating[p2.getNation().getId()].seasons[0] + points / 2.0;
         }
     }
 
@@ -873,25 +789,22 @@ public class Season {
         Arrays.stream(kn).forEach(Player::advanceAge);
     }
 
-    private void end_of_season_adjust() {
-        nation_rating[nation_pos[0]].seasons[0] = nation_rating[nation_pos[0]].seasons[0] / 5;
-        nation_rating[nation_pos[1]].seasons[0] = nation_rating[nation_pos[1]].seasons[0] / 5;
-        nation_rating[nation_pos[2]].seasons[0] = nation_rating[nation_pos[2]].seasons[0] / 5;
-        nation_rating[nation_pos[3]].seasons[0] = nation_rating[nation_pos[3]].seasons[0] / 4;
-        nation_rating[nation_pos[4]].seasons[0] = nation_rating[nation_pos[4]].seasons[0] / 4;
-
-        for (int i = 0; i < 30; ++i) {
-            kn[i].applyRandomDeckChanges();
-        }
+    private void performEndOfSeasonAdjustments() {
+        nationRating.normalizeCurrentYearRating();
+        Arrays.stream(kn).forEach(Player::applyRandomDeckChanges);
 
         if (year % 2 == 0) {
-            Player bestPlayer = elo.getPlayersByRating().get(0);
-            bestPlayer.decreaseDeck();
-            bestPlayer.decreaseDeck();
-            println(bestPlayer.getPlayerName() + " has decreased his skill.");
-            println();
-            readln();
+            decreaseBestPlayerSkills();
         }
+    }
+
+    private void decreaseBestPlayerSkills() {
+        Player bestPlayer = elo.getPlayersByRating().get(0);
+        bestPlayer.decreaseDeck();
+        bestPlayer.decreaseDeck();
+        println(bestPlayer.getPlayerName() + " has decreased his skill.");
+        println();
+        readln();
     }
 
     private void playTitlePlayoffs() {
@@ -1265,7 +1178,7 @@ public class Season {
         println("Participants");
         println();
         for (int i = 0; i < teams.length; i++) {
-            Team team = teams[nation_pos[i]];
+            Team team = teams[nationRating.nation_pos[i]];
             println(team.name);
             for (int j = 0; j < team.id.length; j++) {
                 print(String.format("%d: %s", j + 1, kn[team.id[j]].getPlayerName()));
@@ -1279,16 +1192,16 @@ public class Season {
         }
 
         int[] sf = new int[4];
-        sf[0] = nation_pos[0];
-        sf[2] = nation_pos[1];
-        sf[3] = nation_pos[2];
+        sf[0] = nationRating.nation_pos[0];
+        sf[2] = nationRating.nation_pos[1];
+        sf[3] = nationRating.nation_pos[2];
 
         // Quaterfinal
-        MatchResult mr = playTeamMatch(teams[nation_pos[3]], teams[nation_pos[4]]);
+        MatchResult mr = playTeamMatch(teams[nationRating.nation_pos[3]], teams[nationRating.nation_pos[4]]);
         if (mr.rounds.r1 > mr.rounds.r2) {
-            sf[1] = nation_pos[3];
+            sf[1] = nationRating.nation_pos[3];
         } else {
-            sf[1] = nation_pos[4];
+            sf[1] = nationRating.nation_pos[4];
         }
 
         // Semifinals

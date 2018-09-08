@@ -11,6 +11,8 @@ public enum Nation {
     KAMELEOPARD("Kameleopard"),
     OBERON_22("Oberon-22");
 
+    public static final int COUNT = 5;
+
     private String name;
 
     Nation(String name) {
