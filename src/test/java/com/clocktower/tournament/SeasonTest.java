@@ -1,5 +1,7 @@
 package com.clocktower.tournament;
 
+import com.clocktower.tournament.match.SimpleResult;
+
 class SeasonTest {
 
     //@Test
@@ -11,7 +13,7 @@ class SeasonTest {
         p2.restartCareer(true);
 
         for (int i = 0; i < 1000; i++) {
-            Season.SimpleResult r = Season.playPenalties(p1, p2);
+            SimpleResult r = Season.playGamePenalties(p1, p2);
             Logger.println(r.r1 + ":" + r.r2);
         }
         Logger.println();

@@ -2,6 +2,8 @@ package com.clocktower.tournament;
 
 import com.clocktower.tournament.domain.DefaultData;
 import com.clocktower.tournament.domain.Nation;
+import com.clocktower.tournament.match.MatchResult;
+import com.clocktower.tournament.match.SimpleResult;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -60,20 +62,6 @@ public class Season {
 
     public static class NationRatingItem {
         public double[] seasons = new double[SEASON_COUNT];
-    }
-
-    public static class SimpleResult {
-        int r1;
-        int r2;
-    }
-
-    public static class MatchResult {
-        int id1;
-        int id2;
-        int rw1;
-        int rw2;
-        int gw1;
-        int gw2;
     }
 
     public static class GroupResult {
@@ -741,42 +729,17 @@ public class Season {
     }
 
     private MatchResult bojgr_t(int id1, int id2, int points) {
-        MatchResult res = new MatchResult();
-        res.rw1 = 0;
-        res.rw2 = 0;
-        res.id1 = id1;
-        res.id2 = id2;
-        res.gw1 = 0;
-        res.gw2 = 0;
+        MatchResult res = new MatchResult(id1, id2);
 
         println(kn[id1].getNameWithNation() + " vs " + kn[id2].getNameWithNation());
 
-        // TODO: incapsulate
-        SimpleResult l = playTime(kn[id1], kn[id2], NORMAL_TIME_LENGTH);
-        res.gw1 += l.r1;
-        res.gw2 += l.r2;
-        print(l.r1 + ":" + l.r2 + " ");
-        if (l.r1 > l.r2) {
-            res.rw1 += +2;
-        } else if (l.r2 > l.r1) {
-            res.rw2 += +2;
-        } else {
-            res.rw1 += 1;
-            res.rw2 += 1;
-        }
+        SimpleResult l = playGameRound(kn[id1], kn[id2], NORMAL_TIME_LENGTH);
+        print(l + " ");
+        res.addRoundResult(l);
 
-        l = playTime(kn[id1], kn[id2], NORMAL_TIME_LENGTH);
-        res.gw1 += l.r1;
-        res.gw2 += l.r2;
-        print("/ " + l.r1 + ":" + l.r2 + " ");
-        if (l.r1 > l.r2) {
-            res.rw1 += +2;
-        } else if (l.r2 > l.r1) {
-            res.rw2 += +2;
-        } else {
-            res.rw1 += 1;
-            res.rw2 += 1;
-        }
+        l = playGameRound(kn[id1], kn[id2], NORMAL_TIME_LENGTH);
+        print("/ " + l + " ");
+        res.addRoundResult(l);
 
         println("( " + res.rw1 + ":" + res.rw2 + " )");
 
@@ -798,63 +761,29 @@ public class Season {
     }
 
     private MatchResult boj_t(int id1, int id2, int points) {
-        MatchResult res = new MatchResult();
-        res.rw1 = 0;
-        res.rw2 = 0;
-        res.id1 = id1;
-        res.id2 = id2;
-        res.gw1 = 0;
-        res.gw2 = 0;
+        MatchResult res = new MatchResult(id1, id2);
 
         println(kn[id1].getNameWithNation() + " vs " + kn[id2].getNameWithNation());
 
         // TODO: incapsulate
-        SimpleResult l = playTime(kn[id1], kn[id2], NORMAL_TIME_LENGTH);
-        res.gw1 += l.r1;
-        res.gw2 += l.r2;
-        print(l.r1 + ":" + l.r2 + " ");
-        if (l.r1 > l.r2) {
-            res.rw1 += +2;
-        } else if (l.r2 > l.r1) {
-            res.rw2 += +2;
-        } else {
-            res.rw1 += 1;
-            res.rw2 += 1;
-        }
+        SimpleResult l = playGameRound(kn[id1], kn[id2], NORMAL_TIME_LENGTH);
+        print(l + " ");
+        res.addRoundResult(l);
 
-        l = playTime(kn[id1], kn[id2], NORMAL_TIME_LENGTH);
-        res.gw1 += l.r1;
-        res.gw2 += l.r2;
-        print("/ " + l.r1 + ":" + l.r2 + " ");
-        if (l.r1 > l.r2) {
-            res.rw1 += +2;
-        } else if (l.r2 > l.r1) {
-            res.rw2 += +2;
-        } else {
-            res.rw1 += 1;
-            res.rw2 += 1;
-        }
-
+        l = playGameRound(kn[id1], kn[id2], NORMAL_TIME_LENGTH);
+        print("/ " + l + " ");
+        res.addRoundResult(l);
 
         if (res.rw1 == res.rw2) {
-            l = playTime(kn[id1], kn[id2], ADDITIONAL_TIME_LENGTH);
-            print("/ e.t. " + l.r1 + ":" + l.r2 + " ");
+            l = playGameRound(kn[id1], kn[id2], ADDITIONAL_TIME_LENGTH);
+            print("/ e.t. " + l + " ");
+            res.addRoundResult(l);
+        }
 
-            res.gw1 += l.r1;
-            res.gw2 += l.r2;
-            if (l.r1 > l.r2) {
-                res.rw1 += 1;
-            } else if (l.r2 > l.r1) {
-                res.rw2 += 1;
-            } else {
-                l = playPenalties(kn[id1], kn[id2]);
-                print("/ pen. " + l.r1 + ":" + l.r2 + " ");
-                if (l.r1 > l.r2) {
-                    res.rw1 += 1;
-                } else {
-                    res.rw2 += 1;
-                }
-            }
+        if (res.rw1 == res.rw2) {
+            l = playGamePenalties(kn[id1], kn[id2]);
+            print("/ pen. " + l + " ");
+            res.addRoundResult(l);
         }
 
         println("( " + res.rw1 + ":" + res.rw2 + " )");
@@ -882,7 +811,7 @@ public class Season {
         return res;
     }
 
-    private static SimpleResult playTime(Player p1, Player p2, int len) {
+    private static SimpleResult playGameRound(Player p1, Player p2, int len) {
         int[] d1 = p1.getShuffledDeck();
         int[] d2 = p2.getShuffledDeck();
 
@@ -897,7 +826,7 @@ public class Season {
         return r;
     }
 
-    static SimpleResult playPenalties(Player p1, Player p2) {
+    static SimpleResult playGamePenalties(Player p1, Player p2) {
         SimpleResult r = new SimpleResult();
 
         int round = 0;
@@ -1427,11 +1356,7 @@ public class Season {
     }
 
     private MatchResult playTeamMatch(Team team1, Team team2) {
-        MatchResult res = new MatchResult();
-        res.rw1 = 0;
-        res.rw2 = 0;
-        res.gw1 = 0;
-        res.gw2 = 0;
+        MatchResult res = new MatchResult(-1, -1);
 
         int[] buf1 = new int[3];
         int[] buf2 = new int[3];
