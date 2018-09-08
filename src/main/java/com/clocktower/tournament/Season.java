@@ -87,9 +87,8 @@ public class Season {
         String seasonLogFileName = filename("season", true);
         Logger.setCurrentFilename(seasonLogFileName);
 
-        nationRating.printNationTable();
-        nationRating.calculateNationRankingsAndPrint();
-        nationRating.advanceYear();
+        nationRating.printPointHistory();
+        nationRating.calculateRankingsAndPrint();
 
         playTournaments();
         //playLeagues();
@@ -122,7 +121,7 @@ public class Season {
         elo.advanceYear();
 
         playTitlePlayoffs();
-        performEndOfSeasonAdjustments();
+        adjustPlayerSkillsAfterSeason();
 
         saveToFile(filename(FILE_NAME_RATING, true),
                 writer -> elo.print(writer, false));
@@ -130,7 +129,8 @@ public class Season {
         printStatsToFile();
 
         year += 1;
-        nationRating.printNationTable();
+        nationRating.advanceYear();
+        nationRating.printPointHistory();
         save();
 
         Logger.closeCurrentFile();
@@ -676,7 +676,7 @@ public class Season {
 
         updateElo(p1, p2, res);
         updateExp(p1, p2, res);
-        nationRating.updateNationRatings(p1, p2, res, points);
+        nationRating.updateRatings(p1, p2, res, points);
 
         return res;
     }
@@ -787,10 +787,8 @@ public class Season {
         Arrays.stream(kn).forEach(Player::advanceAge);
     }
 
-    private void performEndOfSeasonAdjustments() {
-        nationRating.normalizeCurrentYearRating();
+    private void adjustPlayerSkillsAfterSeason() {
         Arrays.stream(kn).forEach(Player::applyRandomDeckChanges);
-
         if (year % 2 == 0) {
             decreaseBestPlayerSkills();
         }
