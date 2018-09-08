@@ -727,16 +727,14 @@ public class Season {
 
         println("( " + res.rounds + " )");
 
+        updateElo(kn[id1], kn[id2], res);
+        updateExp(kn[id1], kn[id2], res);
+
         if (res.rounds.r1 > res.rounds.r2) {
-            kn[id1].addExp(kn[id2].getLevel());
-            elo.update(id1, id2, 1, 0);
             nation_rating[kn[id1].getNation().getId()].seasons[0] = nation_rating[kn[id1].getNation().getId()].seasons[0] + points;
         } else if (res.rounds.r2 > res.rounds.r1) {
-            kn[id2].addExp(kn[id1].getLevel());
-            elo.update(id1, id2, 0, 1);
             nation_rating[kn[id2].getNation().getId()].seasons[0] = nation_rating[kn[id2].getNation().getId()].seasons[0] + points;
         } else {
-            elo.update(id1, id2, 0.5, 0.5);
             nation_rating[kn[id1].getNation().getId()].seasons[0] = nation_rating[kn[id1].getNation().getId()].seasons[0] + points / 2;
             nation_rating[kn[id2].getNation().getId()].seasons[0] = nation_rating[kn[id2].getNation().getId()].seasons[0] + points / 2;
         }
@@ -772,26 +770,28 @@ public class Season {
         println("( " + res.rounds + " )");
 
         if (res.rounds.r1 > res.rounds.r2) {
-            kn[id1].addExp(kn[id2].getLevel());
             nation_rating[kn[id1].getNation().getId()].seasons[0] = nation_rating[kn[id1].getNation().getId()].seasons[0] + points;
         } else if (res.rounds.r2 > res.rounds.r1) {
-            kn[id2].addExp(kn[id1].getLevel());
             nation_rating[kn[id2].getNation().getId()].seasons[0] = nation_rating[kn[id2].getNation().getId()].seasons[0] + points;
         }
 
-        if (res.rounds.r1 > res.rounds.r2 && res.rounds.r1 - res.rounds.r2 >= 2) {
-            elo.update(id1, id2, 1, 0);
-        } else if (res.rounds.r2 > res.rounds.r1 && res.rounds.r2 - res.rounds.r1 >= 2) {
-            elo.update(id1, id2, 0, 1);
-        } else if (res.rounds.r1 > res.rounds.r2) {
-            elo.update(id1, id2, 0.6, 0.4);
-        } else if (res.rounds.r2 > res.rounds.r1) {
-            elo.update(id1, id2, 0.4, 0.6);
-        } else {
-            elo.update(id1, id2, 0.5, 0.5);
-        }
+        updateElo(kn[id1], kn[id2], res);
+        updateExp(kn[id1], kn[id2], res);
 
         return res;
+    }
+
+    private void updateElo(Player p1, Player p2, MatchResult mr) {
+        double s = mr.rounds.r1 + mr.rounds.r2;
+        elo.update(p1.id, p2.id, mr.rounds.r1 / s, mr.rounds.r2 / s);
+    }
+
+    private void updateExp(Player p1, Player p2, MatchResult mr) {
+        if (mr.rounds.r1 > mr.rounds.r2) {
+            p1.addExp(p2.getLevel());
+        } else if (mr.rounds.r2 > mr.rounds.r1) {
+            p2.addExp(p1.getLevel());
+        }
     }
 
     private static SimpleResult playGameRound(Player p1, Player p2, int len) {
