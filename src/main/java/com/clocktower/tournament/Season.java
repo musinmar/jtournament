@@ -1,5 +1,6 @@
 package com.clocktower.tournament;
 
+import com.clocktower.tournament.domain.DefaultData;
 import com.clocktower.tournament.domain.Nation;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.ArrayUtils;

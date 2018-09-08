@@ -1,6 +1,6 @@
-package com.clocktower.tournament;
+package com.clocktower.tournament.domain;
 
-import com.clocktower.tournament.domain.DeckType;
+import com.clocktower.tournament.Player;
 
 import static com.clocktower.tournament.domain.Nation.ALMAGEST;
 import static com.clocktower.tournament.domain.Nation.BELLEROFON;
