@@ -11,13 +11,13 @@ public class MatchResult {
         this.id2 = id2;
     }
 
-    public void addRoundResult(SimpleResult r) {
+    public void addRoundResult(SimpleResult r, boolean additionalTime) {
         games.r1 += r.r1;
         games.r2 += r.r2;
         if (r.r1 > r.r2) {
-            rounds.r1 += 2;
+            rounds.r1 += additionalTime ? 1 : 2;
         } else if (r.r2 > r.r1) {
-            rounds.r2 += 2;
+            rounds.r2 += additionalTime ? 1 : 2;
         } else {
             rounds.r1 += 1;
             rounds.r2 += 1;

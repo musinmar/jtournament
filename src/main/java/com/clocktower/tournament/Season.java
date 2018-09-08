@@ -719,11 +719,11 @@ public class Season {
 
         SimpleResult l = playGameRound(kn[id1], kn[id2], NORMAL_TIME_LENGTH);
         print(l + " ");
-        res.addRoundResult(l);
+        res.addRoundResult(l, false);
 
         l = playGameRound(kn[id1], kn[id2], NORMAL_TIME_LENGTH);
         print("/ " + l + " ");
-        res.addRoundResult(l);
+        res.addRoundResult(l, false);
 
         println("( " + res.rounds + " )");
 
@@ -749,25 +749,24 @@ public class Season {
 
         println(kn[id1].getNameWithNation() + " vs " + kn[id2].getNameWithNation());
 
-        // TODO: incapsulate
         SimpleResult l = playGameRound(kn[id1], kn[id2], NORMAL_TIME_LENGTH);
         print(l + " ");
-        res.addRoundResult(l);
+        res.addRoundResult(l, false);
 
         l = playGameRound(kn[id1], kn[id2], NORMAL_TIME_LENGTH);
         print("/ " + l + " ");
-        res.addRoundResult(l);
+        res.addRoundResult(l, false);
 
         if (res.rounds.r1 == res.rounds.r2) {
             l = playGameRound(kn[id1], kn[id2], ADDITIONAL_TIME_LENGTH);
             print("/ e.t. " + l + " ");
-            res.addRoundResult(l);
+            res.addRoundResult(l, true);
         }
 
         if (res.rounds.r1 == res.rounds.r2) {
             l = playGamePenalties(kn[id1], kn[id2]);
             print("/ pen. " + l + " ");
-            res.addRoundResult(l);
+            res.addRoundResult(l, true);
         }
 
         println("( " + res.rounds + " )");
