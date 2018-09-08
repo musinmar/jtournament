@@ -518,7 +518,7 @@ public class Season {
         int len = players.length;
 
         for (int i = 0; i < len / 2; ++i) {
-            MatchResult mr = playPlayoffGame(players[i * 2], players[i * 2 + 1], points);
+            MatchResult mr = playPlayoffGame(kn[players[i * 2]], kn[players[i * 2 + 1]], points);
             if (mr.rounds.r1 > mr.rounds.r2) {
                 winners[i] = players[i * 2];
                 loosers[i] = players[i * 2 + 1];
@@ -550,7 +550,7 @@ public class Season {
     private SimpleResult play_series(int id1, int id2, int wins, int points) {
         SimpleResult r = new SimpleResult();
         while (r.r1 != wins && r.r2 != wins) {
-            MatchResult mr = playPlayoffGame(id1, id2, points);
+            MatchResult mr = playPlayoffGame(kn[id1], kn[id2], points);
             readln();
             if (mr.rounds.r1 > mr.rounds.r2) {
                 r.r1 += 1;
@@ -702,7 +702,7 @@ public class Season {
     }
 
     private void play_group_match(GroupResult[] results, int id1, int id2, int points) {
-        MatchResult mres = playGroupGame(results[id1].playerId, results[id2].playerId, points);
+        MatchResult mres = playGroupGame(kn[results[id1].playerId], kn[results[id2].playerId], points);
         results[id1].roundsWon += mres.rounds.r1;
         results[id1].gamesWon += mres.games.r1;
         results[id1].gamesLost += mres.games.r2;
@@ -712,36 +712,36 @@ public class Season {
         readln();
     }
 
-    private MatchResult playGroupGame(int id1, int id2, int points) {
-        return playGame(id1, id2, false, points);
+    private MatchResult playGroupGame(Player p1, Player p2, int points) {
+        return playGame(p1, p2, false, points);
     }
 
-    private MatchResult playPlayoffGame(int id1, int id2, int points) {
-        return playGame(id1, id2, true, points);
+    private MatchResult playPlayoffGame(Player p1, Player p2, int points) {
+        return playGame(p1, p2, true, points);
     }
 
-    private MatchResult playGame(int id1, int id2, boolean isPlayoff, int points) {
-        MatchResult res = new MatchResult(id1, id2);
+    private MatchResult playGame(Player p1, Player p2, boolean isPlayoff, int points) {
+        MatchResult res = new MatchResult(p1.id, p2.id);
 
-        println(kn[id1].getNameWithNation() + " vs " + kn[id2].getNameWithNation());
+        println(p1.getNameWithNation() + " vs " + p2.getNameWithNation());
 
-        SimpleResult l = playGameRound(kn[id1], kn[id2], NORMAL_TIME_LENGTH);
+        SimpleResult l = playGameRound(p1, p2, NORMAL_TIME_LENGTH);
         print(l + " ");
         res.addRoundResult(l, false);
 
-        l = playGameRound(kn[id1], kn[id2], NORMAL_TIME_LENGTH);
+        l = playGameRound(p1, p2, NORMAL_TIME_LENGTH);
         print("/ " + l + " ");
         res.addRoundResult(l, false);
 
         if (isPlayoff) {
             if (res.rounds.r1 == res.rounds.r2) {
-                l = playGameRound(kn[id1], kn[id2], ADDITIONAL_TIME_LENGTH);
+                l = playGameRound(p1, p2, ADDITIONAL_TIME_LENGTH);
                 print("/ e.t. " + l + " ");
                 res.addRoundResult(l, true);
             }
 
             if (res.rounds.r1 == res.rounds.r2) {
-                l = playGamePenalties(kn[id1], kn[id2]);
+                l = playGamePenalties(p1, p2);
                 print("/ pen. " + l + " ");
                 res.addRoundResult(l, true);
             }
@@ -749,9 +749,9 @@ public class Season {
 
         println("( " + res.rounds + " )");
 
-        updateElo(kn[id1], kn[id2], res);
-        updateExp(kn[id1], kn[id2], res);
-        updateNationRatings(kn[id1], kn[id2], res, points);
+        updateElo(p1, p2, res);
+        updateExp(p1, p2, res);
+        updateNationRatings(p1, p2, res, points);
 
         return res;
     }
@@ -1337,7 +1337,7 @@ public class Season {
 
         for (int j = 0; j <= 2; ++j) {
             for (int i = 0; i <= 2; ++i) {
-                MatchResult mres = playPlayoffGame(buf1[i], buf2[i], 0);
+                MatchResult mres = playPlayoffGame(kn[buf1[i]], kn[buf2[i]], 0);
                 res.addSubMatchResult(mres.rounds);
                 readln();
 
