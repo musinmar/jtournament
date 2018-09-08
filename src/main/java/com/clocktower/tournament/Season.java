@@ -65,10 +65,10 @@ public class Season {
     }
 
     public static class GroupResult {
-        int id;
-        int rounds_won;
-        int games_won;
-        int games_lost;
+        int playerId;
+        int roundsWon;
+        int gamesWon;
+        int gamesLost;
     }
 
     public static class Team {
@@ -571,7 +571,7 @@ public class Season {
         GroupResult[] results = new GroupResult[len];
         for (int i = 0; i < players.length; i++) {
             GroupResult result = new GroupResult();
-            result.id = players[i];
+            result.playerId = players[i];
             results[i] = result;
         }
 
@@ -653,7 +653,7 @@ public class Season {
         print_group_results(results);
 
         for (int i = 0; i < players.length; i++) {
-            players[i] = results[i].id;
+            players[i] = results[i].playerId;
         }
     }
 
@@ -668,19 +668,19 @@ public class Season {
     }
 
     private int group_result_more(GroupResult res1, GroupResult res2) {
-        if (res1.rounds_won > res2.rounds_won) {
+        if (res1.roundsWon > res2.roundsWon) {
             return 1;
-        } else if (res1.rounds_won < res2.rounds_won) {
+        } else if (res1.roundsWon < res2.roundsWon) {
             return -1;
         } else {
-            int dif1 = res1.games_won - res1.games_lost;
-            int dif2 = res2.games_won - res2.games_lost;
+            int dif1 = res1.gamesWon - res1.gamesLost;
+            int dif2 = res2.gamesWon - res2.gamesLost;
             if (dif1 > dif2) {
                 return 1;
             } else if (dif1 < dif2) {
                 return -1;
             } else {
-                return elo.playerIsBetterThan(res1.id, res2.id);
+                return elo.playerIsBetterThan(res1.playerId, res2.playerId);
             }
         }
     }
@@ -688,27 +688,27 @@ public class Season {
     private void print_group_results(GroupResult[] results) {
         int len = results.length;
         int maxNameLength = Arrays.stream(results)
-                .map(r -> kn[r.id].getPlayerName())
+                .map(r -> kn[r.playerId].getPlayerName())
                 .mapToInt(String::length)
                 .max()
                 .orElse(0);
 
         String formatString = "%d. %-" + (maxNameLength + 1) + "s %2d:%2d  %d";
         for (int i = 0; i < len; i++) {
-            println(String.format(formatString, (i + 1), kn[results[i].id].getPlayerName(),
-                    results[i].games_won, results[i].games_lost, results[i].rounds_won));
+            println(String.format(formatString, (i + 1), kn[results[i].playerId].getPlayerName(),
+                    results[i].gamesWon, results[i].gamesLost, results[i].roundsWon));
         }
         readln();
     }
 
     private void play_group_match(GroupResult[] results, int id1, int id2, int points) {
-        MatchResult mres = bojgr_t(results[id1].id, results[id2].id, points);
-        results[id1].rounds_won += mres.rounds.r1;
-        results[id1].games_won += mres.games.r1;
-        results[id1].games_lost += mres.games.r2;
-        results[id2].rounds_won += mres.rounds.r2;
-        results[id2].games_won += mres.games.r2;
-        results[id2].games_lost += mres.games.r1;
+        MatchResult mres = bojgr_t(results[id1].playerId, results[id2].playerId, points);
+        results[id1].roundsWon += mres.rounds.r1;
+        results[id1].gamesWon += mres.games.r1;
+        results[id1].gamesLost += mres.games.r2;
+        results[id2].roundsWon += mres.rounds.r2;
+        results[id2].gamesWon += mres.games.r2;
+        results[id2].gamesLost += mres.games.r1;
         readln();
     }
 
