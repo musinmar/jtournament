@@ -847,7 +847,7 @@ public class Season {
             } else if (l.r2 > l.r1) {
                 res.rw2 += 1;
             } else {
-                l = penalty(id1, id2);
+                l = playPenalties(kn[id1], kn[id2]);
                 print("/ pen. " + l.r1 + ":" + l.r2 + " ");
                 if (l.r1 > l.r2) {
                     res.rw1 += 1;
@@ -883,10 +883,8 @@ public class Season {
     }
 
     private static SimpleResult playTime(Player p1, Player p2, int len) {
-        int[] d1 = ArrayUtils.clone(p1.deck);
-        int[] d2 = ArrayUtils.clone(p2.deck);
-        ArrayUtils.shuffle(d1);
-        ArrayUtils.shuffle(d2);
+        int[] d1 = p1.getShuffledDeck();
+        int[] d2 = p2.getShuffledDeck();
 
         SimpleResult r = new SimpleResult();
         for (int i = 0; i < len; i++) {
@@ -899,121 +897,46 @@ public class Season {
         return r;
     }
 
-    private SimpleResult penalty(int id1, int id2) {
-        int[] t1 = new int[20];
-        int[] t2 = new int[20];
-        for (int i = 0; i < 20; i++) {
-            t1[i] = i;
-            t2[i] = i;
-        }
-
+    static SimpleResult playPenalties(Player p1, Player p2) {
         SimpleResult r = new SimpleResult();
 
-        for (int i = 1; i <= 3; ++i) {
-            int k1 = 0;
-            int k2 = 0;
+        int round = 0;
+        while (true) {
+            int[] d1 = p1.getShuffledDeck();
+            int[] d2 = p2.getShuffledDeck();
+            for (int i = 0; i < 20; i += 2) {
+                int k1 = 0;
+                int k2 = 0;
 
-            int l1 = random(21 - i * 2 + 1);
-            int l2 = random(21 - i * 2 + 1);
-            if (kn[id1].deck[t1[l1]] > kn[id2].deck[t2[l2]]) {
-                k1 += 1;
-            } else {
-                k2 += 1;
-            }
-
-            for (int j = l1; j < 20 - 1; ++j) {
-                t1[j] = t1[j + 1];
-            }
-            for (int j = l2; j < 20 - 1; ++j) {
-                t2[j] = t2[j + 1];
-            }
-
-            l1 = random(21 - i * 2);
-            l2 = random(21 - i * 2);
-            if (kn[id2].deck[t2[l2]] > kn[id1].deck[t1[l1]]) {
-                k2 += 1;
-            } else {
-                k1 += 1;
-            }
-
-            for (int j = l1; j < 20 - 1; ++j) {
-                t1[j] = t1[j + 1];
-            }
-            for (int j = l2; j < 20 - 1; ++j) {
-                t2[j] = t2[j + 1];
-            }
-
-            if (k1 == 2) {
-                r.r1 += 1;
-            }
-            if (k2 == 2) {
-                r.r2 += 1;
-            }
-            if (k1 == k2) {
-                r.r1 += 1;
-                r.r2 += 1;
-            }
-        }
-
-        int i = 3;
-        while (r.r1 == r.r2) {
-            i += 1;
-            if (i % 10 == 1) {
-                for (int j = 0; j < 20; j++) {
-                    t1[j] = j;
-                    t2[j] = j;
+                if (d1[i] > d2[i]) {
+                    ++k1;
+                } else {
+                    ++k2;
                 }
+                if (d1[i + 1] < d2[i + 1]) {
+                    ++k2;
+                } else {
+                    ++k1;
+                }
+
+                if (k1 >= k2) {
+                    ++r.r1;
+                }
+                if (k2 >= k1) {
+                    ++r.r2;
+                }
+
+                if (round >= 2 && (r.r1 > r.r2 || r.r1 < r.r2)) {
+                    break;
+                }
+                ++round;
             }
 
-            int k1 = 0;
-            int k2 = 0;
-
-            int t = i % 10;
-            if (t == 0) {
-                t = 10;
-            }
-
-            int l1 = random(21 - t * 2 + 1);
-            int l2 = random(21 - t * 2 + 1);
-            if (kn[id1].deck[t1[l1]] > kn[id2].deck[t2[l2]]) {
-                k1 += 1;
-            } else {
-                k2 += 1;
-            }
-
-            for (int j = l1; j < 20 - 1; ++j) {
-                t1[j] = t1[j + 1];
-            }
-            for (int j = l2; j < 20 - 1; ++j) {
-                t2[j] = t2[j + 1];
-            }
-
-            l1 = random(21 - t * 2);
-            l2 = random(21 - t * 2);
-            if (kn[id2].deck[t2[l2]] > kn[id1].deck[t1[l1]]) {
-                k2 += 1;
-            } else {
-                k1 += 1;
-            }
-
-            for (int j = l1; j < 20 - 1; ++j) {
-                t1[j] = t1[j + 1];
-            }
-            for (int j = l2; j < 20 - 1; ++j) {
-                t2[j] = t2[j + 1];
-            }
-
-            if (k1 == 2) {
-                r.r1 += 1;
-            }
-            if (k2 == 2) {
-                r.r2 += 1;
-            }
-            if (k1 == k2) {
-                r.r1 += 1;
-                r.r2 += 1;
+            if (r.r1 > r.r2 || r.r1 < r.r2) {
+                break;
             }
         }
+
         return r;
     }
 

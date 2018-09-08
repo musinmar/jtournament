@@ -5,6 +5,7 @@ import com.clocktower.tournament.domain.Nation;
 import com.clocktower.tournament.domain.Title;
 import com.clocktower.tournament.domain.Trophy;
 import com.clocktower.tournament.utils.IntToRomanConverter;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -302,5 +303,11 @@ public class Player {
     static void changeDeckAtPosition(int[] deck, int pos, int dif) {
         deck[pos] += dif;
         Arrays.sort(deck);
+    }
+
+    public int[] getShuffledDeck() {
+        int[] d = ArrayUtils.clone(deck);
+        ArrayUtils.shuffle(d);
+        return d;
     }
 }
