@@ -71,6 +71,7 @@ public class NationRating {
 
     public void printPointHistory() {
         println("Federations table");
+        println();
         int index = 0;
         for (Nation nation : Nation.values()) {
             PointHistoryItem pointHistoryItem = pointHistory.get(nation);
@@ -79,6 +80,7 @@ public class NationRating {
             println();
             ++index;
         }
+        println();
     }
 
     public void calculateRankingsAndPrint() {

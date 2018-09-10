@@ -94,6 +94,8 @@ public class Season {
     }
 
     public void simulateSeason() {
+        println();
+
         String seasonLogFileName = makeFilename("season", true);
         Logger.setCurrentFilename(seasonLogFileName);
 

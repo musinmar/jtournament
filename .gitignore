@@ -1,6 +1,7 @@
 .idea/
 target/
 season/
+release/
 dependency-reduced-pom.xml
 *.jar
 *.iml
