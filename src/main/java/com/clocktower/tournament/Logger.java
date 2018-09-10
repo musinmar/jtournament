@@ -37,15 +37,17 @@ public class Logger {
         }
     }
 
-    public static void readln() {
+    public static String readln() {
+        String ret = null;
         if (NO_PROMPT) {
             println();
         } else {
-            scanner.nextLine();
+            ret = scanner.nextLine();
         }
         if (currentWriter != null) {
             currentWriter.println();
         }
+        return ret;
     }
 
     public static void setCurrentFilename(String filename) {

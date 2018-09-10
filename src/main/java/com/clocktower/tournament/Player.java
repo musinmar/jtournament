@@ -210,7 +210,7 @@ public class Player {
     }
 
     public void save(PrintWriter writer) {
-        writer.println(id);
+        writer.println(id + 1);
         writer.println(name);
         writer.println(surname);
         writer.println(title.getPrefix());
@@ -237,7 +237,7 @@ public class Player {
     }
 
     public void load(Scanner sc) {
-        id = sc.nextInt();
+        id = sc.nextInt() - 1;
         name = sc.next();
         surname = sc.next();
         sc.nextLine();

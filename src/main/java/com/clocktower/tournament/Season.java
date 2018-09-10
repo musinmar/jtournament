@@ -4,6 +4,7 @@ import com.clocktower.tournament.domain.DefaultData;
 import com.clocktower.tournament.domain.Nation;
 import com.clocktower.tournament.match.MatchResult;
 import com.clocktower.tournament.match.SimpleResult;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -12,6 +13,7 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -35,8 +37,6 @@ public class Season {
 
     private static final int PLAYER_COUNT = 30;
 
-    private static final int NATION_SIZE = 6;
-
     private static final String FILE_NAME_KNIGHTS = "knights";
     private static final String FILE_NAME_SEASON = "season";
     private static final String FILE_NAME_ELO = "elo";
@@ -47,10 +47,12 @@ public class Season {
     private static final int NORMAL_TIME_LENGTH = 9;
     private static final int ADDITIONAL_TIME_LENGTH = 7;
 
+    private static final int NATIONAL_TEAM_MATCH_ROUNDS = 1;
+
     private int year;
     private final String FOLDER = "season";
 
-    private Player[] kn = new Player[PLAYER_COUNT];
+    private Player[] kn;
     private EloRating elo = new EloRating();
 
     private NationRating nationRating = new NationRating();
@@ -70,12 +72,20 @@ public class Season {
         int[] id;
     }
 
+    public static class PlayerPair {
+        final Player p1;
+        final Player p2;
+
+        public PlayerPair(Player p1, Player p2) {
+            this.p1 = p1;
+            this.p2 = p2;
+        }
+    }
+
     public Season() {
     }
 
     public void init(boolean newGame) {
-        Arrays.setAll(kn, i -> new Player());
-
         if (newGame) {
             initNewGame();
         } else {
@@ -83,8 +93,8 @@ public class Season {
         }
     }
 
-    public void startSimulation() {
-        String seasonLogFileName = filename("season", true);
+    public void simulateSeason() {
+        String seasonLogFileName = makeFilename("season", true);
         Logger.setCurrentFilename(seasonLogFileName);
 
         nationRating.printPointHistory();
@@ -110,7 +120,7 @@ public class Season {
             playNationalWorldCup();
         }
 
-        saveToFile(filename(FILE_NAME_RATING_CHANGE, true),
+        saveToFile(makeFilename(FILE_NAME_RATING_CHANGE, true),
                 writer -> elo.print(writer, true));
 
         advancePlayersAge();
@@ -123,7 +133,7 @@ public class Season {
         playTitlePlayoffs();
         adjustPlayerSkillsAfterSeason();
 
-        saveToFile(filename(FILE_NAME_RATING, true),
+        saveToFile(makeFilename(FILE_NAME_RATING, true),
                 writer -> elo.print(writer, false));
 
         printStatsToFile();
@@ -160,15 +170,15 @@ public class Season {
     }
 
     private void save() {
-        saveToFile(filename(FILE_NAME_KNIGHTS, false), writer -> {
+        saveToFile(makeFilename(FILE_NAME_KNIGHTS, false), writer -> {
             Arrays.stream(kn).forEach(p -> p.save(writer));
         });
-        saveToFile(filename(FILE_NAME_SEASON, false), writer -> {
+        saveToFile(makeFilename(FILE_NAME_SEASON, false), writer -> {
             writer.println(year);
             nationRating.write(writer);
             Arrays.stream(leagues).forEach(writer::println);
         });
-        saveToFile(filename(FILE_NAME_ELO, false), elo::save);
+        saveToFile(makeFilename(FILE_NAME_ELO, false), elo::save);
     }
 
     private void saveToFile(String filename, Consumer<PrintWriter> writerConsumer) {
@@ -180,21 +190,23 @@ public class Season {
     }
 
     private void load() {
-        readFromFile(filename(FILE_NAME_KNIGHTS, false), sc -> {
-            for (int i = 0; i < 30; i++) {
+        readFromFile(makeFilename(FILE_NAME_KNIGHTS, false), sc -> {
+            kn = new Player[PLAYER_COUNT];
+            for (int i = 0; i < PLAYER_COUNT; i++) {
+                kn[i] = new Player();
                 kn[i].load(sc);
             }
         });
 
-        readFromFile(filename(FILE_NAME_SEASON, false), sc -> {
+        readFromFile(makeFilename(FILE_NAME_SEASON, false), sc -> {
             year = sc.nextInt();
             nationRating.read(sc);
-            for (int i = 0; i < 30; i++) {
+            for (int i = 0; i < PLAYER_COUNT; i++) {
                 leagues[i] = sc.nextInt();
             }
         });
 
-        readFromFile(filename(FILE_NAME_ELO, false), sc -> {
+        readFromFile(makeFilename(FILE_NAME_ELO, false), sc -> {
             elo.load(sc, kn);
         });
     }
@@ -209,7 +221,7 @@ public class Season {
         }
     }
 
-    private String filename(String s, boolean withYear) {
+    private String makeFilename(String s, boolean withYear) {
         Path folderPath = Paths.get(FOLDER);
         if (!Files.exists(folderPath)) {
             try {
@@ -1193,7 +1205,7 @@ public class Season {
         sf[3] = teams.get(nationRating.getRankedNation(2));
 
         // Quaterfinal
-        MatchResult mr = playTeamMatch(teams.get(nationRating.getRankedNation(3)), teams.get(nationRating.getRankedNation(4)));
+        MatchResult mr = playTeamMatch(teams.get(nationRating.getRankedNation(3)), teams.get(nationRating.getRankedNation(4)), NATIONAL_TEAM_MATCH_ROUNDS);
         if (mr.rounds.r1 > mr.rounds.r2) {
             sf[1] = teams.get(nationRating.getRankedNation(3));
         } else {
@@ -1202,13 +1214,13 @@ public class Season {
 
         // Semifinals
         Team[] f = new Team[2];
-        mr = playTeamMatch(sf[0], sf[1]);
+        mr = playTeamMatch(sf[0], sf[1], NATIONAL_TEAM_MATCH_ROUNDS);
         if (mr.rounds.r1 > mr.rounds.r2) {
             f[0] = sf[0];
         } else {
             f[0] = sf[1];
         }
-        mr = playTeamMatch(sf[2], sf[3]);
+        mr = playTeamMatch(sf[2], sf[3], NATIONAL_TEAM_MATCH_ROUNDS);
         if (mr.rounds.r1 > mr.rounds.r2) {
             f[1] = sf[2];
         } else {
@@ -1216,7 +1228,7 @@ public class Season {
         }
 
         // Final
-        mr = playTeamMatch(f[0], f[1]);
+        mr = playTeamMatch(f[0], f[1], NATIONAL_TEAM_MATCH_ROUNDS);
         Team winner;
         if (mr.rounds.r1 > mr.rounds.r2) {
             winner = f[0];
@@ -1233,37 +1245,42 @@ public class Season {
         }
     }
 
-    private MatchResult playTeamMatch(Team team1, Team team2) {
-        MatchResult res = new MatchResult(-1, -1);
+    private MatchResult playTeamMatch(Team team1, Team team2, int rounds) {
+        Preconditions.checkArgument(team1.id.length == team2.id.length);
+        Preconditions.checkArgument(team1.id.length % 2 == 1);
+        Preconditions.checkArgument(rounds % 2 == 1);
+        int teamSize = team1.id.length;
 
-        int[] buf1 = new int[3];
-        int[] buf2 = new int[3];
-        copyArray(team1.id, buf1, 3, 0, 0);
-        copyArray(team2.id, buf2, 3, 0, 0);
+        MatchResult res = new MatchResult(-1, -1);
 
         println(String.format("%s vs %s", team1.name, team2.name));
         println();
 
-        for (int j = 0; j <= 2; ++j) {
-            for (int i = 0; i <= 2; ++i) {
-                MatchResult mres = playPlayoffGame(kn[buf1[i]], kn[buf2[i]], 0);
-                res.addSubMatchResult(mres.rounds);
-                readln();
-
-                if (res.rounds.r1 == 5 || res.rounds.r2 == 5) {
-                    break;
+        List<PlayerPair> schedule = new ArrayList<>();
+        for (int k = 0; k < rounds; k++) {
+            for (int i = 0; i < teamSize; ++i) {
+                for (int j = 0; j < teamSize; ++j) {
+                    schedule.add(new PlayerPair(kn[team1.id[j]], kn[team2.id[(j + i) % teamSize]]));
                 }
             }
+        }
 
-            if (res.rounds.r1 == 5 || res.rounds.r2 == 5) {
+        int maxWinCount = teamSize * teamSize * rounds / 2 + 1;
+        int counter = 0;
+        for (PlayerPair pair : schedule) {
+            MatchResult mres = playPlayoffGame(pair.p1, pair.p2, 0);
+            res.addSubMatchResult(mres.rounds);
+            readln();
+
+            if (res.rounds.r1 == maxWinCount || res.rounds.r2 == maxWinCount) {
                 break;
             }
 
-            int b = buf2[0];
-            for (int i = 0; i <= 1; ++i) {
-                buf2[i] = buf2[i + 1];
+            if (counter % teamSize == teamSize - 1) {
+                println(String.format("Current score - %d:%d (%d:%d)", res.rounds.r1, res.rounds.r2, res.games.r1, res.games.r2));
+                println();
             }
-            buf2[2] = b;
+            ++counter;
         }
 
         println(String.format("%s vs %s - %d:%d (%d:%d)", team1.name, team2.name, res.rounds.r1, res.rounds.r2, res.games.r1, res.games.r2));
@@ -1285,7 +1302,7 @@ public class Season {
     }
 
     private void printStatsToFile() {
-        saveToFile(filename(FILE_NAME_STATS, true),
+        saveToFile(makeFilename(FILE_NAME_STATS, true),
                 writer -> {
                     writeLevels(writer);
                     writer.println();

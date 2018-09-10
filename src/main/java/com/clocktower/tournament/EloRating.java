@@ -40,7 +40,7 @@ public class EloRating {
 
     public void save(PrintWriter writer) {
         items.forEach(item -> {
-            writer.println(item.player.id);
+            writer.println(item.player.id + 1);
             writer.println(item.pointsLastYear);
             writer.println(item.points);
         });
@@ -52,7 +52,7 @@ public class EloRating {
                 .collect(toList());
 
         for (int i = 0; i < players.length; i++) {
-            int k = sc.nextInt();
+            int k = sc.nextInt() - 1;
             Item item = items.get(k);
             item.pointsLastYear = sc.nextDouble();
             item.points = sc.nextDouble();
