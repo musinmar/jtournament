@@ -13,7 +13,7 @@ public class Main {
         Season season = new Season();
         season.init(newGameRequested);
         season.simulateSeason();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < Settings.getSimulatedSeasonCount() - 1; i++) {
             season = new Season();
             season.init(false);
             season.simulateSeason();

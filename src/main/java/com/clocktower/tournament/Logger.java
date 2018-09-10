@@ -6,7 +6,7 @@ import java.util.Scanner;
 
 public class Logger {
 
-    private static final boolean NO_PROMPT = true;
+    private static final boolean NO_PROMPT = Settings.getIsPromptDisabled();
 
     private static PrintWriter currentWriter;
     private static Scanner scanner = new Scanner(System.in);
