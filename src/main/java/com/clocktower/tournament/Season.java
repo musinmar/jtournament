@@ -256,7 +256,7 @@ public class Season {
             year = sc.nextInt();
             nationRating.read(sc);
             for (int i = 0; i < PLAYER_COUNT; i++) {
-                leagues[i] = sc.nextInt();
+                leagues[i] = sc.nextInt() - 1;
             }
         });
 
