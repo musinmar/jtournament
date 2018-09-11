@@ -4,6 +4,7 @@ import com.clocktower.tournament.domain.DeckType;
 import com.clocktower.tournament.domain.Nation;
 import com.clocktower.tournament.domain.Title;
 import com.clocktower.tournament.domain.Trophy;
+import com.clocktower.tournament.dto.PlayerDto;
 import com.clocktower.tournament.utils.IntToRomanConverter;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -234,6 +235,30 @@ public class Player {
         writer.println(deckType.getV2());
 
         Arrays.stream(deck).forEach(writer::println);
+    }
+
+    public PlayerDto toDto() {
+        PlayerDto playerDto = new PlayerDto();
+        playerDto.setId(id);
+        playerDto.setName(name);
+        playerDto.setSurname(surname);
+        playerDto.setTitle(title);
+        playerDto.setNation(nation);
+        playerDto.setTown(town);
+        playerDto.setAge(age);
+        playerDto.setGeneration(generation);
+        playerDto.setPersistentLevel(persistentLevel);
+        playerDto.setLevel(level);
+        playerDto.setAt(at);
+        playerDto.setDef(def);
+        playerDto.setS(s);
+        playerDto.setL(l);
+        playerDto.setV(v);
+        playerDto.setExp(exp);
+        playerDto.setTrophies(trophies);
+        playerDto.setDeckType(new int[]{deckType.getV1(), deckType.getV2()});
+        playerDto.setDeck(deck);
+        return playerDto;
     }
 
     public void load(Scanner sc) {

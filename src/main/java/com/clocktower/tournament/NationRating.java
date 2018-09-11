@@ -1,6 +1,7 @@
 package com.clocktower.tournament;
 
 import com.clocktower.tournament.domain.Nation;
+import com.clocktower.tournament.dto.NationRatingDto;
 import com.clocktower.tournament.match.MatchResult;
 import org.apache.commons.lang3.mutable.MutableDouble;
 
@@ -16,6 +17,7 @@ import static com.clocktower.tournament.Logger.println;
 import static com.clocktower.tournament.Logger.readln;
 import static java.util.Comparator.comparingDouble;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 public class NationRating {
     private static final int SEASON_COUNT = 4;
@@ -31,6 +33,12 @@ public class NationRating {
             for (int i = 0; i < SEASON_COUNT; i++) {
                 seasons[i] = defaultPoints;
             }
+        }
+
+        public NationRatingDto.PointHistoryItemDto toDto() {
+            NationRatingDto.PointHistoryItemDto itemDto = new NationRatingDto.PointHistoryItemDto();
+            itemDto.setSeasons(seasons);
+            return itemDto;
         }
     }
 
@@ -57,6 +65,13 @@ public class NationRating {
                 .map(pointHistory::get)
                 .flatMapToDouble(pointHistoryItem -> Arrays.stream(pointHistoryItem.seasons))
                 .forEach(writer::println);
+    }
+
+    public NationRatingDto toDto() {
+        NationRatingDto nationRatingDto = new NationRatingDto();
+        nationRatingDto.setPointHistory(pointHistory.entrySet().stream()
+                .collect(toMap(Map.Entry::getKey, e -> e.getValue().toDto())));
+        return nationRatingDto;
     }
 
     public void read(Scanner sc) {

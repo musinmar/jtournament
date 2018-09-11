@@ -1,5 +1,7 @@
 package com.clocktower.tournament;
 
+import com.clocktower.tournament.dto.EloRatingDto;
+
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
@@ -20,6 +22,14 @@ public class EloRating {
 
         Item(Player player) {
             this.player = player;
+        }
+
+        public EloRatingDto.ItemDto toDto() {
+            EloRatingDto.ItemDto itemDto = new EloRatingDto.ItemDto();
+            itemDto.setPlayerId(player.id);
+            itemDto.setPoints(points);
+            itemDto.setPointsLastYear(pointsLastYear);
+            return itemDto;
         }
     }
 
@@ -44,6 +54,12 @@ public class EloRating {
             writer.println(item.pointsLastYear);
             writer.println(item.points);
         });
+    }
+
+    public EloRatingDto toDto() {
+        EloRatingDto eloRatingDto = new EloRatingDto();
+        eloRatingDto.setItems(items.stream().map(Item::toDto).collect(toList()));
+        return eloRatingDto;
     }
 
     public void load(Scanner sc, Player[] players) {

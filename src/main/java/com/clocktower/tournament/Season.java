@@ -2,12 +2,17 @@ package com.clocktower.tournament;
 
 import com.clocktower.tournament.domain.DefaultData;
 import com.clocktower.tournament.domain.Nation;
+import com.clocktower.tournament.dto.SeasonDto;
 import com.clocktower.tournament.match.MatchResult;
 import com.clocktower.tournament.match.SimpleResult;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -37,12 +42,13 @@ public class Season {
 
     private static final int PLAYER_COUNT = 30;
 
-    private static final String FILE_NAME_KNIGHTS = "knights";
-    private static final String FILE_NAME_SEASON = "season";
-    private static final String FILE_NAME_ELO = "elo";
-    private static final String FILE_NAME_RATING = "rating";
-    private static final String FILE_NAME_RATING_CHANGE = "rating change";
-    private static final String FILE_NAME_STATS = "stats";
+    private static final String FILE_NAME_SEASON_JSON = "season.json";
+    private static final String FILE_NAME_KNIGHTS = "knights.txt";
+    private static final String FILE_NAME_SEASON = "season.txt";
+    private static final String FILE_NAME_ELO = "elo.txt";
+    private static final String FILE_NAME_RATING = "rating.txt";
+    private static final String FILE_NAME_RATING_CHANGE = "rating change.txt";
+    private static final String FILE_NAME_STATS = "stats.txt";
 
     private static final int NORMAL_TIME_LENGTH = 9;
     private static final int ADDITIONAL_TIME_LENGTH = 7;
@@ -150,6 +156,9 @@ public class Season {
 
     private void initNewGame() {
         kn = DefaultData.initDefaultPlayers();
+        for (Player player : kn) {
+            player.restartCareer(false);
+        }
 
         elo.init(kn);
 
@@ -164,14 +173,33 @@ public class Season {
 
         nationRating.initDefault();
 
-        for (Player player : kn) {
-            player.restartCareer(false);
-        }
-
         save();
     }
 
     private void save() {
+        saveAsTxt();
+        saveAsJson();
+    }
+
+    private void saveAsJson() {
+        SeasonDto seasonDto = new SeasonDto();
+        seasonDto.setYear(year);
+        seasonDto.setPlayers(Arrays.stream(kn).map(Player::toDto).collect(toList()));
+        seasonDto.setLeagues(Arrays.stream(leagues).boxed().collect(toList()));
+        seasonDto.setNationRating(nationRating.toDto());
+        seasonDto.setEloRating(elo.toDto());
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        File file = new File(makeFilename(FILE_NAME_SEASON_JSON, false));
+        try {
+            mapper.writeValue(file, seasonDto);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void saveAsTxt() {
         saveToFile(makeFilename(FILE_NAME_KNIGHTS, false), writer -> {
             Arrays.stream(kn).forEach(p -> p.save(writer));
         });
@@ -237,7 +265,7 @@ public class Season {
         if (withYear) {
             ret += " " + year;
         }
-        return folderPath.resolve(ret + ".txt").toAbsolutePath().toString();
+        return folderPath.resolve(ret).toAbsolutePath().toString();
     }
 
     private void playTournaments() {
