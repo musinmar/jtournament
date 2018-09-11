@@ -185,7 +185,7 @@ public class Season {
         SeasonDto seasonDto = new SeasonDto();
         seasonDto.setYear(year);
         seasonDto.setPlayers(Arrays.stream(kn).map(Player::toDto).collect(toList()));
-        seasonDto.setLeagues(Arrays.stream(leagues).boxed().collect(toList()));
+        seasonDto.setLeagues(leagues);
         seasonDto.setNationRating(nationRating.toDto());
         seasonDto.setEloRating(elo.toDto());
 
@@ -220,6 +220,30 @@ public class Season {
     }
 
     private void load() {
+        if (Files.exists(Paths.get(makeFilename(FILE_NAME_SEASON_JSON, false)))) {
+            readFromJson();
+        } else {
+            readFromTxtFile();
+        }
+    }
+
+    private void readFromJson() {
+        ObjectMapper mapper = new ObjectMapper();
+        SeasonDto seasonDto;
+        try {
+            seasonDto = mapper.readValue(new File(makeFilename(FILE_NAME_SEASON_JSON, false)), SeasonDto.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        year = seasonDto.getYear();
+        kn = seasonDto.getPlayers().stream().map(Player::fromDto).toArray(Player[]::new);
+        leagues = seasonDto.getLeagues();
+        nationRating = NationRating.fromDto(seasonDto.getNationRating());
+        elo = EloRating.fromDto(seasonDto.getEloRating(), kn);
+    }
+
+    private void readFromTxtFile() {
         readFromFile(makeFilename(FILE_NAME_KNIGHTS, false), sc -> {
             kn = new Player[PLAYER_COUNT];
             for (int i = 0; i < PLAYER_COUNT; i++) {
@@ -240,7 +264,6 @@ public class Season {
             elo.load(sc, kn);
         });
     }
-
 
     private void readFromFile(String filename, Consumer<Scanner> readingConsumer) {
         try (Scanner sc = new Scanner(Paths.get(filename))) {

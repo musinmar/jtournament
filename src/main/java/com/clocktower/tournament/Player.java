@@ -298,6 +298,30 @@ public class Player {
         }
     }
 
+    public static Player fromDto(PlayerDto playerDto) {
+        Player player = new Player();
+        player.id = playerDto.getId();
+        player.name = playerDto.getName();
+        player.surname = playerDto.getSurname();
+        player.title = playerDto.getTitle();
+        player.nation = playerDto.getNation();
+        player.town = playerDto.getTown();
+        player.age = playerDto.getAge();
+        player.generation = playerDto.getGeneration();
+        player.persistentLevel = playerDto.getPersistentLevel();
+        player.level = playerDto.getLevel();
+        player.at = playerDto.getAt();
+        player.def = playerDto.getDef();
+        player.s = playerDto.getS();
+        player.l = playerDto.getL();
+        player.v = playerDto.getV();
+        player.exp = playerDto.getExp();
+        player.trophies = playerDto.getTrophies();
+        player.deckType = new DeckType(playerDto.getDeckType()[0], playerDto.getDeckType()[1]);
+        player.deck = playerDto.getDeck();
+        return player;
+    }
+
     public void addTrophy(String trophy, int year) {
         trophies.add(new Trophy(trophy, year));
     }

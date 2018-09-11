@@ -12,7 +12,7 @@ public class SeasonDto {
 
     private int year;
     private List<PlayerDto> players;
-    private List<Integer> leagues;
+    private int[] leagues;
     private NationRatingDto nationRating;
     private EloRatingDto eloRating;
 
@@ -40,11 +40,11 @@ public class SeasonDto {
         this.players = players;
     }
 
-    public List<Integer> getLeagues() {
+    public int[] getLeagues() {
         return leagues;
     }
 
-    public void setLeagues(List<Integer> leagues) {
+    public void setLeagues(int[] leagues) {
         this.leagues = leagues;
     }
 

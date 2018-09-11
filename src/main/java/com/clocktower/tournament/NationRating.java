@@ -35,10 +35,16 @@ public class NationRating {
             }
         }
 
-        public NationRatingDto.PointHistoryItemDto toDto() {
+        NationRatingDto.PointHistoryItemDto toDto() {
             NationRatingDto.PointHistoryItemDto itemDto = new NationRatingDto.PointHistoryItemDto();
             itemDto.setSeasons(seasons);
             return itemDto;
+        }
+
+        static PointHistoryItem fromDto(NationRatingDto.PointHistoryItemDto itemDto) {
+            PointHistoryItem item = new PointHistoryItem(0);
+            item.seasons = itemDto.getSeasons();
+            return item;
         }
     }
 
@@ -82,6 +88,13 @@ public class NationRating {
             }
             pointHistory.put(nation, pointHistoryItem);
         }
+    }
+
+    public static NationRating fromDto(NationRatingDto nationRatingDto) {
+        NationRating nationRating = new NationRating();
+        nationRating.pointHistory = nationRatingDto.getPointHistory().entrySet().stream()
+                .collect(toMap(Map.Entry::getKey, e -> PointHistoryItem.fromDto(e.getValue())));
+        return nationRating;
     }
 
     public void printPointHistory() {

@@ -24,12 +24,19 @@ public class EloRating {
             this.player = player;
         }
 
-        public EloRatingDto.ItemDto toDto() {
+        EloRatingDto.ItemDto toDto() {
             EloRatingDto.ItemDto itemDto = new EloRatingDto.ItemDto();
             itemDto.setPlayerId(player.id);
             itemDto.setPoints(points);
             itemDto.setPointsLastYear(pointsLastYear);
             return itemDto;
+        }
+
+        static Item fromDto(EloRatingDto.ItemDto itemDto, Player[] players) {
+            Item item = new Item(players[itemDto.getPlayerId()]);
+            item.points = itemDto.getPoints();
+            item.pointsLastYear = itemDto.getPointsLastYear();
+            return item;
         }
     }
 
@@ -73,6 +80,12 @@ public class EloRating {
             item.pointsLastYear = sc.nextDouble();
             item.points = sc.nextDouble();
         }
+    }
+
+    public static EloRating fromDto(EloRatingDto eloRatingDto, Player[] players) {
+        EloRating eloRating = new EloRating();
+        eloRating.items = eloRatingDto.getItems().stream().map(i -> Item.fromDto(i, players)).collect(toList());
+        return eloRating;
     }
 
     public List<Player> getPlayersByRating() {

@@ -3,8 +3,11 @@ package com.clocktower.tournament.domain;
 import java.util.Objects;
 
 public class Trophy {
-    private final String name;
-    private final int year;
+    private String name;
+    private int year;
+
+    public Trophy() {
+    }
 
     public Trophy(String name, int year) {
         this.name = name;
@@ -15,8 +18,16 @@ public class Trophy {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public int getYear() {
         return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
     }
 
     @Override
