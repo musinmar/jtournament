@@ -50,8 +50,7 @@ public class Player {
     private int v;
 
     private DeckType deckType;
-    // TODO: create class for deck
-    public int[] deck = new int[20];
+    private int[] deck = new int[20];
 
     public Player() {
     }
@@ -360,5 +359,9 @@ public class Player {
         int[] d = ArrayUtils.clone(deck);
         ArrayUtils.shuffle(d);
         return d;
+    }
+
+    public int getEffectiveLevel() {
+        return Arrays.stream(deck).sum();
     }
 }

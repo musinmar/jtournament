@@ -1359,6 +1359,8 @@ public class Season {
                 writer -> {
                     writeLevels(writer);
                     writer.println();
+//                    writeEffectiveLevels(writer);
+//                    writer.println();
                     writeAges(writer);
                     writer.println();
                     writeTrophies(writer);
@@ -1385,6 +1387,22 @@ public class Season {
         for (int i = 0; i < playersByLevel.size(); i++) {
             Player p = playersByLevel.get(i);
             writer.println(String.format(formatString, (i + 1), p.getPlayerName(), p.getLevel()));
+        }
+    }
+
+    private void writeEffectiveLevels(PrintWriter writer) {
+        List<Player> playersByLevel = Arrays.stream(kn)
+                .sorted(comparingInt(Player::getEffectiveLevel).reversed())
+                .collect(toList());
+
+        int maxNameLength = getMaxNameLength(playersByLevel);
+        String formatString = "%-2d: %-" + (maxNameLength + 1) + "s %-4d";
+
+        writer.println("Effective Levels");
+        for (int i = 0; i < playersByLevel.size(); i++) {
+            Player p = playersByLevel.get(i);
+            int effectiveLevel = Arrays.stream(p.getShuffledDeck()).sum();
+            writer.println(String.format(formatString, (i + 1), p.getPlayerName(), p.getEffectiveLevel()));
         }
     }
 
