@@ -69,4 +69,32 @@ public class Trophy {
         int year = Integer.valueOf(s.substring(i + 1, s.length()));
         return new Trophy(name, year);
     }
+
+    public static int getValue(String name) {
+        switch (name) {
+            case "World Cup":
+                return 10;
+            case "Division A":
+                return 9;
+            case "Champions League":
+                return 8;
+            case "National World Cup":
+                return 6;
+            case "Federations Cup":
+                return 4;
+            case "Division B":
+                return 3;
+            case "Cup of Almagest":
+            case "Cup of Bellerofon":
+            case "Cup of Galileo":
+            case "Cup of Kameleopard":
+            case "Cup of Oberon-22":
+                return 2;
+            case "Division C":
+                return -3;
+            case "Division D":
+                return -4;
+        }
+        throw new IllegalStateException("Unknown trophy: " + name);
+    }
 }

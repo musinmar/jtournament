@@ -11,9 +11,11 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import static com.clocktower.tournament.Logger.println;
@@ -328,7 +330,7 @@ public class Player {
 
     public Map<String, Long> getTrophiesByType() {
         return trophies.stream()
-                .collect(Collectors.groupingBy(Trophy::getName, counting()));
+                .collect(Collectors.groupingBy(Trophy::getName, () -> new TreeMap<>(Comparator.comparingInt(Trophy::getValue).reversed()), counting()));
     }
 
     public void increaseDeck() {
