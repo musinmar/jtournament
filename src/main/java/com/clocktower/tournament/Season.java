@@ -121,7 +121,7 @@ public class Season {
 
         int wc = 0;
         if ((year - 2) % 4 == 0) {
-            world_cup();
+            playWorldCup();
         }
 
         if ((year - 1) % 2 == 0) {
@@ -980,7 +980,7 @@ public class Season {
         readln();
     }
 
-    private void world_cup() {
+    private void playWorldCup() {
         println();
         println("World Championship");
 
@@ -1039,7 +1039,7 @@ public class Season {
 
         println("First Round Semifinals");
         println();
-        play_playoff_round(ro1sf, ro2, dummy, 0);
+        playSeriesPlayoffRound(ro1sf, ro2, dummy, 4, 0);
 
         println("Second Round");
         println();
