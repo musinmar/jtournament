@@ -8,4 +8,8 @@ public class SimpleResult {
     public String toString() {
         return r1 + ":" + r2;
     }
+
+    public int getTopScore() {
+        return Math.max(r1, r2);
+    }
 }

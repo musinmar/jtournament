@@ -4,6 +4,7 @@ import com.clocktower.tournament.domain.DefaultData;
 import com.clocktower.tournament.domain.Nation;
 import com.clocktower.tournament.dto.SeasonDto;
 import com.clocktower.tournament.simulation.MatchResult;
+import com.clocktower.tournament.simulation.PlayerSeriesResult;
 import com.clocktower.tournament.simulation.SimpleResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -404,48 +405,36 @@ public class Season {
         println("Semifinals");
         println();
         //play_playoff_round(t_fc, fc_sf, fc_f, dummy, 2);
-        play_series_playoff_round(fc_sf, fc_f, dummy, 3, 1);
+        playSeriesPlayoffRound(fc_sf, fc_f, dummy, 3, 1);
 
         println("Champions League - Semifinal Group");
         println("Semifinals");
         println();
 
-        play_series_playoff_round(cl_sf, cl_f, dummy, 3, 2);
+        playSeriesPlayoffRound(cl_sf, cl_f, dummy, 3, 2);
 
         println("Federations Cup - FINAL");
         println("Final");
         println();
-        SimpleResult r = play_series(fc_f[0], fc_f[1], 3, 1);
-        int fc_winner;
-        if (r.r1 > r.r2) {
-            fc_winner = fc_f[0];
-        } else {
-            fc_winner = fc_f[1];
-        }
+        PlayerSeriesResult r = playSeries(kn[fc_f[0]], kn[fc_f[1]], 3, 1);
+        Player fcWinner = r.getWinner();
         readln();
-        println();
-        println("Knight " + kn[fc_winner].getPlayerName() + " is the winner of the Federation Cup!");
+        println("Knight " + fcWinner.getPlayerName() + " is the winner of the Federation Cup!");
         println();
 
         println("Champions League - FINAL");
         println("Final");
         println();
-        r = play_series(cl_f[0], cl_f[1], 3, 2);
-        int cl_winner;
-        if (r.r1 > r.r2) {
-            cl_winner = cl_f[0];
-        } else {
-            cl_winner = cl_f[1];
-        }
+        r = playSeries(kn[cl_f[0]], kn[cl_f[1]], 3, 2);
+        Player clWinner = r.getWinner();
         readln();
-        println();
-        println("Knight " + kn[cl_winner].getPlayerName() + " is the winner of the Champions League!");
-        println(kn[cl_winner].getNation().getName() + "\'s triumph!");
+        println("Knight " + clWinner.getPlayerName() + " is the winner of the Champions League!");
+        println(clWinner.getNation().getName() + "\'s triumph!");
         println();
 
 
-        kn[fc_winner].addTrophy("Federations Cup", year);
-        kn[cl_winner].addTrophy("Champions League", year);
+        fcWinner.addTrophy("Federations Cup", year);
+        clWinner.addTrophy("Champions League", year);
     }
 
     private int get_player_from(int rank, int pos) {
@@ -523,26 +512,22 @@ public class Season {
         println();
     }
 
-    private void play_series_playoff_round(int[] players, int[] winners, int[] loosers, int wins, int points) {
+    private void playSeriesPlayoffRound(int[] players, int[] winners, int[] loosers, int wins, int points) {
         int len = players.length;
         for (int i = 0; i < len / 2; ++i) {
-            SimpleResult r = play_series(players[i * 2], players[i * 2 + 1], wins, points);
-            if (r.r1 > r.r2) {
-                winners[i] = players[i * 2];
-                loosers[i] = players[i * 2 + 1];
-            } else {
-                winners[i] = players[i * 2 + 1];
-                loosers[i] = players[i * 2];
-            }
+            PlayerSeriesResult r = playSeries(kn[players[i * 2]], kn[players[i * 2 + 1]], wins, points);
+            winners[i] = r.getWinner().id;
+            loosers[i] = r.getLoser().id;
             readln();
         }
         println();
     }
 
-    private SimpleResult play_series(int id1, int id2, int wins, int points) {
-        SimpleResult r = new SimpleResult();
-        while (r.r1 != wins && r.r2 != wins) {
-            MatchResult mr = playPlayoffGame(kn[id1], kn[id2], points);
+    private PlayerSeriesResult playSeries(Player p1, Player p2, int wins, int points) {
+        PlayerSeriesResult seriesResult = new PlayerSeriesResult(p1, p2);
+        SimpleResult r = seriesResult.getResult();
+        while (r.getTopScore() != wins) {
+            MatchResult mr = playPlayoffGame(p1, p2, points);
             readln();
             if (mr.rounds.r1 > mr.rounds.r2) {
                 r.r1 += 1;
@@ -550,7 +535,7 @@ public class Season {
                 r.r2 += 1;
             }
         }
-        return r;
+        return seriesResult;
     }
 
     private void play_group(int[] players, String groupName, int points, int rounds) {
@@ -874,24 +859,20 @@ public class Season {
         List<Player> playersByRating = elo.getPlayersByRating();
         List<Player> playersByRatingReversed = Lists.reverse(playersByRating);
 
-        int worstLord = playersByRatingReversed.stream()
+        Player worstLord = playersByRatingReversed.stream()
                 .filter(p -> p.getTitle() == LORD)
-                .map(p -> p.id)
                 .findFirst().orElseThrow(RuntimeException::new);
 
-        int worstSir = playersByRatingReversed.stream()
+        Player worstSir = playersByRatingReversed.stream()
                 .filter(p -> p.getTitle() == SIR)
-                .map(p -> p.id)
                 .findFirst().orElseThrow(RuntimeException::new);
 
-        int bestSir = playersByRating.stream()
+        Player bestSir = playersByRating.stream()
                 .filter(p -> p.getTitle() == SIR)
-                .map(p -> p.id)
                 .findFirst().orElseThrow(RuntimeException::new);
 
-        int bestCommon = playersByRating.stream()
+        Player bestCommon = playersByRating.stream()
                 .filter(p -> p.getTitle() == COMMON)
-                .map(p -> p.id)
                 .findFirst().orElseThrow(RuntimeException::new);
 
 
@@ -900,15 +881,15 @@ public class Season {
 
         println("Sir play off");
         println();
-        SimpleResult r = play_series(worstSir, bestCommon, 3, 0);
+        PlayerSeriesResult r = playSeries(worstSir, bestCommon, 3, 0);
         //playPlayoffGame(worst_sir, best_common, r1, r2, t, 0);
 
-        if (r.r2 > r.r1) {
-            kn[worstSir].setTitle(COMMON);
-            kn[bestCommon].setTitle(SIR);
-            println("Knight " + kn[bestCommon].getSimplePlayerName() + " has gained the Sir title!");
+        if (r.getWinner() == bestCommon) {
+            worstSir.setTitle(COMMON);
+            bestCommon.setTitle(SIR);
+            println("Knight " + bestCommon.getSimplePlayerName() + " has gained the Sir title!");
         } else {
-            println("Knight " + kn[worstSir].getSimplePlayerName() + " has defended the Sir title!");
+            println("Knight " + worstSir.getSimplePlayerName() + " has defended the Sir title!");
         }
         readln();
 
@@ -917,14 +898,14 @@ public class Season {
         println("Lord play off");
         println();
         //playPlayoffGame(worst_lord, best_sir, r1, r2, t, 0);
-        r = play_series(worstLord, bestSir, 3, 0);
+        r = playSeries(worstLord, bestSir, 3, 0);
 
-        if (r.r2 > r.r1) {
-            kn[worstLord].setTitle(SIR);
-            kn[bestSir].setTitle(LORD);
-            println("Knight " + kn[bestSir].getSimplePlayerName() + " has gained the Lord title!");
+        if (r.getWinner() == bestSir) {
+            worstLord.setTitle(SIR);
+            bestSir.setTitle(LORD);
+            println("Knight " + bestSir.getSimplePlayerName() + " has gained the Lord title!");
         } else {
-            println("Knight " + kn[worstLord].getSimplePlayerName() + " has defended the Lord title!");
+            println("Knight " + worstLord.getSimplePlayerName() + " has defended the Lord title!");
         }
         readln();
         println();
@@ -1130,32 +1111,26 @@ public class Season {
 
         println("Quarterfinals");
         println();
-        play_series_playoff_round(qf, sf, dummy, 4, 0);
+        playSeriesPlayoffRound(qf, sf, dummy, 4, 0);
 
         println("Semifinals");
         println();
-        play_series_playoff_round(sf, f, dummy, 4, 0);
+        playSeriesPlayoffRound(sf, f, dummy, 4, 0);
 
         println("Final");
         println();
 
-        SimpleResult r = play_series(f[0], f[1], 4, 0);
-        int wc;
-        if (r.r1 > r.r2) {
-            wc = f[0];
-        } else {
-            wc = f[1];
-        }
-        //for i = 1 to 30 do if sl[i].id=Wc then sl[i].os=sl[i].os+20;
+        PlayerSeriesResult r = playSeries(kn[f[0]], kn[f[1]], 4, 0);
+        Player wcWinner = r.getWinner();
 
         readln();
 
-        println(kn[wc].getNation().getName() + " knight " + kn[wc].getPlayerName() + " is the World Champion!!!");
-        println("It is the best day in the history of " + kn[wc].getTown() + "!");
-        println("Everyone from " + kn[wc].getNation().getName() + " are celebrating!");
-        println("Grand Master " + kn[wc].getSimplePlayerName() + " is now in the history!");
+        println(wcWinner.getNation().getName() + " knight " + wcWinner.getPlayerName() + " is the World Champion!!!");
+        println("It is the best day in the history of " + wcWinner.getTown() + "!");
+        println("Everyone from " + wcWinner.getNation().getName() + " are celebrating!");
+        println("Grand Master " + wcWinner.getSimplePlayerName() + " is now in the history!");
 
-        kn[wc].addTrophy("World Cup", year);
+        wcWinner.addTrophy("World Cup", year);
 
         readln();
     }
@@ -1184,21 +1159,15 @@ public class Season {
         int lastp = league.length - 1;
         if (points != 1) {
             println(name + " - relegation match");
-            SimpleResult r = play_series(league[lastp - 1], league[lastp], 3, 0);
-            if (r.r2 > r.r1) {
-                int j = league[lastp];
-                league[lastp] = league[lastp - 1];
-                league[lastp - 1] = j;
-            }
+            PlayerSeriesResult r = playSeries(kn[league[lastp - 1]], kn[league[lastp]], 3, 0);
+            league[lastp - 1] = r.getWinner().id;
+            league[lastp] = r.getLoser().id;
         }
 
         println(name + " - final match");
-        SimpleResult r = play_series(league[0], league[1], 3, 0);
-        if (r.r2 > r.r1) {
-            int j = league[0];
-            league[0] = league[1];
-            league[1] = j;
-        }
+        PlayerSeriesResult r = playSeries(kn[league[0]], kn[league[1]], 3, 0);
+        league[0] = r.getWinner().id;
+        league[1] = r.getLoser().id;
 
         for (int i = first; i <= last; ++i) {
             leagues[i - 1] = league[i - first];
