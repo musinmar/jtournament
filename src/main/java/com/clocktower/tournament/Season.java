@@ -67,7 +67,7 @@ public class Season {
     private int[] leagues = new int[PLAYER_COUNT];
 
     public static class GroupResult {
-        int playerId;
+        Player player;
         int roundsWon;
         int gamesWon;
         int gamesLost;
@@ -473,7 +473,7 @@ public class Season {
                 .toArray();
 
         String name = "Cup of " + nation.getName();
-        play_group(players, name, 0, 1);
+        playGroup(players, name, 0, 1);
         println();
 
         kn[players[0]].addTrophy(name, year);
@@ -487,7 +487,7 @@ public class Season {
             for (int j = 0; j <= 3; ++j) {
                 buf[j] = players[(i - 1) * 4 + j];
             }
-            play_group(buf, "Group " + i, points, rounds);
+            playGroup(buf, "Group " + i, points, rounds);
             for (int j = 0; j <= 3; ++j) {
                 players[(i - 1) * 4 + j] = buf[j];
             }
@@ -538,7 +538,7 @@ public class Season {
         return seriesResult;
     }
 
-    private void play_group(int[] players, String groupName, int points, int rounds) {
+    private void playGroup(int[] players, String groupName, int points, int rounds) {
         println(groupName);
         println();
 
@@ -548,39 +548,39 @@ public class Season {
         GroupResult[] results = new GroupResult[len];
         for (int i = 0; i < players.length; i++) {
             GroupResult result = new GroupResult();
-            result.playerId = players[i];
+            result.player = kn[players[i]];
             results[i] = result;
         }
 
 
         for (int k = 1; k <= rounds; ++k) {
             if (len == 4) {
-                play_group_match(results, 0, 2, points);
-                play_group_match(results, 1, 3, points);
-                play_group_match(results, 3, 0, points);
-                play_group_match(results, 2, 1, points);
-                play_group_match(results, 0, 1, points);
-                play_group_match(results, 3, 2, points);
+                playGroupMatch(results, 0, 2, points);
+                playGroupMatch(results, 1, 3, points);
+                playGroupMatch(results, 3, 0, points);
+                playGroupMatch(results, 2, 1, points);
+                playGroupMatch(results, 0, 1, points);
+                playGroupMatch(results, 3, 2, points);
             } else if (len == 6) {
-                play_group_match(results, 0, 5, points);
-                play_group_match(results, 2, 4, points);
-                play_group_match(results, 1, 3, points);
+                playGroupMatch(results, 0, 5, points);
+                playGroupMatch(results, 2, 4, points);
+                playGroupMatch(results, 1, 3, points);
 
-                play_group_match(results, 5, 2, points);
-                play_group_match(results, 0, 1, points);
-                play_group_match(results, 4, 3, points);
+                playGroupMatch(results, 5, 2, points);
+                playGroupMatch(results, 0, 1, points);
+                playGroupMatch(results, 4, 3, points);
 
-                play_group_match(results, 4, 5, points);
-                play_group_match(results, 3, 0, points);
-                play_group_match(results, 1, 2, points);
+                playGroupMatch(results, 4, 5, points);
+                playGroupMatch(results, 3, 0, points);
+                playGroupMatch(results, 1, 2, points);
 
-                play_group_match(results, 5, 1, points);
-                play_group_match(results, 0, 4, points);
-                play_group_match(results, 2, 3, points);
+                playGroupMatch(results, 5, 1, points);
+                playGroupMatch(results, 0, 4, points);
+                playGroupMatch(results, 2, 3, points);
 
-                play_group_match(results, 3, 5, points);
-                play_group_match(results, 0, 2, points);
-                play_group_match(results, 4, 1, points);
+                playGroupMatch(results, 3, 5, points);
+                playGroupMatch(results, 0, 2, points);
+                playGroupMatch(results, 4, 1, points);
             } else {
                 int[] buf = new int[len];
                 int[] buf2 = new int[len];
@@ -599,11 +599,11 @@ public class Season {
                         }
                         sort_group_results(bufresults);
                         println(groupName);
-                        print_group_results(bufresults);
+                        printGroupResults(bufresults);
                     }
 
                     for (int j = 0; j < halflen; ++j) {
-                        play_group_match(results, buf[j], buf[j + halflen], points);
+                        playGroupMatch(results, buf[j], buf[j + halflen], points);
                     }
 
                     buf2[0] = buf[0];
@@ -627,10 +627,10 @@ public class Season {
         sort_group_results(results);
 
         println(groupName);
-        print_group_results(results);
+        printGroupResults(results);
 
         for (int i = 0; i < players.length; i++) {
-            players[i] = results[i].playerId;
+            players[i] = results[i].player.id;
         }
     }
 
@@ -657,35 +657,35 @@ public class Season {
             } else if (dif1 < dif2) {
                 return -1;
             } else {
-                return elo.playerIsBetterThan(res1.playerId, res2.playerId);
+                return elo.playerIsBetterThan(res1.player, res2.player);
             }
         }
     }
 
-    private void print_group_results(GroupResult[] results) {
+    private void printGroupResults(GroupResult[] results) {
         int len = results.length;
         int maxNameLength = Arrays.stream(results)
-                .map(r -> kn[r.playerId].getPlayerName())
+                .map(r -> r.player.getPlayerName())
                 .mapToInt(String::length)
                 .max()
                 .orElse(0);
 
         String formatString = "%d. %-" + (maxNameLength + 1) + "s %2d:%2d  %d";
         for (int i = 0; i < len; i++) {
-            println(String.format(formatString, (i + 1), kn[results[i].playerId].getPlayerName(),
+            println(String.format(formatString, (i + 1), results[i].player.getPlayerName(),
                     results[i].gamesWon, results[i].gamesLost, results[i].roundsWon));
         }
         readln();
     }
 
-    private void play_group_match(GroupResult[] results, int id1, int id2, int points) {
-        MatchResult mres = playGroupGame(kn[results[id1].playerId], kn[results[id2].playerId], points);
-        results[id1].roundsWon += mres.rounds.r1;
-        results[id1].gamesWon += mres.games.r1;
-        results[id1].gamesLost += mres.games.r2;
-        results[id2].roundsWon += mres.rounds.r2;
-        results[id2].gamesWon += mres.games.r2;
-        results[id2].gamesLost += mres.games.r1;
+    private void playGroupMatch(GroupResult[] results, int id1, int id2, int points) {
+        MatchResult r = playGroupGame(results[id1].player, results[id2].player, points);
+        results[id1].roundsWon += r.rounds.r1;
+        results[id1].gamesWon += r.games.r1;
+        results[id1].gamesLost += r.games.r2;
+        results[id2].roundsWon += r.rounds.r2;
+        results[id2].gamesWon += r.games.r2;
+        results[id2].gamesLost += r.games.r1;
         readln();
     }
 
@@ -1153,7 +1153,7 @@ public class Season {
         for (int i = first; i <= last; ++i) {
             league[i - first] = leagues[i - 1];
         }
-        play_group(league, name, points, 1);
+        playGroup(league, name, points, 1);
         println();
 
         int lastp = league.length - 1;

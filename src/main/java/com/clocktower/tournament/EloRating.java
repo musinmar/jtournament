@@ -105,8 +105,8 @@ public class EloRating {
         item2.points += calculateRatingChange(rat2, rat1, r2);
     }
 
-    public int playerIsBetterThan(int id1, int id2) {
-        return (int) Math.signum(items.get(id1).points - items.get(id2).points);
+    public int playerIsBetterThan(Player p1, Player p2) {
+        return (int) Math.signum(items.get(p1.id).points - items.get(p2.id).points);
     }
 
     public void sortPlayers(int[] players) {
