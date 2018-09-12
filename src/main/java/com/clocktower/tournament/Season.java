@@ -43,12 +43,12 @@ public class Season {
     private static final int PLAYER_COUNT = 30;
 
     private static final String FILE_NAME_SEASON_JSON = "season.json";
-    private static final String FILE_NAME_KNIGHTS = "knights.txt";
-    private static final String FILE_NAME_SEASON = "season.txt";
-    private static final String FILE_NAME_ELO = "elo.txt";
-    private static final String FILE_NAME_RATING = "rating.txt";
-    private static final String FILE_NAME_RATING_CHANGE = "rating change.txt";
-    private static final String FILE_NAME_STATS = "stats.txt";
+    private static final String FILE_NAME_KNIGHTS = "knights";
+    private static final String FILE_NAME_SEASON = "season";
+    private static final String FILE_NAME_ELO = "elo";
+    private static final String FILE_NAME_RATING = "rating";
+    private static final String FILE_NAME_RATING_CHANGE = "rating change";
+    private static final String FILE_NAME_STATS = "stats";
 
     private static final int NORMAL_TIME_LENGTH = 9;
     private static final int ADDITIONAL_TIME_LENGTH = 7;
@@ -102,7 +102,7 @@ public class Season {
     public void simulateSeason() {
         println();
 
-        String seasonLogFileName = makeFilename("season", true);
+        String seasonLogFileName = makeFilename("season", true, true);
         Logger.setCurrentFilename(seasonLogFileName);
 
         nationRating.printPointHistory();
@@ -128,7 +128,7 @@ public class Season {
             playNationalWorldCup();
         }
 
-        saveToFile(makeFilename(FILE_NAME_RATING_CHANGE, true),
+        saveToFile(makeFilename(FILE_NAME_RATING_CHANGE, true, true),
                 writer -> elo.print(writer, true));
 
         advancePlayersAge();
@@ -141,7 +141,7 @@ public class Season {
         playTitlePlayoffs();
         adjustPlayerSkillsAfterSeason();
 
-        saveToFile(makeFilename(FILE_NAME_RATING, true),
+        saveToFile(makeFilename(FILE_NAME_RATING, true, true),
                 writer -> elo.print(writer, false));
 
         printStatsToFile();
@@ -191,7 +191,7 @@ public class Season {
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        File file = new File(makeFilename(FILE_NAME_SEASON_JSON, false));
+        File file = new File(makeFilename(FILE_NAME_SEASON_JSON, false, false));
         try {
             mapper.writeValue(file, seasonDto);
         } catch (IOException e) {
@@ -200,15 +200,15 @@ public class Season {
     }
 
     private void saveAsTxt() {
-        saveToFile(makeFilename(FILE_NAME_KNIGHTS, false), writer -> {
+        saveToFile(makeFilename(FILE_NAME_KNIGHTS, false, true), writer -> {
             Arrays.stream(kn).forEach(p -> p.save(writer));
         });
-        saveToFile(makeFilename(FILE_NAME_SEASON, false), writer -> {
+        saveToFile(makeFilename(FILE_NAME_SEASON, false, true), writer -> {
             writer.println(year);
             nationRating.write(writer);
             Arrays.stream(leagues).forEach(writer::println);
         });
-        saveToFile(makeFilename(FILE_NAME_ELO, false), elo::save);
+        saveToFile(makeFilename(FILE_NAME_ELO, false, true), elo::save);
     }
 
     private void saveToFile(String filename, Consumer<PrintWriter> writerConsumer) {
@@ -220,7 +220,7 @@ public class Season {
     }
 
     private void load() {
-        if (Files.exists(Paths.get(makeFilename(FILE_NAME_SEASON_JSON, false)))) {
+        if (Files.exists(Paths.get(makeFilename(FILE_NAME_SEASON_JSON, false, false)))) {
             readFromJson();
         } else {
             readFromTxtFile();
@@ -231,7 +231,7 @@ public class Season {
         ObjectMapper mapper = new ObjectMapper();
         SeasonDto seasonDto;
         try {
-            seasonDto = mapper.readValue(new File(makeFilename(FILE_NAME_SEASON_JSON, false)), SeasonDto.class);
+            seasonDto = mapper.readValue(new File(makeFilename(FILE_NAME_SEASON_JSON, false, false)), SeasonDto.class);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -244,7 +244,7 @@ public class Season {
     }
 
     private void readFromTxtFile() {
-        readFromFile(makeFilename(FILE_NAME_KNIGHTS, false), sc -> {
+        readFromFile(makeFilename(FILE_NAME_KNIGHTS, false, true), sc -> {
             kn = new Player[PLAYER_COUNT];
             for (int i = 0; i < PLAYER_COUNT; i++) {
                 kn[i] = new Player();
@@ -252,7 +252,7 @@ public class Season {
             }
         });
 
-        readFromFile(makeFilename(FILE_NAME_SEASON, false), sc -> {
+        readFromFile(makeFilename(FILE_NAME_SEASON, false, true), sc -> {
             year = sc.nextInt();
             nationRating.read(sc);
             for (int i = 0; i < PLAYER_COUNT; i++) {
@@ -260,7 +260,7 @@ public class Season {
             }
         });
 
-        readFromFile(makeFilename(FILE_NAME_ELO, false), sc -> {
+        readFromFile(makeFilename(FILE_NAME_ELO, false, true), sc -> {
             elo.load(sc, kn);
         });
     }
@@ -274,7 +274,7 @@ public class Season {
         }
     }
 
-    private String makeFilename(String s, boolean withYear) {
+    private String makeFilename(String s, boolean withYear, boolean txtExtension) {
         Path folderPath = Paths.get(FOLDER);
         if (!Files.exists(folderPath)) {
             try {
@@ -287,6 +287,9 @@ public class Season {
         String ret = s;
         if (withYear) {
             ret += " " + year;
+        }
+        if (txtExtension) {
+            ret += ".txt";
         }
         return folderPath.resolve(ret).toAbsolutePath().toString();
     }
@@ -1355,7 +1358,7 @@ public class Season {
     }
 
     private void printStatsToFile() {
-        saveToFile(makeFilename(FILE_NAME_STATS, true),
+        saveToFile(makeFilename(FILE_NAME_STATS, true, true),
                 writer -> {
                     writeLevels(writer);
                     writer.println();
