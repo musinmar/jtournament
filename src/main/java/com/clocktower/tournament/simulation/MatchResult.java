@@ -1,4 +1,4 @@
-package com.clocktower.tournament.match;
+package com.clocktower.tournament.simulation;
 
 public class MatchResult {
     public int id1;

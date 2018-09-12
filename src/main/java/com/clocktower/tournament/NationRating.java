@@ -2,7 +2,7 @@ package com.clocktower.tournament;
 
 import com.clocktower.tournament.domain.Nation;
 import com.clocktower.tournament.dto.NationRatingDto;
-import com.clocktower.tournament.match.MatchResult;
+import com.clocktower.tournament.simulation.MatchResult;
 import org.apache.commons.lang3.mutable.MutableDouble;
 
 import java.io.PrintWriter;
