@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,7 +64,7 @@ public class Season {
     private NationRating nationRating = new NationRating();
     private Map<Nation, List<Integer>> nationalCupResults = new HashMap<>();
 
-    private int[] leagues = new int[PLAYER_COUNT];
+    private List<Integer> leagues;
 
     public static class GroupResult {
         Player player;
@@ -162,12 +161,10 @@ public class Season {
 
         elo.init(kn);
 
-        List<Player> playersByLevel = Arrays.stream(kn)
+        leagues = Arrays.stream(kn)
                 .sorted(comparingInt(Player::getLevel).reversed())
+                .map(p -> p.id)
                 .collect(toList());
-        for (int i = 0; i < PLAYER_COUNT; i++) {
-            leagues[i] = playersByLevel.get(i).id;
-        }
 
         year = 1;
 
@@ -206,7 +203,7 @@ public class Season {
         saveToFile(makeFilename(FILE_NAME_SEASON, false, true), writer -> {
             writer.println(year);
             nationRating.write(writer);
-            Arrays.stream(leagues).forEach(writer::println);
+            leagues.forEach(writer::println);
         });
         saveToFile(makeFilename(FILE_NAME_ELO, false, true), elo::save);
     }
@@ -256,7 +253,7 @@ public class Season {
             year = sc.nextInt();
             nationRating.read(sc);
             for (int i = 0; i < PLAYER_COUNT; i++) {
-                leagues[i] = sc.nextInt() - 1;
+                leagues.add(sc.nextInt() - 1);
             }
         });
 
@@ -1092,13 +1089,13 @@ public class Season {
 
         //playCup();
 
-        ArrayUtils.swap(leagues, 7, 8);
-        ArrayUtils.swap(leagues, 15, 16);
-        ArrayUtils.swap(leagues, 23, 24);
+        Collections.swap(leagues, 7, 8);
+        Collections.swap(leagues, 15, 16);
+        Collections.swap(leagues, 23, 24);
     }
 
     private void playLeague(int first, int last, String name, int points) {
-        List<Integer> league = Arrays.stream(ArrayUtils.subarray(leagues, first - 1, last)).boxed().collect(toList());
+        List<Integer> league = new ArrayList<>(leagues.subList(first - 1, last));
 
         playGroup(league, name, points, 1);
         println();
@@ -1117,7 +1114,7 @@ public class Season {
         league.set(1, r.getLoser().id);
 
         for (int i = first; i <= last; ++i) {
-            leagues[i - 1] = league.get(i - first);
+            leagues.set(i - 1, league.get(i - first));
         }
 
         println();

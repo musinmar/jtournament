@@ -1,8 +1,5 @@
 package com.clocktower.tournament.dto;
 
-import com.clocktower.tournament.EloRating;
-import com.clocktower.tournament.Player;
-
 import java.util.List;
 
 public class SeasonDto {
@@ -12,7 +9,7 @@ public class SeasonDto {
 
     private int year;
     private List<PlayerDto> players;
-    private int[] leagues;
+    private List<Integer> leagues;
     private NationRatingDto nationRating;
     private EloRatingDto eloRating;
 
@@ -40,11 +37,11 @@ public class SeasonDto {
         this.players = players;
     }
 
-    public int[] getLeagues() {
+    public List<Integer> getLeagues() {
         return leagues;
     }
 
-    public void setLeagues(int[] leagues) {
+    public void setLeagues(List<Integer> leagues) {
         this.leagues = leagues;
     }
 
