@@ -7,6 +7,8 @@ import com.clocktower.tournament.simulation.MatchResult;
 import com.clocktower.tournament.simulation.PlayerSeriesResult;
 import com.clocktower.tournament.simulation.PlayoffResult;
 import com.clocktower.tournament.simulation.SimpleResult;
+import com.clocktower.tournament.simulation.Team;
+import com.clocktower.tournament.simulation.TeamPlayoffResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.base.Preconditions;
@@ -67,11 +69,6 @@ public class Season {
         int roundsWon;
         int gamesWon;
         int gamesLost;
-    }
-
-    public static class Team {
-        String name;
-        int[] id;
     }
 
     public static class PlayerPair {
@@ -429,7 +426,7 @@ public class Season {
         PlayoffResult pr = new PlayoffResult();
         int len = players.size();
         for (int i = 0; i < len / 2; ++i) {
-            MatchResult mr = playPlayoffGame(kn[players.get(i * 2)], kn[players.get(i * 2 + 1)], points);
+            MatchResult<Player> mr = playPlayoffGame(kn[players.get(i * 2)], kn[players.get(i * 2 + 1)], points);
             pr.winners.add(mr.getWinner().id);
             pr.losers.add(mr.getLoser().id);
             readln();
@@ -455,7 +452,7 @@ public class Season {
         PlayerSeriesResult seriesResult = new PlayerSeriesResult(p1, p2);
         SimpleResult r = seriesResult.getResult();
         while (r.getTopScore() != wins) {
-            MatchResult mr = playPlayoffGame(p1, p2, 0);
+            MatchResult<Player> mr = playPlayoffGame(p1, p2, 0);
             readln();
             if (mr.rounds.r1 > mr.rounds.r2) {
                 r.r1 += 1;
@@ -612,7 +609,7 @@ public class Season {
     }
 
     private void playGroupMatch(GroupResult[] results, int id1, int id2, int points) {
-        MatchResult r = playGroupGame(results[id1].player, results[id2].player, points);
+        MatchResult<Player> r = playGroupGame(results[id1].player, results[id2].player, points);
         results[id1].roundsWon += r.rounds.r1;
         results[id1].gamesWon += r.games.r1;
         results[id1].gamesLost += r.games.r2;
@@ -622,16 +619,16 @@ public class Season {
         readln();
     }
 
-    private MatchResult playGroupGame(Player p1, Player p2, int points) {
+    private MatchResult<Player> playGroupGame(Player p1, Player p2, int points) {
         return playGame(p1, p2, false, points);
     }
 
-    private MatchResult playPlayoffGame(Player p1, Player p2, int points) {
+    private MatchResult<Player> playPlayoffGame(Player p1, Player p2, int points) {
         return playGame(p1, p2, true, points);
     }
 
-    private MatchResult playGame(Player p1, Player p2, boolean isPlayoff, int points) {
-        MatchResult res = new MatchResult(p1, p2);
+    private MatchResult<Player> playGame(Player p1, Player p2, boolean isPlayoff, int points) {
+        MatchResult<Player> res = new MatchResult<>(p1, p2);
 
         println(p1.getNameWithNation() + " vs " + p2.getNameWithNation());
 
@@ -666,12 +663,12 @@ public class Season {
         return res;
     }
 
-    private void updateElo(Player p1, Player p2, MatchResult mr) {
+    private void updateElo(Player p1, Player p2, MatchResult<Player> mr) {
         double s = mr.rounds.r1 + mr.rounds.r2;
         elo.update(p1.id, p2.id, mr.rounds.r1 / s, mr.rounds.r2 / s);
     }
 
-    private void updateExp(Player p1, Player p2, MatchResult mr) {
+    private void updateExp(Player p1, Player p2, MatchResult<Player> mr) {
         if (mr.rounds.r1 > mr.rounds.r2) {
             p1.addExp(p2.getLevel());
         } else if (mr.rounds.r2 > mr.rounds.r1) {
@@ -1075,24 +1072,30 @@ public class Season {
         kn[league.get(0)].addTrophy(name, year);
     }
 
-    private Team makeNationalTeam(Nation nation) {
+    private Team makeNationalTeam(Nation nation, boolean mainTeam) {
         Team res = new Team();
-        res.name = nation.getName();
+        res.name = nation.getName() + (mainTeam ? "" : " B");
 
         List<Player> playersByRating = elo.getPlayersByRating();
-        res.id = playersByRating.stream()
+        res.ids = playersByRating.stream()
                 .filter(p -> p.getNation() == nation)
+                .skip(mainTeam ? 0 : 3)
                 .limit(3)
-                .mapToInt(p -> p.id)
-                .toArray();
+                .map(p -> p.id)
+                .collect(toList());
 
         return res;
     }
 
     private void playNationalWorldCup() {
-        Map<Nation, Team> teams = new HashMap<>();
-        for (Nation nation : Nation.values()) {
-            teams.put(nation, makeNationalTeam(nation));
+        List<Team> teams = new ArrayList<>();
+        for (int i = 0; i < Nation.COUNT; ++i) {
+            Nation nation = nationRating.getRankedNation(i);
+            teams.add(makeNationalTeam(nation, true));
+        }
+        for (int i = 0; i < Nation.COUNT; ++i) {
+            Nation nation = nationRating.getRankedNation(i);
+            teams.add(makeNationalTeam(nation, false));
         }
 
         println(String.format("National World Cup - Season %d", year));
@@ -1100,11 +1103,10 @@ public class Season {
 
         println("Participants");
         println();
-        for (int i = 0; i < Nation.COUNT; i++) {
-            Team team = teams.get(nationRating.getRankedNation(i));
+        for (Team team : teams) {
             println(team.name);
-            for (int j = 0; j < team.id.length; j++) {
-                print(String.format("%d: %s", j + 1, kn[team.id[j]].getPlayerName()));
+            for (int j = 0; j < team.ids.size(); j++) {
+                print(String.format("%d: %s", j + 1, kn[team.ids.get(j)].getPlayerName()));
                 if (j == 0) {
                     println(" - Captain");
                 } else {
@@ -1114,59 +1116,68 @@ public class Season {
             println();
         }
 
-        Team[] sf = new Team[4];
-        sf[0] = teams.get(nationRating.getRankedNation(0));
-        sf[2] = teams.get(nationRating.getRankedNation(1));
-        sf[3] = teams.get(nationRating.getRankedNation(2));
+        // First round
+        List<Team> firstRound = new ArrayList<>(Arrays.asList(
+                teams.get(6),
+                teams.get(7),
+                teams.get(8),
+                teams.get(9)
+        ));
+        println("First round");
+        println();
+        TeamPlayoffResult firstRoundResult = playTeamPlayoffRound(firstRound, NATIONAL_TEAM_MATCH_ROUNDS);
 
-        // Quaterfinal
-        MatchResult mr = playTeamMatch(teams.get(nationRating.getRankedNation(3)), teams.get(nationRating.getRankedNation(4)), NATIONAL_TEAM_MATCH_ROUNDS);
-        if (mr.rounds.r1 > mr.rounds.r2) {
-            sf[1] = teams.get(nationRating.getRankedNation(3));
-        } else {
-            sf[1] = teams.get(nationRating.getRankedNation(4));
-        }
+        // Quaterfinals
+        List<Team> qf = new ArrayList<>(Arrays.asList(
+                teams.get(0),
+                firstRoundResult.winners.get(0),
+                teams.get(3),
+                teams.get(4),
+                teams.get(1),
+                firstRoundResult.winners.get(1),
+                teams.get(2),
+                teams.get(5)
+        ));
+        println("Quarterfinals");
+        println();
+        TeamPlayoffResult qfResult = playTeamPlayoffRound(qf, NATIONAL_TEAM_MATCH_ROUNDS);
 
-        // Semifinals
-        Team[] f = new Team[2];
-        mr = playTeamMatch(sf[0], sf[1], NATIONAL_TEAM_MATCH_ROUNDS);
-        if (mr.rounds.r1 > mr.rounds.r2) {
-            f[0] = sf[0];
-        } else {
-            f[0] = sf[1];
-        }
-        mr = playTeamMatch(sf[2], sf[3], NATIONAL_TEAM_MATCH_ROUNDS);
-        if (mr.rounds.r1 > mr.rounds.r2) {
-            f[1] = sf[2];
-        } else {
-            f[1] = sf[3];
-        }
+        println("Semifinals");
+        println();
+        TeamPlayoffResult sfResult = playTeamPlayoffRound(qfResult.winners, NATIONAL_TEAM_MATCH_ROUNDS);
 
-        // Final
-        mr = playTeamMatch(f[0], f[1], NATIONAL_TEAM_MATCH_ROUNDS);
-        Team winner;
-        if (mr.rounds.r1 > mr.rounds.r2) {
-            winner = f[0];
-        } else {
-            winner = f[1];
-        }
+        println("Final");
+        println();
+        TeamPlayoffResult fResult = playTeamPlayoffRound(sfResult.winners, NATIONAL_TEAM_MATCH_ROUNDS);
 
+        Team winner = fResult.winners.get(0);
         println(String.format("%s is the winner of the National World Cup %d", winner.name, year));
         println();
         readln();
 
-        for (int i : winner.id) {
+        for (int i : winner.ids) {
             kn[i].addTrophy("National World Cup", year);
         }
     }
 
-    private MatchResult playTeamMatch(Team team1, Team team2, int rounds) {
-        Preconditions.checkArgument(team1.id.length == team2.id.length);
-        Preconditions.checkArgument(team1.id.length % 2 == 1);
-        Preconditions.checkArgument(rounds % 2 == 1);
-        int teamSize = team1.id.length;
+    private TeamPlayoffResult playTeamPlayoffRound(List<Team> teams, int rounds) {
+        TeamPlayoffResult pr = new TeamPlayoffResult();
+        int len = teams.size() / 2;
+        for (int i = 0; i < len; i++) {
+            MatchResult<Team> mr = playTeamMatch(teams.get(i * 2), teams.get(i * 2 + 1), rounds);
+            pr.winners.add(mr.getWinner());
+            pr.losers.add(mr.getLoser());
+        }
+        return pr;
+    }
 
-        MatchResult res = new MatchResult(null, null);
+    private MatchResult<Team> playTeamMatch(Team team1, Team team2, int rounds) {
+        Preconditions.checkArgument(team1.ids.size() == team2.ids.size());
+        Preconditions.checkArgument(team1.ids.size() % 2 == 1);
+        Preconditions.checkArgument(rounds % 2 == 1);
+        int teamSize = team1.ids.size();
+
+        MatchResult<Team> res = new MatchResult<>(team1, team2);
 
         println(String.format("%s vs %s", team1.name, team2.name));
         println();
@@ -1175,7 +1186,7 @@ public class Season {
         for (int k = 0; k < rounds; k++) {
             for (int i = 0; i < teamSize; ++i) {
                 for (int j = 0; j < teamSize; ++j) {
-                    schedule.add(new PlayerPair(kn[team1.id[j]], kn[team2.id[(j + i) % teamSize]]));
+                    schedule.add(new PlayerPair(kn[team1.ids.get(j)], kn[team2.ids.get((j + i) % teamSize)]));
                 }
             }
         }
@@ -1183,7 +1194,7 @@ public class Season {
         int maxWinCount = teamSize * teamSize * rounds / 2 + 1;
         int counter = 0;
         for (PlayerPair pair : schedule) {
-            MatchResult mres = playPlayoffGame(pair.p1, pair.p2, 0);
+            MatchResult<Player> mres = playPlayoffGame(pair.p1, pair.p2, 0);
             res.addSubMatchResult(mres.rounds);
             readln();
 
