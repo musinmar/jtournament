@@ -63,7 +63,7 @@ public class Season {
     private EloRating elo = new EloRating();
 
     private NationRating nationRating = new NationRating();
-    private Map<Nation, int[]> nationalCupResults = new HashMap<>();
+    private Map<Nation, List<Integer>> nationalCupResults = new HashMap<>();
 
     private int[] leagues = new int[PLAYER_COUNT];
 
@@ -436,7 +436,7 @@ public class Season {
 
     private int get_player_from(int rank, int pos) {
         Nation nation = nationRating.getRankedNation(rank - 1);
-        return nationalCupResults.get(nation)[pos - 1];
+        return nationalCupResults.get(nation).get(pos - 1);
     }
 
     private void makeGroups(List<Integer> a) {
@@ -457,32 +457,27 @@ public class Season {
         ));
     }
 
-    private int[] playNationalCup(Nation nation) {
-        int[] players = Arrays.stream(kn)
+    private List<Integer> playNationalCup(Nation nation) {
+        List<Integer> players = Arrays.stream(kn)
                 .filter(p -> p.getNation() == nation)
-                .mapToInt(p -> p.id)
-                .toArray();
+                .map(p -> p.id)
+                .collect(toList());
 
         String name = "Cup of " + nation.getName();
         playGroup(players, name, 0, 1);
         println();
 
-        kn[players[0]].addTrophy(name, year);
+        kn[players.get(0)].addTrophy(name, year);
         return players;
     }
 
     private List<Integer> playGroupRound(List<Integer> players, int points, int rounds) {
         List<Integer> result = new ArrayList<>();
         int n = (players.size() + 1) / 4;
-        int[] buf = new int[4];
-        for (int i = 1; i <= n; ++i) {
-            for (int j = 0; j <= 3; ++j) {
-                buf[j] = players.get((i - 1) * 4 + j);
-            }
-            playGroup(buf, "Group " + i, points, rounds);
-            for (int j = 0; j <= 3; ++j) {
-                result.add(buf[j]);
-            }
+        for (int i = 0; i < n; ++i) {
+            List<Integer> group = new ArrayList<>(players.subList(i * 4, (i + 1) * 4));
+            playGroup(group, "Group " + (i + 1), points, rounds);
+            result.addAll(group);
         }
         println();
         return result;
@@ -525,20 +520,19 @@ public class Season {
         return seriesResult;
     }
 
-    private void playGroup(int[] players, String groupName, int points, int rounds) {
+    private void playGroup(List<Integer> players, String groupName, int points, int rounds) {
         println(groupName);
         println();
 
-        int len = players.length;
+        int len = players.size();
         printParticipants(players);
 
         GroupResult[] results = new GroupResult[len];
-        for (int i = 0; i < players.length; i++) {
+        for (int i = 0; i < players.size(); i++) {
             GroupResult result = new GroupResult();
-            result.player = kn[players[i]];
+            result.player = kn[players.get(i)];
             results[i] = result;
         }
-
 
         for (int k = 1; k <= rounds; ++k) {
             if (len == 4) {
@@ -616,8 +610,8 @@ public class Season {
         println(groupName);
         printGroupResults(results);
 
-        for (int i = 0; i < players.length; i++) {
-            players[i] = results[i].player.id;
+        for (int i = 0; i < players.size(); i++) {
+            players.set(i, results[i].player.id);
         }
     }
 
@@ -1104,39 +1098,37 @@ public class Season {
     }
 
     private void playLeague(int first, int last, String name, int points) {
-        int[] league = new int[last - first + 1];
-        for (int i = first; i <= last; ++i) {
-            league[i - first] = leagues[i - 1];
-        }
+        List<Integer> league = Arrays.stream(ArrayUtils.subarray(leagues, first - 1, last)).boxed().collect(toList());
+
         playGroup(league, name, points, 1);
         println();
 
-        int lastp = league.length - 1;
+        int lastp = league.size() - 1;
         if (points != 1) {
             println(name + " - relegation match");
-            PlayerSeriesResult r = playSeries(kn[league[lastp - 1]], kn[league[lastp]], 3, 0);
-            league[lastp - 1] = r.getWinner().id;
-            league[lastp] = r.getLoser().id;
+            PlayerSeriesResult r = playSeries(kn[league.get(lastp - 1)], kn[league.get(lastp)], 3, 0);
+            league.set(lastp - 1, r.getWinner().id);
+            league.set(lastp, r.getLoser().id);
         }
 
         println(name + " - final match");
-        PlayerSeriesResult r = playSeries(kn[league[0]], kn[league[1]], 3, 0);
-        league[0] = r.getWinner().id;
-        league[1] = r.getLoser().id;
+        PlayerSeriesResult r = playSeries(kn[league.get(0)], kn[league.get(1)], 3, 0);
+        league.set(0, r.getWinner().id);
+        league.set(1, r.getLoser().id);
 
         for (int i = first; i <= last; ++i) {
-            leagues[i - 1] = league[i - first];
+            leagues[i - 1] = league.get(i - first);
         }
 
         println();
-        println("Knight " + kn[league[0]].getPlayerName() + " is the winner of the " + name + "!");
+        println("Knight " + kn[league.get(0)].getPlayerName() + " is the winner of the " + name + "!");
         if (points != 1) {
-            println("Knight " + kn[league[lastp]].getPlayerName() + " have been relegated.");
+            println("Knight " + kn[league.get(lastp)].getPlayerName() + " have been relegated.");
         }
 
         println();
 
-        kn[league[0]].addTrophy(name, year);
+        kn[league.get(0)].addTrophy(name, year);
     }
 
     private Team makeNationalTeam(Nation nation) {
