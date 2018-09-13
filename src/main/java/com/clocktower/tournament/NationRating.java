@@ -18,7 +18,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 public class NationRating {
-    private static final int SEASON_COUNT = 4;
+    private static final int SEASON_COUNT = 5;
 
     private Map<Nation, PointHistoryItem> pointHistory = new HashMap<>();
     private List<Nation> ranking;
@@ -41,7 +41,7 @@ public class NationRating {
 
         static PointHistoryItem fromDto(NationRatingDto.PointHistoryItemDto itemDto) {
             PointHistoryItem item = new PointHistoryItem(0);
-            item.seasons = itemDto.getSeasons();
+            item.seasons = Arrays.copyOf(itemDto.getSeasons(), SEASON_COUNT);
             return item;
         }
     }
