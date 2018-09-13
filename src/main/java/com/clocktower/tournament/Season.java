@@ -5,6 +5,7 @@ import com.clocktower.tournament.domain.Nation;
 import com.clocktower.tournament.dto.SeasonDto;
 import com.clocktower.tournament.simulation.MatchResult;
 import com.clocktower.tournament.simulation.PlayerSeriesResult;
+import com.clocktower.tournament.simulation.PlayoffResult;
 import com.clocktower.tournament.simulation.SimpleResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -271,13 +272,12 @@ public class Season {
                 get_player_from(4, 4),
                 get_player_from(5, 4)));
 
-        List<Integer> clQualifyingRound1Losers = new ArrayList<>();
-
         printParticipants(clQualifyingRound1);
         shuffle(clQualifyingRound1, true);
 
-        playPlayoffRound(clQualifyingRound1, clQualifyingRound2, clQualifyingRound1Losers, 2);
-        fcQualifyingRound1.addAll(clQualifyingRound1Losers);
+        PlayoffResult clQr1Result = playPlayoffRound(clQualifyingRound1, 2);
+        clQualifyingRound2.addAll(clQr1Result.winners);
+        fcQualifyingRound1.addAll(clQr1Result.losers);
 
         println("Federations Cup - Season " + year);
         println("First qualification round");
@@ -286,8 +286,8 @@ public class Season {
         printParticipants(fcQualifyingRound1);
         shuffle(fcQualifyingRound1, true);
 
-        playPlayoffRound(fcQualifyingRound1, fcQualifyingRound2, new ArrayList<>(), 1);
-
+        PlayoffResult fcQr1Result = playPlayoffRound(fcQualifyingRound1, 1);
+        fcQualifyingRound2.addAll(fcQr1Result.winners);
 
         List<Integer> clGroupRound = new ArrayList<>(Arrays.asList(
                 get_player_from(1, 1),
@@ -300,21 +300,21 @@ public class Season {
                 get_player_from(3, 4),
                 get_player_from(5, 3)));
 
-        List<Integer> clQualificationRound2Losers = new ArrayList<>();
-
         println("Champions League - Second qualification round");
         println();
 
         printParticipants(clQualifyingRound2);
         shuffle(clQualifyingRound2, true);
-        playPlayoffRound(clQualifyingRound2, clGroupRound, clQualificationRound2Losers, 2);
-        fcQualifyingRound2.addAll(clQualificationRound2Losers);
+        PlayoffResult clQr2Result = playPlayoffRound(clQualifyingRound2, 2);
+        clGroupRound.addAll(clQr2Result.winners);
+        fcQualifyingRound2.addAll(clQr2Result.losers);
 
         println("Federations Cup - Second qualification round");
         println();
         printParticipants(fcQualifyingRound2);
         shuffle(fcQualifyingRound2, true);
-        playPlayoffRound(fcQualifyingRound2, fcGroupRound, new ArrayList<>(), 1);
+        PlayoffResult fcQr2Result = playPlayoffRound(fcQualifyingRound2, 1);
+        fcGroupRound.addAll(fcQr2Result.winners);
 
         println("Federations Cup - Group round");
         println();
@@ -345,14 +345,12 @@ public class Season {
         println("Federations Cup - Semifinals");
         println("Semifinals");
         println();
-        List<Integer> fc_f = new ArrayList<>();
-        playSeriesPlayoffRound(fc_sf, fc_f, new ArrayList<>(), 3, 1);
+        List<Integer> fc_f = playSeriesPlayoffRound(fc_sf, 3, 1).winners;
 
         println("Champions League - Semifinal Group");
         println("Semifinals");
         println();
-        List<Integer> cl_f = new ArrayList<>();
-        playSeriesPlayoffRound(cl_sf, cl_f, new ArrayList<>(), 3, 2);
+        List<Integer> cl_f = playSeriesPlayoffRound(cl_sf, 3, 2).winners;
 
         println("Federations Cup - FINAL");
         println("Final");
@@ -427,26 +425,30 @@ public class Season {
         return result;
     }
 
-    private void playPlayoffRound(List<Integer> players, List<Integer> winners, List<Integer> losers, int points) {
+    private PlayoffResult playPlayoffRound(List<Integer> players, int points) {
+        PlayoffResult pr = new PlayoffResult();
         int len = players.size();
         for (int i = 0; i < len / 2; ++i) {
             MatchResult mr = playPlayoffGame(kn[players.get(i * 2)], kn[players.get(i * 2 + 1)], points);
-            winners.add(mr.getWinner().id);
-            losers.add(mr.getLoser().id);
+            pr.winners.add(mr.getWinner().id);
+            pr.losers.add(mr.getLoser().id);
             readln();
         }
         println();
+        return pr;
     }
 
-    private void playSeriesPlayoffRound(List<Integer> players, List<Integer> winners, List<Integer> losers, int wins, int points) {
+    private PlayoffResult playSeriesPlayoffRound(List<Integer> players, int wins, int points) {
+        PlayoffResult pr = new PlayoffResult();
         int len = players.size();
         for (int i = 0; i < len / 2; ++i) {
             PlayerSeriesResult r = playSeries(kn[players.get(i * 2)], kn[players.get(i * 2 + 1)], wins, points);
-            winners.add(r.getWinner().id);
-            losers.add(r.getLoser().id);
+            pr.winners.add(r.getWinner().id);
+            pr.losers.add(r.getLoser().id);
             readln();
         }
         println();
+        return pr;
     }
 
     private PlayerSeriesResult playSeries(Player p1, Player p2, int wins, int points) {
@@ -941,9 +943,8 @@ public class Season {
 
         println("First Round Semifinals");
         println();
-        List<Integer> ro1sfWinners = new ArrayList<>();
-        playSeriesPlayoffRound(ro1sf, ro1sfWinners, new ArrayList<>(), 4, 0);
-        ro2.addAll(ro1sfWinners);
+        PlayoffResult ro2Result = playSeriesPlayoffRound(ro1sf, 4, 0);
+        ro2.addAll(ro2Result.winners);
 
         println("Second Round");
         println();
@@ -1003,13 +1004,11 @@ public class Season {
 
         println("Quarterfinals");
         println();
-        List<Integer> sf = new ArrayList<>();
-        playSeriesPlayoffRound(qf, sf, new ArrayList<>(), 4, 0);
+        List<Integer> sf = playSeriesPlayoffRound(qf, 4, 0).winners;
 
         println("Semifinals");
         println();
-        List<Integer> f = new ArrayList<>();
-        playSeriesPlayoffRound(sf, f, new ArrayList<>(), 4, 0);
+        List<Integer> f = playSeriesPlayoffRound(sf, 4, 0).winners;
 
         println("Final");
         println();
