@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -119,7 +120,6 @@ public class Season {
             playLeagues();
         }
 
-        int wc = 0;
         if ((year - 2) % 4 == 0) {
             playWorldCup();
         }
@@ -303,120 +303,117 @@ public class Season {
         println("First qualification round");
         println();
 
-        int[] cl_qr1 = new int[6];
-        int[] cl_qr2 = new int[8];
-        int[] fc_qr1 = new int[4];
-        int[] fc_qr2 = new int[10];
-        int[] dummy = new int[10];
+        List<Integer> clQualifyingRound1 = new ArrayList<>(Arrays.asList(
+                get_player_from(1, 4),
+                get_player_from(3, 3),
+                get_player_from(4, 2),
+                get_player_from(4, 3),
+                get_player_from(5, 1),
+                get_player_from(5, 2)));
 
-        cl_qr1[0] = get_player_from(1, 4);
-        cl_qr1[1] = get_player_from(3, 3);
-        cl_qr1[2] = get_player_from(4, 2);
-        cl_qr1[3] = get_player_from(4, 3);
-        cl_qr1[4] = get_player_from(5, 1);
-        cl_qr1[5] = get_player_from(5, 2);
+        List<Integer> clQualifyingRound2 = new ArrayList<>(Arrays.asList(
+                get_player_from(1, 3),
+                get_player_from(2, 2),
+                get_player_from(2, 3),
+                get_player_from(3, 2),
+                get_player_from(4, 1)));
 
-        cl_qr2[3] = get_player_from(1, 3);
-        cl_qr2[4] = get_player_from(2, 2);
-        cl_qr2[5] = get_player_from(2, 3);
-        cl_qr2[6] = get_player_from(3, 2);
-        cl_qr2[7] = get_player_from(4, 1);
+        List<Integer> fcQualifyingRound1 = new ArrayList<>(Collections.singletonList(
+                get_player_from(1, 5)));
 
-        fc_qr1[3] = get_player_from(1, 5);
+        List<Integer> fcQualifyingRound2 = new ArrayList<>(Arrays.asList(
+                get_player_from(2, 5),
+                get_player_from(3, 5),
+                get_player_from(4, 4),
+                get_player_from(5, 4)));
 
-        fc_qr2[2] = get_player_from(2, 5);
-        fc_qr2[3] = get_player_from(3, 5);
-        fc_qr2[4] = get_player_from(4, 4);
-        fc_qr2[5] = get_player_from(5, 4);
+        List<Integer> clQualifyingRound1Losers = new ArrayList<>();
 
-        print_players(cl_qr1);
-        shuffle(cl_qr1, true);
+        printParticipants(clQualifyingRound1);
+        shuffle(clQualifyingRound1, true);
 
-        play_playoff_round(cl_qr1, cl_qr2, fc_qr1, 2);
+        playPlayoffRound(clQualifyingRound1, clQualifyingRound2, clQualifyingRound1Losers, 2);
+        fcQualifyingRound1.addAll(clQualifyingRound1Losers);
 
         println("Federations Cup - Season " + year);
         println("First qualification round");
         println();
 
-        print_players(fc_qr1);
-        shuffle(fc_qr1, true);
+        printParticipants(fcQualifyingRound1);
+        shuffle(fcQualifyingRound1, true);
 
-        play_playoff_round(fc_qr1, fc_qr2, dummy, 1);
+        playPlayoffRound(fcQualifyingRound1, fcQualifyingRound2, new ArrayList<>(), 1);
 
-        int[] cl_gr = new int[8];
-        int[] fc_gr = new int[8];
 
-        cl_gr[4] = get_player_from(1, 1);
-        cl_gr[5] = get_player_from(1, 2);
-        cl_gr[6] = get_player_from(2, 1);
-        cl_gr[7] = get_player_from(3, 1);
+        List<Integer> clGroupRound = new ArrayList<>(Arrays.asList(
+                get_player_from(1, 1),
+                get_player_from(1, 2),
+                get_player_from(2, 1),
+                get_player_from(3, 1)));
 
-        fc_gr[5] = get_player_from(2, 4);
-        fc_gr[6] = get_player_from(3, 4);
-        fc_gr[7] = get_player_from(5, 3);
+        List<Integer> fcGroupRound = new ArrayList<>(Arrays.asList(
+                get_player_from(2, 4),
+                get_player_from(3, 4),
+                get_player_from(5, 3)));
 
+        List<Integer> clQualificationRound2Losers = new ArrayList<>();
 
         println("Champions League - Second qualification round");
         println();
 
-        print_players(cl_qr2);
-        shuffle(cl_qr2, true);
-        play_playoff_round(cl_qr2, cl_gr, dummy, 2);
-        for (int i = 0; i <= 3; ++i) {
-            fc_qr2[i + 6] = dummy[i];
-        }
+        printParticipants(clQualifyingRound2);
+        shuffle(clQualifyingRound2, true);
+        playPlayoffRound(clQualifyingRound2, clGroupRound, clQualificationRound2Losers, 2);
+        fcQualifyingRound2.addAll(clQualificationRound2Losers);
 
         println("Federations Cup - Second qualification round");
         println();
-        print_players(fc_qr2);
-        shuffle(fc_qr2, true);
-        play_playoff_round(fc_qr2, fc_gr, dummy, 1);
+        printParticipants(fcQualifyingRound2);
+        shuffle(fcQualifyingRound2, true);
+        playPlayoffRound(fcQualifyingRound2, fcGroupRound, new ArrayList<>(), 1);
 
         println("Federations Cup - Group round");
         println();
-        elo.sortPlayers(fc_gr);
-        print_players(fc_gr);
-        make_groups(fc_gr);
-        play_group_round(fc_gr, 2, 1);
+        elo.sortPlayers(fcGroupRound);
+        printParticipants(fcGroupRound);
+        makeGroups(fcGroupRound);
+        List<Integer> fcGroupRoundResult = playGroupRound(fcGroupRound, 2, 1);
 
-        int[] fc_sf = new int[4];
-        int[] cl_sf = new int[4];
-        int[] fc_f = new int[2];
-        int[] cl_f = new int[2];
-
-        fc_sf[0] = fc_gr[0];
-        fc_sf[1] = fc_gr[5];
-        fc_sf[2] = fc_gr[4];
-        fc_sf[3] = fc_gr[1];
+        List<Integer> fc_sf = new ArrayList<>(Arrays.asList(
+                fcGroupRoundResult.get(0),
+                fcGroupRoundResult.get(5),
+                fcGroupRoundResult.get(4),
+                fcGroupRoundResult.get(1)));
 
         println("Champions League - Group round");
         println();
-        elo.sortPlayers(cl_gr);
-        print_players(cl_gr);
-        make_groups(cl_gr);
-        play_group_round(cl_gr, 4, 1);
+        elo.sortPlayers(clGroupRound);
+        printParticipants(clGroupRound);
+        makeGroups(clGroupRound);
+        List<Integer> clGroupRoundResult = playGroupRound(clGroupRound, 4, 1);
 
-        cl_sf[0] = cl_gr[0];
-        cl_sf[1] = cl_gr[5];
-        cl_sf[2] = cl_gr[4];
-        cl_sf[3] = cl_gr[1];
+        List<Integer> cl_sf = new ArrayList<>(Arrays.asList(
+                clGroupRoundResult.get(0),
+                clGroupRoundResult.get(5),
+                clGroupRoundResult.get(4),
+                clGroupRoundResult.get(1)));
 
         println("Federations Cup - Semifinals");
         println("Semifinals");
         println();
-        //play_playoff_round(t_fc, fc_sf, fc_f, dummy, 2);
-        playSeriesPlayoffRound(fc_sf, fc_f, dummy, 3, 1);
+        List<Integer> fc_f = new ArrayList<>();
+        playSeriesPlayoffRound(fc_sf, fc_f, new ArrayList<>(), 3, 1);
 
         println("Champions League - Semifinal Group");
         println("Semifinals");
         println();
-
-        playSeriesPlayoffRound(cl_sf, cl_f, dummy, 3, 2);
+        List<Integer> cl_f = new ArrayList<>();
+        playSeriesPlayoffRound(cl_sf, cl_f, new ArrayList<>(), 3, 2);
 
         println("Federations Cup - FINAL");
         println("Final");
         println();
-        PlayerSeriesResult r = playSeries(kn[fc_f[0]], kn[fc_f[1]], 3, 1);
+        PlayerSeriesResult r = playSeries(kn[fc_f.get(0)], kn[fc_f.get(1)], 3, 1);
         Player fcWinner = r.getWinner();
         readln();
         println("Knight " + fcWinner.getPlayerName() + " is the winner of the Federation Cup!");
@@ -425,7 +422,7 @@ public class Season {
         println("Champions League - FINAL");
         println("Final");
         println();
-        r = playSeries(kn[cl_f[0]], kn[cl_f[1]], 3, 2);
+        r = playSeries(kn[cl_f.get(0)], kn[cl_f.get(1)], 3, 2);
         Player clWinner = r.getWinner();
         readln();
         println("Knight " + clWinner.getPlayerName() + " is the winner of the Champions League!");
@@ -442,28 +439,22 @@ public class Season {
         return nationalCupResults.get(nation)[pos - 1];
     }
 
-    private void make_groups(int[] a) {
-        int[] b = new int[4];
-        int[] c = new int[4];
-        for (int i = 0; i <= 3; ++i) {
-            b[i] = a[i];
-        }
-        for (int i = 0; i <= 3; ++i) {
-            c[i] = a[i + 4];
-        }
-
+    private void makeGroups(List<Integer> a) {
+        List<Integer> b = new ArrayList<>(a.subList(0, 4));
+        List<Integer> c = new ArrayList<>(a.subList(4, 8));
         shuffle(b, false);
         shuffle(c, false);
-
-        a[0] = b[0];
-        a[1] = b[1];
-        a[2] = c[0];
-        a[3] = c[1];
-        a[4] = b[2];
-        a[5] = b[3];
-        a[6] = c[2];
-        a[7] = c[3];
-        //shuffle(a, true);
+        a.clear();
+        a.addAll(Arrays.asList(
+                b.get(0),
+                b.get(1),
+                c.get(0),
+                c.get(1),
+                b.get(2),
+                b.get(3),
+                c.get(2),
+                c.get(3)
+        ));
     }
 
     private int[] playNationalCup(Nation nation) {
@@ -480,44 +471,40 @@ public class Season {
         return players;
     }
 
-    private void play_group_round(int[] players, int points, int rounds) {
-        int n = (players.length + 1) / 4;
+    private List<Integer> playGroupRound(List<Integer> players, int points, int rounds) {
+        List<Integer> result = new ArrayList<>();
+        int n = (players.size() + 1) / 4;
         int[] buf = new int[4];
         for (int i = 1; i <= n; ++i) {
             for (int j = 0; j <= 3; ++j) {
-                buf[j] = players[(i - 1) * 4 + j];
+                buf[j] = players.get((i - 1) * 4 + j);
             }
             playGroup(buf, "Group " + i, points, rounds);
             for (int j = 0; j <= 3; ++j) {
-                players[(i - 1) * 4 + j] = buf[j];
+                result.add(buf[j]);
             }
         }
         println();
+        return result;
     }
 
-    private void play_playoff_round(int[] players, int[] winners, int[] loosers, int points) {
-        int len = players.length;
-
+    private void playPlayoffRound(List<Integer> players, List<Integer> winners, List<Integer> losers, int points) {
+        int len = players.size();
         for (int i = 0; i < len / 2; ++i) {
-            MatchResult mr = playPlayoffGame(kn[players[i * 2]], kn[players[i * 2 + 1]], points);
-            if (mr.rounds.r1 > mr.rounds.r2) {
-                winners[i] = players[i * 2];
-                loosers[i] = players[i * 2 + 1];
-            } else {
-                winners[i] = players[i * 2 + 1];
-                loosers[i] = players[i * 2];
-            }
+            MatchResult mr = playPlayoffGame(kn[players.get(i * 2)], kn[players.get(i * 2 + 1)], points);
+            winners.add(mr.getWinner().id);
+            losers.add(mr.getLoser().id);
             readln();
         }
         println();
     }
 
-    private void playSeriesPlayoffRound(int[] players, int[] winners, int[] loosers, int wins, int points) {
-        int len = players.length;
+    private void playSeriesPlayoffRound(List<Integer> players, List<Integer> winners, List<Integer> losers, int wins, int points) {
+        int len = players.size();
         for (int i = 0; i < len / 2; ++i) {
-            PlayerSeriesResult r = playSeries(kn[players[i * 2]], kn[players[i * 2 + 1]], wins, points);
-            winners[i] = r.getWinner().id;
-            loosers[i] = r.getLoser().id;
+            PlayerSeriesResult r = playSeries(kn[players.get(i * 2)], kn[players.get(i * 2 + 1)], wins, points);
+            winners.add(r.getWinner().id);
+            losers.add(r.getLoser().id);
             readln();
         }
         println();
@@ -543,7 +530,7 @@ public class Season {
         println();
 
         int len = players.length;
-        print_players(players);
+        printParticipants(players);
 
         GroupResult[] results = new GroupResult[len];
         for (int i = 0; i < players.length; i++) {
@@ -597,7 +584,7 @@ public class Season {
                         for (int j = 0; j < len; ++j) {
                             bufresults[j] = results[j];
                         }
-                        sort_group_results(bufresults);
+                        sortGroupResults(bufresults);
                         println(groupName);
                         printGroupResults(bufresults);
                     }
@@ -624,7 +611,7 @@ public class Season {
             }
         }
 
-        sort_group_results(results);
+        sortGroupResults(results);
 
         println(groupName);
         printGroupResults(results);
@@ -634,17 +621,22 @@ public class Season {
         }
     }
 
-    private void print_players(int[] players) {
+    private void printParticipants(int[] players) {
         Arrays.stream(players)
                 .forEach(i -> println(kn[i].getPlayerName()));
         readln();
     }
 
-    private void sort_group_results(GroupResult[] results) {
-        Arrays.sort(results, reverseOrder(this::group_result_more));
+    private void printParticipants(List<Integer> players) {
+        players.forEach(i -> println(kn[i].getPlayerName()));
+        readln();
     }
 
-    private int group_result_more(GroupResult res1, GroupResult res2) {
+    private void sortGroupResults(GroupResult[] results) {
+        Arrays.sort(results, reverseOrder(this::compareGroupResults));
+    }
+
+    private int compareGroupResults(GroupResult res1, GroupResult res2) {
         if (res1.roundsWon > res2.roundsWon) {
             return 1;
         } else if (res1.roundsWon < res2.roundsWon) {
@@ -698,7 +690,7 @@ public class Season {
     }
 
     private MatchResult playGame(Player p1, Player p2, boolean isPlayoff, int points) {
-        MatchResult res = new MatchResult(p1.id, p2.id);
+        MatchResult res = new MatchResult(p1, p2);
 
         println(p1.getNameWithNation() + " vs " + p2.getNameWithNation());
 
@@ -804,31 +796,18 @@ public class Season {
         return r;
     }
 
-    private void shuffle(int[] a, boolean fed_check) {
+    private void shuffle(List<Integer> a, boolean checkNoSameFederationPairs) {
         boolean done = false;
-        int len = a.length;
-        int[] temp = new int[len];
         while (!done) {
-            for (int i = 0; i < len - 1; ++i) {
-                int r = random(len - i);
-                temp[i] = a[r];
-                int k = a[len - i - 1];
-                a[len - i - 1] = a[r];
-                a[r] = k;
-            }
-
-            temp[len - 1] = a[0];
-
-            if (!fed_check) {
+            Collections.shuffle(a);
+            if (!checkNoSameFederationPairs) {
                 done = true;
             } else {
                 done = true;
-                for (int i = 0; i < len; ++i) {
-                    if (i % 2 == 0) {
-                        if (kn[temp[i]].getNation() == kn[temp[i + 1]].getNation()) {
-                            done = false;
-                            break;
-                        }
+                for (int i = 0; i < a.size(); i += 2) {
+                    if (kn[a.get(i)].getNation() == kn[a.get(i + 1)].getNation()) {
+                        done = false;
+                        break;
                     }
                 }
             }
@@ -984,34 +963,19 @@ public class Season {
         println();
         println("World Championship");
 
-        int[] dummy = new int[20];
-        int[] ro1 = new int[8];
-        int[] ro1sf = new int[4];
-        int[] ro2 = new int[16];
-        int[] gr = new int[16];
-        int[] qf = new int[8];
-        int[] sf = new int[4];
-        int[] f = new int[2];
-
         int[] buf8 = new int[8];
         int[] buf16 = new int[16];
 
         List<Player> playersByRating = elo.getPlayersByRating();
-        for (int i = 22; i < 30; ++i) {
-            ro1[i - 22] = playersByRating.get(i).id;
-        }
-        for (int i = 8; i < 22; ++i) {
-            ro2[i - 6] = playersByRating.get(i).id;
-        }
-        for (int i = 0; i < 8; ++i) {
-            gr[i + 8] = playersByRating.get(i).id;
-        }
+        List<Integer> ro1 = playersByRating.subList(22, 30).stream().map(p -> p.id).collect(toList());
+        List<Integer> ro2 = playersByRating.subList(8, 22).stream().map(p -> p.id).collect(toList());
+        List<Integer> gr = playersByRating.subList(0, 8).stream().map(p -> p.id).collect(toList());
 
         println();
         println("First Round");
         println();
 
-        print_players(ro1);
+        printParticipants(ro1);
 
         for (int i = 0; i <= 3; ++i) {
             for (int j = 0; j <= 1; ++j) {
@@ -1019,33 +983,34 @@ public class Season {
                 while (buf8[i + r * 4] != 0) {
                     r = random(2);
                 }
-                buf8[i + r * 4] = ro1[i * 2 + j];
+                buf8[i + r * 4] = ro1.get(i * 2 + j);
             }
         }
 
-        for (int i = 0; i <= 7; ++i) {
-            ro1[i] = buf8[i];
-        }
+        ro1 = Arrays.stream(buf8).boxed().collect(toList());
 
         println("Group Round");
         println();
 
-        play_group_round(ro1, 0, 2);
+        playGroupRound(ro1, 0, 2);
 
-        ro1sf[0] = ro1[0];
-        ro1sf[1] = ro1[5];
-        ro1sf[2] = ro1[4];
-        ro1sf[3] = ro1[1];
+        List<Integer> ro1sf = new ArrayList<>(Arrays.asList(
+                ro1.get(0),
+                ro1.get(5),
+                ro1.get(4),
+                ro1.get(1)));
 
         println("First Round Semifinals");
         println();
-        playSeriesPlayoffRound(ro1sf, ro2, dummy, 4, 0);
+        List<Integer> ro1sfWinners = new ArrayList<>();
+        playSeriesPlayoffRound(ro1sf, ro1sfWinners, new ArrayList<>(), 4, 0);
+        ro2.addAll(ro1sfWinners);
 
         println("Second Round");
         println();
 
         elo.sortPlayers(ro2);
-        print_players(ro2);
+        printParticipants(ro2);
 
         for (int i = 0; i <= 3; ++i) {
             for (int j = 0; j <= 3; ++j) {
@@ -1053,74 +1018,64 @@ public class Season {
                 while (buf16[i + r * 4] != 0) {
                     r = random(4);
                 }
-                buf16[i + r * 4] = ro2[i * 4 + j];
+                buf16[i + r * 4] = ro2.get(i * 4 + j);
             }
         }
 
-        for (int i = 0; i <= 15; ++i) {
-            ro2[i] = buf16[i];
-        }
+        ro2 = Arrays.stream(buf16).boxed().collect(toList());
 
         println("Group Round");
         println();
-        play_group_round(ro2, 0, 2);
-
-        //readlnt(t);
-
-        for (int i = 0; i <= 3; ++i) {
-            for (int j = 0; j <= 1; ++j) {
-                gr[i * 2 + j] = ro2[i * 4 + j];
-            }
-        }
+        List<Integer> ro2Winners = playGroupRound(ro2, 0, 2);
+        gr.addAll(ro2Winners);
 
         println("Final Round");
         println();
         elo.sortPlayers(gr);
-        print_players(gr);
+        printParticipants(gr);
 
         buf16 = new int[16];
 
         for (int i = 0; i <= 3; ++i) {
-
             for (int j = 0; j <= 3; ++j) {
-
                 int r = random(4);
                 while (buf16[i + r * 4] != 0) {
                     r = random(4);
                 }
-                buf16[i + r * 4] = gr[i * 4 + j];
+                buf16[i + r * 4] = gr.get(i * 4 + j);
             }
         }
 
-        for (int i = 0; i <= 15; ++i) {
-            gr[i] = buf16[i];
-        }
+        gr = Arrays.stream(buf16).boxed().collect(toList());
 
         println("Group Round");
         println();
-        play_group_round(gr, 0, 2);
+        List<Integer> groupRoundWinners = playGroupRound(gr, 0, 2);
 
-        qf[0] = gr[0];
-        qf[1] = gr[9];
-        qf[2] = gr[4];
-        qf[3] = gr[13];
-        qf[4] = gr[8];
-        qf[5] = gr[1];
-        qf[6] = gr[12];
-        qf[7] = gr[5];
+        List<Integer> qf = new ArrayList<>(Arrays.asList(
+                groupRoundWinners.get(0),
+                groupRoundWinners.get(9),
+                groupRoundWinners.get(4),
+                groupRoundWinners.get(13),
+                groupRoundWinners.get(8),
+                groupRoundWinners.get(1),
+                groupRoundWinners.get(12),
+                groupRoundWinners.get(5)));
 
         println("Quarterfinals");
         println();
-        playSeriesPlayoffRound(qf, sf, dummy, 4, 0);
+        List<Integer> sf = new ArrayList<>();
+        playSeriesPlayoffRound(qf, sf, new ArrayList<>(), 4, 0);
 
         println("Semifinals");
         println();
-        playSeriesPlayoffRound(sf, f, dummy, 4, 0);
+        List<Integer> f = new ArrayList<>();
+        playSeriesPlayoffRound(sf, f, new ArrayList<>(), 4, 0);
 
         println("Final");
         println();
 
-        PlayerSeriesResult r = playSeries(kn[f[0]], kn[f[1]], 4, 0);
+        PlayerSeriesResult r = playSeries(kn[f.get(0)], kn[f.get(1)], 4, 0);
         Player wcWinner = r.getWinner();
 
         readln();
@@ -1275,7 +1230,7 @@ public class Season {
         Preconditions.checkArgument(rounds % 2 == 1);
         int teamSize = team1.id.length;
 
-        MatchResult res = new MatchResult(-1, -1);
+        MatchResult res = new MatchResult(null, null);
 
         println(String.format("%s vs %s", team1.name, team2.name));
         println();
@@ -1312,17 +1267,6 @@ public class Season {
         readln();
 
         return res;
-    }
-
-    private void copyArray(int[] src, int[] dest, int count, int fromSrc, int fromDest) {
-        int[] dummy = new int[count];
-        for (int i = 0; i < count; ++i) {
-            dummy[i] = src[fromSrc + i];
-        }
-        shuffle(dummy, false);
-        for (int i = 0; i < count; ++i) {
-            dest[fromDest + i] = dummy[i];
-        }
     }
 
     private void printStatsToFile() {

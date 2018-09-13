@@ -4,6 +4,7 @@ import com.clocktower.tournament.dto.EloRatingDto;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
@@ -109,13 +110,8 @@ public class EloRating {
         return (int) Math.signum(items.get(p1.id).points - items.get(p2.id).points);
     }
 
-    public void sortPlayers(int[] players) {
-        int[] sortedPlayers = Arrays.stream(players)
-                .boxed()
-                .sorted(comparingDouble((Integer id) -> items.get(id).points).reversed())
-                .mapToInt(i -> i)
-                .toArray();
-        System.arraycopy(sortedPlayers, 0, players, 0, players.length);
+    public void sortPlayers(List<Integer> players) {
+        players.sort(comparingDouble((Integer id) -> items.get(id).points).reversed());
     }
 
     public void print(PrintWriter writer, boolean withDifs) {

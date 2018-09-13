@@ -1,14 +1,16 @@
 package com.clocktower.tournament.simulation;
 
+import com.clocktower.tournament.Player;
+
 public class MatchResult {
-    public int id1;
-    public int id2;
+    public final Player player1;
+    public final Player player2;
     public final SimpleResult rounds = new SimpleResult();
     public final SimpleResult games = new SimpleResult();
 
-    public MatchResult(int id1, int id2) {
-        this.id1 = id1;
-        this.id2 = id2;
+    public MatchResult(Player player1, Player player2) {
+        this.player1 = player1;
+        this.player2 = player2;
     }
 
     public void addRoundResult(SimpleResult r, boolean additionalTime) {
@@ -32,5 +34,19 @@ public class MatchResult {
         }
         games.r1 += r.r1;
         games.r2 += r.r2;
+    }
+
+    public Player getWinner() {
+        if (rounds.r1 > rounds.r2) {
+            return player1;
+        } else if (rounds.r1 < rounds.r2) {
+            return player2;
+        } else {
+            throw new IllegalStateException();
+        }
+    }
+
+    public Player getLoser() {
+        return player1 == getWinner() ? player2 : player1;
     }
 }
