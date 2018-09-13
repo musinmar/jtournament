@@ -8,13 +8,11 @@ import com.clocktower.tournament.dto.PlayerDto;
 import com.clocktower.tournament.utils.IntToRomanConverter;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -211,33 +209,6 @@ public class Player {
         level += 1;
     }
 
-    public void save(PrintWriter writer) {
-        writer.println(id + 1);
-        writer.println(name);
-        writer.println(surname);
-        writer.println(title.getPrefix());
-        writer.println(nation.getName());
-        writer.println(town);
-        writer.println(age);
-        writer.println(generation);
-        writer.println(persistentLevel);
-        writer.println(level);
-        writer.println(at);
-        writer.println(def);
-        writer.println(s);
-        writer.println(l);
-        writer.println(v);
-        writer.println(exp);
-
-        writer.println(trophies.size());
-        trophies.forEach(writer::println);
-
-        writer.println(deckType.getV1());
-        writer.println(deckType.getV2());
-
-        Arrays.stream(deck).forEach(writer::println);
-    }
-
     public PlayerDto toDto() {
         PlayerDto playerDto = new PlayerDto();
         playerDto.setId(id);
@@ -260,43 +231,6 @@ public class Player {
         playerDto.setDeckType(new int[]{deckType.getV1(), deckType.getV2()});
         playerDto.setDeck(deck);
         return playerDto;
-    }
-
-    public void load(Scanner sc) {
-        id = sc.nextInt() - 1;
-        name = sc.next();
-        surname = sc.next();
-        sc.nextLine();
-        String titleLabel = sc.nextLine();
-        title = Title.fromName(titleLabel.trim());
-        String nationName = sc.next();
-        this.nation = Nation.fromName(nationName);
-        town = sc.next();
-        age = sc.nextInt();
-        generation = sc.nextInt();
-        persistentLevel = sc.nextInt();
-        level = sc.nextInt();
-        at = sc.nextInt();
-        def = sc.nextInt();
-        s = sc.nextInt();
-        l = sc.nextInt();
-        v = sc.nextInt();
-        exp = sc.nextInt();
-
-        int k = sc.nextInt();
-        sc.nextLine();
-        for (int i = 0; i < k; i++) {
-            String s = sc.nextLine();
-            trophies.add(Trophy.valueOf(s));
-        }
-
-        int deckTypeV1 = sc.nextInt();
-        int deckTypeV2 = sc.nextInt();
-        deckType = new DeckType(deckTypeV1, deckTypeV2);
-
-        for (int i = 0; i < 20; i++) {
-            deck[i] = sc.nextInt();
-        }
     }
 
     public static Player fromDto(PlayerDto playerDto) {

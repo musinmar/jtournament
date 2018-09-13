@@ -4,9 +4,7 @@ import com.clocktower.tournament.dto.EloRatingDto;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Scanner;
 
 import static java.util.Comparator.comparingDouble;
 import static java.util.stream.Collectors.toList;
@@ -56,31 +54,10 @@ public class EloRating {
         advanceYear();
     }
 
-    public void save(PrintWriter writer) {
-        items.forEach(item -> {
-            writer.println(item.player.id + 1);
-            writer.println(item.pointsLastYear);
-            writer.println(item.points);
-        });
-    }
-
     public EloRatingDto toDto() {
         EloRatingDto eloRatingDto = new EloRatingDto();
         eloRatingDto.setItems(items.stream().map(Item::toDto).collect(toList()));
         return eloRatingDto;
-    }
-
-    public void load(Scanner sc, Player[] players) {
-        items = Arrays.stream(players)
-                .map(Item::new)
-                .collect(toList());
-
-        for (int i = 0; i < players.length; i++) {
-            int k = sc.nextInt() - 1;
-            Item item = items.get(k);
-            item.pointsLastYear = sc.nextDouble();
-            item.points = sc.nextDouble();
-        }
     }
 
     public static EloRating fromDto(EloRatingDto eloRatingDto, Player[] players) {

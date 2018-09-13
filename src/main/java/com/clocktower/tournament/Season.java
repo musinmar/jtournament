@@ -22,9 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.function.Consumer;
 
 import static com.clocktower.tournament.Logger.print;
@@ -43,9 +41,6 @@ public class Season {
     private static final int PLAYER_COUNT = 30;
 
     private static final String FILE_NAME_SEASON_JSON = "season.json";
-    private static final String FILE_NAME_KNIGHTS = "knights";
-    private static final String FILE_NAME_SEASON = "season";
-    private static final String FILE_NAME_ELO = "elo";
     private static final String FILE_NAME_RATING = "rating";
     private static final String FILE_NAME_RATING_CHANGE = "rating change";
     private static final String FILE_NAME_STATS = "stats";
@@ -174,7 +169,6 @@ public class Season {
     }
 
     private void save() {
-        saveAsTxt();
         saveAsJson();
     }
 
@@ -196,18 +190,6 @@ public class Season {
         }
     }
 
-    private void saveAsTxt() {
-        saveToFile(makeFilename(FILE_NAME_KNIGHTS, false, true), writer -> {
-            Arrays.stream(kn).forEach(p -> p.save(writer));
-        });
-        saveToFile(makeFilename(FILE_NAME_SEASON, false, true), writer -> {
-            writer.println(year);
-            nationRating.write(writer);
-            leagues.forEach(writer::println);
-        });
-        saveToFile(makeFilename(FILE_NAME_ELO, false, true), elo::save);
-    }
-
     private void saveToFile(String filename, Consumer<PrintWriter> writerConsumer) {
         try (PrintWriter writer = new PrintWriter(filename)) {
             writerConsumer.accept(writer);
@@ -217,11 +199,7 @@ public class Season {
     }
 
     private void load() {
-        if (Files.exists(Paths.get(makeFilename(FILE_NAME_SEASON_JSON, false, false)))) {
-            readFromJson();
-        } else {
-            readFromTxtFile();
-        }
+        readFromJson();
     }
 
     private void readFromJson() {
@@ -238,37 +216,6 @@ public class Season {
         leagues = seasonDto.getLeagues();
         nationRating = NationRating.fromDto(seasonDto.getNationRating());
         elo = EloRating.fromDto(seasonDto.getEloRating(), kn);
-    }
-
-    private void readFromTxtFile() {
-        readFromFile(makeFilename(FILE_NAME_KNIGHTS, false, true), sc -> {
-            kn = new Player[PLAYER_COUNT];
-            for (int i = 0; i < PLAYER_COUNT; i++) {
-                kn[i] = new Player();
-                kn[i].load(sc);
-            }
-        });
-
-        readFromFile(makeFilename(FILE_NAME_SEASON, false, true), sc -> {
-            year = sc.nextInt();
-            nationRating.read(sc);
-            for (int i = 0; i < PLAYER_COUNT; i++) {
-                leagues.add(sc.nextInt() - 1);
-            }
-        });
-
-        readFromFile(makeFilename(FILE_NAME_ELO, false, true), sc -> {
-            elo.load(sc, kn);
-        });
-    }
-
-    private void readFromFile(String filename, Consumer<Scanner> readingConsumer) {
-        try (Scanner sc = new Scanner(Paths.get(filename))) {
-            sc.useLocale(Locale.US);
-            readingConsumer.accept(sc);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private String makeFilename(String s, boolean withYear, boolean txtExtension) {

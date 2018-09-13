@@ -5,12 +5,10 @@ import com.clocktower.tournament.dto.NationRatingDto;
 import com.clocktower.tournament.simulation.MatchResult;
 import org.apache.commons.lang3.mutable.MutableDouble;
 
-import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 
 import static com.clocktower.tournament.Logger.print;
 import static com.clocktower.tournament.Logger.println;
@@ -66,28 +64,11 @@ public class NationRating {
         pointHistory.put(Nation.OBERON_22, new PointHistoryItem(4));
     }
 
-    public void write(PrintWriter writer) {
-        Arrays.stream(Nation.values())
-                .map(pointHistory::get)
-                .flatMapToDouble(pointHistoryItem -> Arrays.stream(pointHistoryItem.seasons))
-                .forEach(writer::println);
-    }
-
     public NationRatingDto toDto() {
         NationRatingDto nationRatingDto = new NationRatingDto();
         nationRatingDto.setPointHistory(pointHistory.entrySet().stream()
                 .collect(toMap(Map.Entry::getKey, e -> e.getValue().toDto())));
         return nationRatingDto;
-    }
-
-    public void read(Scanner sc) {
-        for (Nation nation : Nation.values()) {
-            PointHistoryItem pointHistoryItem = new PointHistoryItem(0);
-            for (int j = 0; j < SEASON_COUNT; j++) {
-                pointHistoryItem.seasons[j] = sc.nextDouble();
-            }
-            pointHistory.put(nation, pointHistoryItem);
-        }
     }
 
     public static NationRating fromDto(NationRatingDto nationRatingDto) {
