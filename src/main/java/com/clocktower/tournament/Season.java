@@ -453,7 +453,7 @@ public class Season {
         PlayerSeriesResult seriesResult = new PlayerSeriesResult(p1, p2);
         SimpleResult r = seriesResult.getResult();
         while (r.getTopScore() != wins) {
-            MatchResult mr = playPlayoffGame(p1, p2, points);
+            MatchResult mr = playPlayoffGame(p1, p2, 0);
             readln();
             if (mr.rounds.r1 > mr.rounds.r2) {
                 r.r1 += 1;
@@ -461,6 +461,7 @@ public class Season {
                 r.r2 += 1;
             }
         }
+        nationRating.updateRatings(p1, p2, r, points);
         return seriesResult;
     }
 
@@ -658,7 +659,7 @@ public class Season {
 
         updateElo(p1, p2, res);
         updateExp(p1, p2, res);
-        nationRating.updateRatings(p1, p2, res, points);
+        nationRating.updateRatings(p1, p2, res.rounds, points);
 
         return res;
     }

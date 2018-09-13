@@ -2,7 +2,7 @@ package com.clocktower.tournament;
 
 import com.clocktower.tournament.domain.Nation;
 import com.clocktower.tournament.dto.NationRatingDto;
-import com.clocktower.tournament.simulation.MatchResult;
+import com.clocktower.tournament.simulation.SimpleResult;
 import org.apache.commons.lang3.mutable.MutableDouble;
 
 import java.util.Arrays;
@@ -114,6 +114,10 @@ public class NationRating {
     }
 
     public void advanceYear() {
+        double sum = seasonPoints.values().stream().mapToDouble(MutableDouble::doubleValue).sum();
+        println("Total points received this season: %.2f", sum);
+        println();
+
         int[] countCoefficient = new int[]{5, 5, 5, 4, 4};
         for (int i = 0; i < Nation.COUNT; i++) {
             Nation nation = getRankedNation(i);
@@ -125,10 +129,10 @@ public class NationRating {
         }
     }
 
-    public void updateRatings(Player p1, Player p2, MatchResult mr, int points) {
-        if (mr.rounds.r1 > mr.rounds.r2) {
+    public void updateRatings(Player p1, Player p2, SimpleResult r, int points) {
+        if (r.r1 > r.r2) {
             addSeasonPoints(p1.getNation(), points);
-        } else if (mr.rounds.r2 > mr.rounds.r1) {
+        } else if (r.r2 > r.r1) {
             addSeasonPoints(p2.getNation(), points);
         } else {
             addSeasonPoints(p1.getNation(), points / 2.0);
