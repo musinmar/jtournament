@@ -177,16 +177,9 @@ public class Season {
         List<String> names = Arrays.asList("Irif Eagles", "Linagor Titans", "Alior Centaurs", "Turon Dragons",
                 "Ejmoril Giants", "Reldor Griffons", "Dilion Direwolves", "Telmir Minotaurs");
         for (int i = 0; i < 8; i++) {
-            teams.add(createTeam(names.get(i), players.subList(i * 3, (i + 1) * 3)));
+            teams.add(new Team(names.get(i), players.subList(i * 3, (i + 1) * 3)));
         }
         return teams;
-    }
-
-    private Team createTeam(String name, List<Player> players) {
-        Team team = new Team();
-        team.name = name;
-        team.ids = players.stream().map(p -> p.id).collect(toList());
-        return team;
     }
 
     private void save() {
@@ -1096,18 +1089,14 @@ public class Season {
     }
 
     private Team makeNationalTeam(Nation nation, boolean mainTeam) {
-        Team res = new Team();
-        res.name = nation.getName() + (mainTeam ? "" : " B");
-
+        String name = nation.getName() + (mainTeam ? "" : " B");
         List<Player> playersByRating = elo.getPlayersByRating();
-        res.ids = playersByRating.stream()
+        List<Player> teamMembers = playersByRating.stream()
                 .filter(p -> p.getNation() == nation)
                 .skip(mainTeam ? 0 : 3)
                 .limit(3)
-                .map(p -> p.id)
                 .collect(toList());
-
-        return res;
+        return new Team(name, teamMembers);
     }
 
     private void playNationalWorldCup() {
@@ -1126,18 +1115,7 @@ public class Season {
 
         println("Participants");
         println();
-        for (Team team : teams) {
-            println(team.name);
-            for (int j = 0; j < team.ids.size(); j++) {
-                print(String.format("%d: %s", j + 1, kn[team.ids.get(j)].getPlayerName()));
-                if (j == 0) {
-                    println(" - Captain");
-                } else {
-                    println();
-                }
-            }
-            println();
-        }
+        teams.forEach(this::printTeam);
 
         // First round
         List<Team> firstRound = new ArrayList<>(Arrays.asList(
@@ -1174,13 +1152,24 @@ public class Season {
         TeamPlayoffResult fResult = playTeamPlayoffRound(sfResult.winners, NATIONAL_TEAM_MATCH_ROUNDS);
 
         Team winner = fResult.winners.get(0);
-        println(String.format("%s is the winner of the National World Cup %d", winner.name, year));
+        println(String.format("%s is the winner of the National World Cup %d", winner.getName(), year));
         println();
         readln();
 
-        for (int i : winner.ids) {
-            kn[i].addTrophy("National World Cup", year);
+        winner.getPlayers().forEach(p -> p.addTrophy("National World Cup", year));
+    }
+
+    private void printTeam(Team team) {
+        println(team.getName());
+        for (int j = 0; j < team.getPlayers().size(); j++) {
+            print(String.format("%d: %s", j + 1, team.getPlayers().get(j).getPlayerName()));
+            if (j == 0) {
+                println(" - Captain");
+            } else {
+                println();
+            }
         }
+        println();
     }
 
     private TeamPlayoffResult playTeamPlayoffRound(List<Team> teams, int rounds) {
@@ -1195,21 +1184,21 @@ public class Season {
     }
 
     private MatchResult<Team> playTeamMatch(Team team1, Team team2, int rounds) {
-        Preconditions.checkArgument(team1.ids.size() == team2.ids.size());
-        Preconditions.checkArgument(team1.ids.size() % 2 == 1);
+        Preconditions.checkArgument(team1.getPlayers().size() == team2.getPlayers().size());
+        Preconditions.checkArgument(team1.getPlayers().size() % 2 == 1);
         Preconditions.checkArgument(rounds % 2 == 1);
-        int teamSize = team1.ids.size();
+        int teamSize = team1.getPlayers().size();
 
         MatchResult<Team> res = new MatchResult<>(team1, team2);
 
-        println(String.format("%s vs %s", team1.name, team2.name));
+        println(String.format("%s vs %s", team1.getName(), team2.getName()));
         println();
 
         List<PlayerPair> schedule = new ArrayList<>();
         for (int k = 0; k < rounds; k++) {
             for (int i = 0; i < teamSize; ++i) {
                 for (int j = 0; j < teamSize; ++j) {
-                    schedule.add(new PlayerPair(kn[team1.ids.get(j)], kn[team2.ids.get((j + i) % teamSize)]));
+                    schedule.add(new PlayerPair(team1.getPlayers().get(j), team2.getPlayers().get((j + i) % teamSize)));
                 }
             }
         }
@@ -1232,7 +1221,7 @@ public class Season {
             ++counter;
         }
 
-        println(String.format("%s vs %s - %d:%d (%d:%d)", team1.name, team2.name, res.rounds.r1, res.rounds.r2, res.games.r1, res.games.r2));
+        println(String.format("%s vs %s - %d:%d (%d:%d)", team1.getName(), team2.getName(), res.rounds.r1, res.rounds.r2, res.games.r1, res.games.r2));
         println();
         readln();
 
@@ -1330,18 +1319,7 @@ public class Season {
 
         println("Participants");
         println();
-        for (Team team : allTeams) {
-            println(team.name);
-            for (int j = 0; j < team.ids.size(); j++) {
-                print(String.format("%d: %s", j + 1, kn[team.ids.get(j)].getPlayerName()));
-                if (j == 0) {
-                    println(" - Captain");
-                } else {
-                    println();
-                }
-            }
-            println();
-        }
+        allTeams.forEach(this::printTeam);
 
         Collections.shuffle(allTeams);
 
@@ -1358,12 +1336,10 @@ public class Season {
         TeamPlayoffResult fResult = playTeamPlayoffRound(sfResult.winners, NATIONAL_TEAM_MATCH_ROUNDS);
 
         Team winner = fResult.winners.get(0);
-        println(String.format("%s is the winner of the Golden Cup %d", winner.name, year));
+        println(String.format("%s is the winner of the Golden Cup %d", winner.getName(), year));
         println();
         readln();
 
-        for (int i : winner.ids) {
-            kn[i].addTrophy("Golden Cup", year);
-        }
+        winner.getPlayers().forEach(p -> p.addTrophy("Golden Cup", year));
     }
 }
