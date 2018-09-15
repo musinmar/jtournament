@@ -1,6 +1,7 @@
 package com.clocktower.tournament;
 
 import com.clocktower.tournament.dto.EloRatingDto;
+import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import static java.util.stream.Collectors.toList;
 
 public class EloRating {
     private static final double K_FACTOR = 20;
+    private static final double AVERAGE_RATING = 500;
 
     private List<Item> items;
 
@@ -48,7 +50,7 @@ public class EloRating {
                 .collect(toList());
 
         items.forEach(item -> {
-            resetPlayer(item.player);
+            item.points = AVERAGE_RATING;
         });
 
         advanceYear();
@@ -63,7 +65,17 @@ public class EloRating {
     public static EloRating fromDto(EloRatingDto eloRatingDto, Player[] players) {
         EloRating eloRating = new EloRating();
         eloRating.items = eloRatingDto.getItems().stream().map(i -> Item.fromDto(i, players)).collect(toList());
+        eloRating.normalize();
+        eloRating.advanceYear();
         return eloRating;
+    }
+
+    private void normalize() {
+        double ratingSum = items.stream().mapToDouble(i -> i.points).sum();
+        double dif = ratingSum - AVERAGE_RATING * items.size();
+        if (Math.abs(dif) > 1) {
+            items.forEach(i -> i.points -= dif / items.size());
+        }
     }
 
     public List<Player> getPlayersByRating() {
@@ -120,9 +132,16 @@ public class EloRating {
     }
 
     public void resetPlayer(Player player) {
+        double[][] data = items.stream()
+                .map(item -> new double[]{item.player.getLevel(), item.points})
+                .toArray(double[][]::new);
+
+        SimpleRegression simpleRegression = new SimpleRegression();
+        simpleRegression.addData(data);
+
         Item item = items.get(player.id);
-        //items[i].points = 500 + (items[i].player.level - 5) * 50;
-        item.points = 500;
+        item.points = simpleRegression.getIntercept() + simpleRegression.getSlope() * player.getLevel();
+        normalize();
     }
 
     private static double calculateRatingChange(double rat1, double rat2, double res) {
