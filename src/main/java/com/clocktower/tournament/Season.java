@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static com.clocktower.tournament.Logger.print;
 import static com.clocktower.tournament.Logger.println;
@@ -63,6 +64,7 @@ public class Season {
     private Map<Nation, List<Integer>> nationalCupResults = new HashMap<>();
 
     private List<Integer> leagues;
+    //private List<Team> teams;
 
     public static class GroupResult {
         Player player;
@@ -100,6 +102,8 @@ public class Season {
 
         nationRating.printPointHistory();
         nationRating.calculateRankingsAndPrint();
+
+        //playGoldenCup();
 
         playTournaments();
         //playLeagues();
@@ -164,6 +168,25 @@ public class Season {
         nationRating.initDefault();
 
         save();
+    }
+
+    private List<Team> makeRandomTeams() {
+        List<Team> teams = new ArrayList<>();
+        List<Player> players = Arrays.stream(kn).collect(Collectors.toList());
+        Collections.shuffle(players);
+        List<String> names = Arrays.asList("Irif Eagles", "Linagor Titans", "Alior Centaurs", "Turon Dragons",
+                "Ejmoril Giants", "Reldor Griffons", "Dilion Direwolves", "Telmir Minotaurs");
+        for (int i = 0; i < 8; i++) {
+            teams.add(createTeam(names.get(i), players.subList(i * 3, (i + 1) * 3)));
+        }
+        return teams;
+    }
+
+    private Team createTeam(String name, List<Player> players) {
+        Team team = new Team();
+        team.name = name;
+        team.ids = players.stream().map(p -> p.id).collect(toList());
+        return team;
     }
 
     private void save() {
@@ -1296,6 +1319,51 @@ public class Season {
             for (Map.Entry<String, Long> entry : trophies.entrySet()) {
                 writer.println(entry.getKey() + ": " + entry.getValue());
             }
+        }
+    }
+
+    private void playGoldenCup(List<Team> teams) {
+        println(String.format("Golden Cup - Season %d", year));
+        println();
+
+        List<Team> allTeams = new ArrayList<>(teams);
+
+        println("Participants");
+        println();
+        for (Team team : allTeams) {
+            println(team.name);
+            for (int j = 0; j < team.ids.size(); j++) {
+                print(String.format("%d: %s", j + 1, kn[team.ids.get(j)].getPlayerName()));
+                if (j == 0) {
+                    println(" - Captain");
+                } else {
+                    println();
+                }
+            }
+            println();
+        }
+
+        Collections.shuffle(allTeams);
+
+        println("Quarterfinals");
+        println();
+        TeamPlayoffResult qfResult = playTeamPlayoffRound(allTeams, NATIONAL_TEAM_MATCH_ROUNDS);
+
+        println("Semifinals");
+        println();
+        TeamPlayoffResult sfResult = playTeamPlayoffRound(qfResult.winners, NATIONAL_TEAM_MATCH_ROUNDS);
+
+        println("Final");
+        println();
+        TeamPlayoffResult fResult = playTeamPlayoffRound(sfResult.winners, NATIONAL_TEAM_MATCH_ROUNDS);
+
+        Team winner = fResult.winners.get(0);
+        println(String.format("%s is the winner of the Golden Cup %d", winner.name, year));
+        println();
+        readln();
+
+        for (int i : winner.ids) {
+            kn[i].addTrophy("Golden Cup", year);
         }
     }
 }

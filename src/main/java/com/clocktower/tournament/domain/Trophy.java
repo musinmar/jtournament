@@ -76,8 +76,10 @@ public class Trophy {
                 return 10;
             case "Division A":
                 return 9;
-            case "Champions League":
+            case "Golden Cup":
                 return 8;
+            case "Champions League":
+                return 7;
             case "National World Cup":
                 return 6;
             case "Federations Cup":
