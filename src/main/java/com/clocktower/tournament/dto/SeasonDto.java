@@ -3,7 +3,7 @@ package com.clocktower.tournament.dto;
 import java.util.List;
 
 public class SeasonDto {
-    private static final int VERSION = 1;
+    private static final int VERSION = 2;
 
     private int version = VERSION;
 

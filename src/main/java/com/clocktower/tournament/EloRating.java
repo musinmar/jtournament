@@ -18,8 +18,8 @@ public class EloRating {
 
     private static class Item {
         Player player;
-        double points;
-        double pointsLastYear;
+        double rating;
+        double ratingLastYear;
 
         Item(Player player) {
             this.player = player;
@@ -28,15 +28,14 @@ public class EloRating {
         EloRatingDto.ItemDto toDto() {
             EloRatingDto.ItemDto itemDto = new EloRatingDto.ItemDto();
             itemDto.setPlayerId(player.id);
-            itemDto.setPoints(points);
-            itemDto.setPointsLastYear(pointsLastYear);
+            itemDto.setPoints(rating);
             return itemDto;
         }
 
         static Item fromDto(EloRatingDto.ItemDto itemDto, Player[] players) {
             Item item = new Item(players[itemDto.getPlayerId()]);
-            item.points = itemDto.getPoints();
-            item.pointsLastYear = itemDto.getPointsLastYear();
+            item.rating = itemDto.getPoints();
+            item.ratingLastYear = itemDto.getPoints();
             return item;
         }
     }
@@ -50,10 +49,9 @@ public class EloRating {
                 .collect(toList());
 
         items.forEach(item -> {
-            item.points = AVERAGE_RATING;
+            item.rating = AVERAGE_RATING;
+            item.ratingLastYear = AVERAGE_RATING;
         });
-
-        advanceYear();
     }
 
     public EloRatingDto toDto() {
@@ -66,21 +64,21 @@ public class EloRating {
         EloRating eloRating = new EloRating();
         eloRating.items = eloRatingDto.getItems().stream().map(i -> Item.fromDto(i, players)).collect(toList());
         eloRating.normalize();
-        eloRating.advanceYear();
+        eloRating.savePointsAsLastYearPoints();
         return eloRating;
     }
 
     private void normalize() {
-        double ratingSum = items.stream().mapToDouble(i -> i.points).sum();
+        double ratingSum = items.stream().mapToDouble(i -> i.rating).sum();
         double dif = ratingSum - AVERAGE_RATING * items.size();
         if (Math.abs(dif) > 1) {
-            items.forEach(i -> i.points -= dif / items.size());
+            items.forEach(i -> i.rating -= dif / items.size());
         }
     }
 
     public List<Player> getPlayersByRating() {
         return items.stream()
-                .sorted(comparingDouble((Item item) -> item.points).reversed())
+                .sorted(comparingDouble((Item item) -> item.rating).reversed())
                 .map(item -> item.player)
                 .collect(toList());
     }
@@ -89,18 +87,18 @@ public class EloRating {
         //TODO: replace id with player
         Item item1 = items.get(id1);
         Item item2 = items.get(id2);
-        double rat1 = item1.points;
-        double rat2 = item2.points;
-        item1.points += calculateRatingChange(rat1, rat2, r1);
-        item2.points += calculateRatingChange(rat2, rat1, r2);
+        double rat1 = item1.rating;
+        double rat2 = item2.rating;
+        item1.rating += calculateRatingChange(rat1, rat2, r1);
+        item2.rating += calculateRatingChange(rat2, rat1, r2);
     }
 
     public int playerIsBetterThan(Player p1, Player p2) {
-        return (int) Math.signum(items.get(p1.id).points - items.get(p2.id).points);
+        return (int) Math.signum(items.get(p1.id).rating - items.get(p2.id).rating);
     }
 
     public void sortPlayers(List<Integer> players) {
-        players.sort(comparingDouble((Integer id) -> items.get(id).points).reversed());
+        players.sort(comparingDouble((Integer id) -> items.get(id).rating).reversed());
     }
 
     public void print(PrintWriter writer, boolean withDifs) {
@@ -113,34 +111,34 @@ public class EloRating {
         String formatString = "%-2d: %-" + (maxNameLength + 1) + "s %-7.2f";
 
         List<Item> sortedItems = items.stream()
-                .sorted(comparingDouble((Item item) -> item.points).reversed())
+                .sorted(comparingDouble((Item item) -> item.rating).reversed())
                 .collect(toList());
 
         for (int i = 0; i < sortedItems.size(); i++) {
             Item item = sortedItems.get(i);
-            writer.print(String.format(formatString, (i + 1), item.player.getPlayerName(), item.points));
+            writer.print(String.format(formatString, (i + 1), item.player.getPlayerName(), item.rating));
             if (withDifs) {
-                writer.println(String.format("   %+5.2f", item.points - item.pointsLastYear));
+                writer.println(String.format("   %+5.2f", item.rating - item.ratingLastYear));
             } else {
                 writer.println();
             }
         }
     }
 
-    public void advanceYear() {
-        items.forEach(item -> item.pointsLastYear = item.points);
+    private void savePointsAsLastYearPoints() {
+        items.forEach(item -> item.ratingLastYear = item.rating);
     }
 
     public void resetPlayer(Player player) {
         double[][] data = items.stream()
-                .map(item -> new double[]{item.player.getLevel(), item.points})
+                .map(item -> new double[]{item.player.getLevel(), item.rating})
                 .toArray(double[][]::new);
 
         SimpleRegression simpleRegression = new SimpleRegression();
         simpleRegression.addData(data);
 
         Item item = items.get(player.id);
-        item.points = simpleRegression.getIntercept() + simpleRegression.getSlope() * player.getLevel();
+        item.rating = simpleRegression.getIntercept() + simpleRegression.getSlope() * player.getLevel();
         normalize();
     }
 

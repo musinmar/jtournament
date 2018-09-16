@@ -142,7 +142,6 @@ public class Season {
         printStatsToFile();
 
         year += 1;
-        elo.advanceYear();
         nationRating.advanceYear();
         nationRating.printPointHistory();
         save();

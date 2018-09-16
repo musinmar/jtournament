@@ -1,14 +1,16 @@
 package com.clocktower.tournament.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.List;
 
 public class EloRatingDto {
     private List<ItemDto> items;
 
+    @JsonIgnoreProperties("pointsLastYear")
     public static class ItemDto {
         private int playerId;
         private double points;
-        private double pointsLastYear;
 
         public int getPlayerId() {
             return playerId;
@@ -24,14 +26,6 @@ public class EloRatingDto {
 
         public void setPoints(double points) {
             this.points = points;
-        }
-
-        public double getPointsLastYear() {
-            return pointsLastYear;
-        }
-
-        public void setPointsLastYear(double pointsLastYear) {
-            this.pointsLastYear = pointsLastYear;
         }
     }
 
