@@ -525,16 +525,12 @@ public class Season {
                 for (int i = 0; i < len; ++i) {
                     buf[i] = i;
                 }
-
                 int halflen = len / 2;
-                int i = 1;
-
-                while (i < len) {
+                for (int i = 1; i < len; ++i) {
                     if (i % 2 == 1 && i > 1) {
                         List<GroupResult> bufresults = newArrayList(results);
                         sortGroupResults(bufresults);
-                        println(groupName);
-                        printGroupResults(bufresults);
+                        printGroupResults(groupName, bufresults);
                     }
 
                     for (int j = 0; j < halflen; ++j) {
@@ -553,16 +549,12 @@ public class Season {
                     for (int j = 0; j < len; ++j) {
                         buf[j] = buf2[j];
                     }
-
-                    i = i + 1;
                 }
             }
         }
 
         sortGroupResults(results);
-
-        println(groupName);
-        printGroupResults(results);
+        printGroupResults(groupName, results);
 
         return results.stream().map(r -> r.player).collect(toList());
     }
@@ -594,7 +586,8 @@ public class Season {
         }
     }
 
-    private void printGroupResults(List<GroupResult> results) {
+    private void printGroupResults(String name, List<GroupResult> results) {
+        println(name);
         int len = results.size();
         int maxNameLength = results.stream()
                 .map(r -> r.player.getPlayerName())
