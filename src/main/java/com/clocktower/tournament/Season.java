@@ -837,10 +837,11 @@ public class Season {
     }
 
     private int selectPlayerToRetire() {
+        final double EXPONENTIAL_FACTOR = 12.0;
         double totalWeight = 0;
         double[] weights = new double[PLAYER_COUNT];
         for (int i = 0; i < 30; ++i) {
-            weights[i] = Math.exp(kn[i].getAge() / 20.0);
+            weights[i] = Math.exp(kn[i].getAge() / EXPONENTIAL_FACTOR);
             //print("Weight " + i + 1 + ": ");
             //println(weights[i]:5:2);
             totalWeight = totalWeight + weights[i];

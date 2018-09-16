@@ -5,3 +5,4 @@ release/
 dependency-reduced-pom.xml
 *.jar
 *.iml
+*.xls
