@@ -37,6 +37,7 @@ import static com.clocktower.tournament.domain.Title.SIR;
 import static com.clocktower.tournament.utils.RandomUtils.random;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
 import static java.util.Collections.reverseOrder;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
@@ -829,33 +830,28 @@ public class Season {
 
     private Player selectPlayerToRetire() {
         final double EXPONENTIAL_FACTOR = 12.0;
-        double totalWeight = 0;
-        double[] weights = new double[PLAYER_COUNT];
-        for (int i = 0; i < 30; ++i) {
-            weights[i] = Math.exp(kn.get(i).getAge() / EXPONENTIAL_FACTOR);
-            //print("Weight " + i + 1 + ": ");
-            //println(weights[i]:5:2);
-            totalWeight = totalWeight + weights[i];
-        }
-        //write("Total weight: ");
-        //println(totalWeight:5:2);
+
+        double[] weights = kn.stream().mapToDouble(p -> Math.exp(p.getAge() / EXPONENTIAL_FACTOR)).toArray();
+        double totalWeight = stream(weights).sum();
+
+//        for (int i = 0; i < kn.size(); ++i) {
+//            println("Weight %d: %5.2f", i, weights[i]);
+//        }
+//        println("Total weight: %5.2f", totalWeight);
 
         double r = random() * totalWeight;
-        //write("Random number: ");
-        //println(r:5:2);
-        int id = -1;
-        for (int i = 30 - 1; i >= 0; --i) {
+//        println("Random number: %5.2f", r);
+
+        for (int i = kn.size() - 1; i >= 0; --i) {
             if (totalWeight - weights[i] <= r) {
-                //println("Found interval for weight " + inttostr(i));
-                id = i;
-                break;
+//                println("Found interval for weight %d", i);
+                return kn.get(i);
             } else {
-                totalWeight = totalWeight - weights[i];
-                //write("Not found interval, next weight: ");
-                //println(totalWeight:5:2);
+                totalWeight -= weights[i];
+//                println("Not found interval, next weight: %5.2f", totalWeight);
             }
         }
-        return kn.get(id);
+        throw new RuntimeException("Failed to select player to retire");
     }
 
     private void retireRandomPlayer() {
