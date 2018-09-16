@@ -36,6 +36,7 @@ import static com.clocktower.tournament.domain.Title.COMMON;
 import static com.clocktower.tournament.domain.Title.LORD;
 import static com.clocktower.tournament.domain.Title.SIR;
 import static com.clocktower.tournament.utils.RandomUtils.random;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.reverseOrder;
 import static java.util.Comparator.comparingInt;
@@ -58,13 +59,13 @@ public class Season {
     private int year;
     private final String FOLDER = "season";
 
-    private Player[] kn;
+    private List<Player> kn;
     private EloRating elo = new EloRating();
 
     private NationRating nationRating = new NationRating();
-    private Map<Nation, List<Integer>> nationalCupResults = new HashMap<>();
+    private Map<Nation, List<Player>> nationalCupResults = new HashMap<>();
 
-    private List<Integer> leagues;
+    private List<Player> leagues;
     //private List<Team> teams;
 
     public static class GroupResult {
@@ -157,9 +158,8 @@ public class Season {
 
         elo.init(kn);
 
-        leagues = Arrays.stream(kn)
+        leagues = kn.stream()
                 .sorted(comparingInt(Player::getLevel).reversed())
-                .map(p -> p.id)
                 .collect(toList());
 
         year = 1;
@@ -171,7 +171,7 @@ public class Season {
 
     private List<Team> makeRandomTeams() {
         List<Team> teams = new ArrayList<>();
-        List<Player> players = Arrays.stream(kn).collect(toList());
+        List<Player> players = newArrayList(kn);
         Collections.shuffle(players);
         List<String> names = asList("Irif Eagles", "Linagor Titans", "Alior Centaurs", "Turon Dragons",
                 "Ejmoril Giants", "Reldor Griffons", "Dilion Direwolves", "Telmir Minotaurs");
@@ -188,8 +188,8 @@ public class Season {
     private void saveAsJson() {
         SeasonDto seasonDto = new SeasonDto();
         seasonDto.setYear(year);
-        seasonDto.setPlayers(Arrays.stream(kn).map(Player::toDto).collect(toList()));
-        seasonDto.setLeagues(leagues);
+        seasonDto.setPlayers(kn.stream().map(Player::toDto).collect(toList()));
+        seasonDto.setLeagues(leagues.stream().map(p -> p.id).collect(toList()));
         seasonDto.setNationRating(nationRating.toDto());
         seasonDto.setEloRating(elo.toDto());
 
@@ -225,8 +225,8 @@ public class Season {
         }
 
         year = seasonDto.getYear();
-        kn = seasonDto.getPlayers().stream().map(Player::fromDto).toArray(Player[]::new);
-        leagues = seasonDto.getLeagues();
+        kn = seasonDto.getPlayers().stream().map(Player::fromDto).collect(toList());
+        leagues = seasonDto.getLeagues().stream().map(kn::get).collect(toList());
         nationRating = NationRating.fromDto(seasonDto.getNationRating());
         elo = EloRating.fromDto(seasonDto.getEloRating(), kn);
     }
@@ -260,7 +260,7 @@ public class Season {
         println("First qualification round");
         println();
 
-        List<Integer> clQualifyingRound1 = new ArrayList<>(asList(
+        List<Player> clQualifyingRound1 = new ArrayList<>(asList(
                 get_player_from(1, 4),
                 get_player_from(3, 3),
                 get_player_from(4, 2),
@@ -268,17 +268,17 @@ public class Season {
                 get_player_from(5, 1),
                 get_player_from(5, 2)));
 
-        List<Integer> clQualifyingRound2 = new ArrayList<>(asList(
+        List<Player> clQualifyingRound2 = new ArrayList<>(asList(
                 get_player_from(1, 3),
                 get_player_from(2, 2),
                 get_player_from(2, 3),
                 get_player_from(3, 2),
                 get_player_from(4, 1)));
 
-        List<Integer> fcQualifyingRound1 = new ArrayList<>(Collections.singletonList(
+        List<Player> fcQualifyingRound1 = new ArrayList<>(Collections.singletonList(
                 get_player_from(1, 5)));
 
-        List<Integer> fcQualifyingRound2 = new ArrayList<>(asList(
+        List<Player> fcQualifyingRound2 = new ArrayList<>(asList(
                 get_player_from(2, 5),
                 get_player_from(3, 5),
                 get_player_from(4, 4),
@@ -301,13 +301,13 @@ public class Season {
         PlayoffResult fcQr1Result = playPlayoffRound(fcQualifyingRound1, 1);
         fcQualifyingRound2.addAll(fcQr1Result.winners);
 
-        List<Integer> clGroupRound = new ArrayList<>(asList(
+        List<Player> clGroupRound = new ArrayList<>(asList(
                 get_player_from(1, 1),
                 get_player_from(1, 2),
                 get_player_from(2, 1),
                 get_player_from(3, 1)));
 
-        List<Integer> fcGroupRound = new ArrayList<>(asList(
+        List<Player> fcGroupRound = new ArrayList<>(asList(
                 get_player_from(2, 4),
                 get_player_from(3, 4),
                 get_player_from(5, 3)));
@@ -333,9 +333,9 @@ public class Season {
         elo.sortPlayers(fcGroupRound);
         printParticipants(fcGroupRound);
         makeGroups(fcGroupRound);
-        List<Integer> fcGroupRoundResult = playGroupRound(fcGroupRound, 2, 1);
+        List<Player> fcGroupRoundResult = playGroupRound(fcGroupRound, 2, 1);
 
-        List<Integer> fc_sf = new ArrayList<>(asList(
+        List<Player> fc_sf = new ArrayList<>(asList(
                 fcGroupRoundResult.get(0),
                 fcGroupRoundResult.get(5),
                 fcGroupRoundResult.get(4),
@@ -346,9 +346,9 @@ public class Season {
         elo.sortPlayers(clGroupRound);
         printParticipants(clGroupRound);
         makeGroups(clGroupRound);
-        List<Integer> clGroupRoundResult = playGroupRound(clGroupRound, 4, 1);
+        List<Player> clGroupRoundResult = playGroupRound(clGroupRound, 4, 1);
 
-        List<Integer> cl_sf = new ArrayList<>(asList(
+        List<Player> cl_sf = new ArrayList<>(asList(
                 clGroupRoundResult.get(0),
                 clGroupRoundResult.get(5),
                 clGroupRoundResult.get(4),
@@ -357,17 +357,17 @@ public class Season {
         println("Federations Cup - Semifinals");
         println("Semifinals");
         println();
-        List<Integer> fc_f = playSeriesPlayoffRound(fc_sf, 3, 1).winners;
+        List<Player> fc_f = playSeriesPlayoffRound(fc_sf, 3, 1).winners;
 
         println("Champions League - Semifinal Group");
         println("Semifinals");
         println();
-        List<Integer> cl_f = playSeriesPlayoffRound(cl_sf, 3, 2).winners;
+        List<Player> cl_f = playSeriesPlayoffRound(cl_sf, 3, 2).winners;
 
         println("Federations Cup - FINAL");
         println("Final");
         println();
-        PlayerSeriesResult r = playSeries(kn[fc_f.get(0)], kn[fc_f.get(1)], 3, 1);
+        PlayerSeriesResult r = playSeries(fc_f.get(0), fc_f.get(1), 3, 1);
         Player fcWinner = r.getWinner();
         readln();
         println("Knight " + fcWinner.getPlayerName() + " is the winner of the Federation Cup!");
@@ -376,7 +376,7 @@ public class Season {
         println("Champions League - FINAL");
         println("Final");
         println();
-        r = playSeries(kn[cl_f.get(0)], kn[cl_f.get(1)], 3, 2);
+        r = playSeries(cl_f.get(0), cl_f.get(1), 3, 2);
         Player clWinner = r.getWinner();
         readln();
         println("Knight " + clWinner.getPlayerName() + " is the winner of the Champions League!");
@@ -388,14 +388,14 @@ public class Season {
         clWinner.addTrophy("Champions League", year);
     }
 
-    private int get_player_from(int rank, int pos) {
+    private Player get_player_from(int rank, int pos) {
         Nation nation = nationRating.getRankedNation(rank - 1);
         return nationalCupResults.get(nation).get(pos - 1);
     }
 
-    private void makeGroups(List<Integer> a) {
-        List<Integer> b = new ArrayList<>(a.subList(0, 4));
-        List<Integer> c = new ArrayList<>(a.subList(4, 8));
+    private void makeGroups(List<Player> a) {
+        List<Player> b = new ArrayList<>(a.subList(0, 4));
+        List<Player> c = new ArrayList<>(a.subList(4, 8));
         shuffle(b, false);
         shuffle(c, false);
         a.clear();
@@ -411,25 +411,24 @@ public class Season {
         ));
     }
 
-    private List<Integer> playNationalCup(Nation nation) {
-        List<Integer> players = Arrays.stream(kn)
+    private List<Player> playNationalCup(Nation nation) {
+        List<Player> players = kn.stream()
                 .filter(p -> p.getNation() == nation)
-                .map(p -> p.id)
                 .collect(toList());
 
         String name = "Cup of " + nation.getName();
         playGroup(players, name, 0, 1);
         println();
 
-        kn[players.get(0)].addTrophy(name, year);
+        players.get(0).addTrophy(name, year);
         return players;
     }
 
-    private List<Integer> playGroupRound(List<Integer> players, int points, int rounds) {
-        List<Integer> result = new ArrayList<>();
+    private List<Player> playGroupRound(List<Player> players, int points, int rounds) {
+        List<Player> result = new ArrayList<>();
         int n = (players.size() + 1) / 4;
         for (int i = 0; i < n; ++i) {
-            List<Integer> group = new ArrayList<>(players.subList(i * 4, (i + 1) * 4));
+            List<Player> group = new ArrayList<>(players.subList(i * 4, (i + 1) * 4));
             playGroup(group, "Group " + (i + 1), points, rounds);
             result.addAll(group);
         }
@@ -437,26 +436,26 @@ public class Season {
         return result;
     }
 
-    private PlayoffResult playPlayoffRound(List<Integer> players, int points) {
+    private PlayoffResult playPlayoffRound(List<Player> players, int points) {
         PlayoffResult pr = new PlayoffResult();
         int len = players.size();
         for (int i = 0; i < len / 2; ++i) {
-            MatchResult<Player> mr = playPlayoffGame(kn[players.get(i * 2)], kn[players.get(i * 2 + 1)], points);
-            pr.winners.add(mr.getWinner().id);
-            pr.losers.add(mr.getLoser().id);
+            MatchResult<Player> mr = playPlayoffGame(players.get(i * 2), players.get(i * 2 + 1), points);
+            pr.winners.add(mr.getWinner());
+            pr.losers.add(mr.getLoser());
             readln();
         }
         println();
         return pr;
     }
 
-    private PlayoffResult playSeriesPlayoffRound(List<Integer> players, int wins, int points) {
+    private PlayoffResult playSeriesPlayoffRound(List<Player> players, int wins, int points) {
         PlayoffResult pr = new PlayoffResult();
         int len = players.size();
         for (int i = 0; i < len / 2; ++i) {
-            PlayerSeriesResult r = playSeries(kn[players.get(i * 2)], kn[players.get(i * 2 + 1)], wins, points);
-            pr.winners.add(r.getWinner().id);
-            pr.losers.add(r.getLoser().id);
+            PlayerSeriesResult r = playSeries(players.get(i * 2), players.get(i * 2 + 1), wins, points);
+            pr.winners.add(r.getWinner());
+            pr.losers.add(r.getLoser());
             readln();
         }
         println();
@@ -479,7 +478,7 @@ public class Season {
         return seriesResult;
     }
 
-    private void playGroup(List<Integer> players, String groupName, int points, int rounds) {
+    private void playGroup(List<Player> players, String groupName, int points, int rounds) {
         println(groupName);
         println();
 
@@ -489,7 +488,7 @@ public class Season {
         GroupResult[] results = new GroupResult[len];
         for (int i = 0; i < players.size(); i++) {
             GroupResult result = new GroupResult();
-            result.player = kn[players.get(i)];
+            result.player = players.get(i);
             results[i] = result;
         }
 
@@ -570,18 +569,12 @@ public class Season {
         printGroupResults(results);
 
         for (int i = 0; i < players.size(); i++) {
-            players.set(i, results[i].player.id);
+            players.set(i, results[i].player);
         }
     }
 
-    private void printParticipants(int[] players) {
-        Arrays.stream(players)
-                .forEach(i -> println(kn[i].getPlayerName()));
-        readln();
-    }
-
-    private void printParticipants(List<Integer> players) {
-        players.forEach(i -> println(kn[i].getPlayerName()));
+    private void printParticipants(List<Player> players) {
+        players.forEach(p -> println(p.getPlayerName()));
         readln();
     }
 
@@ -749,7 +742,7 @@ public class Season {
         return r;
     }
 
-    private void shuffle(List<Integer> a, boolean checkNoSameFederationPairs) {
+    private void shuffle(List<Player> a, boolean checkNoSameFederationPairs) {
         boolean done = false;
         while (!done) {
             Collections.shuffle(a);
@@ -758,7 +751,7 @@ public class Season {
             } else {
                 done = true;
                 for (int i = 0; i < a.size(); i += 2) {
-                    if (kn[a.get(i)].getNation() == kn[a.get(i + 1)].getNation()) {
+                    if (a.get(i).getNation() == a.get(i + 1).getNation()) {
                         done = false;
                         break;
                     }
@@ -768,11 +761,11 @@ public class Season {
     }
 
     private void advancePlayersAge() {
-        Arrays.stream(kn).forEach(Player::advanceAge);
+        kn.forEach(Player::advanceAge);
     }
 
     private void adjustPlayerSkillsAfterSeason() {
-        Arrays.stream(kn).forEach(Player::applyRandomDeckChanges);
+        kn.forEach(Player::applyRandomDeckChanges);
         if (year % 2 == 0) {
             decreaseBestPlayerSkills();
         }
@@ -797,7 +790,7 @@ public class Season {
     private void playMatchForTitle(Title contestedTitle, Title contenderTitle, int allowedHolderCount) {
         List<Player> participants;
 
-        long holderCount = Arrays.stream(kn).filter(p -> p.getTitle() == contestedTitle).count();
+        long holderCount = kn.stream().filter(p -> p.getTitle() == contestedTitle).count();
         if (holderCount >= allowedHolderCount) {
             List<Player> playersByRating = elo.getPlayersByRating();
             List<Player> playersByRatingReversed = Lists.reverse(playersByRating);
@@ -835,12 +828,12 @@ public class Season {
         println();
     }
 
-    private int selectPlayerToRetire() {
+    private Player selectPlayerToRetire() {
         final double EXPONENTIAL_FACTOR = 12.0;
         double totalWeight = 0;
         double[] weights = new double[PLAYER_COUNT];
         for (int i = 0; i < 30; ++i) {
-            weights[i] = Math.exp(kn[i].getAge() / EXPONENTIAL_FACTOR);
+            weights[i] = Math.exp(kn.get(i).getAge() / EXPONENTIAL_FACTOR);
             //print("Weight " + i + 1 + ": ");
             //println(weights[i]:5:2);
             totalWeight = totalWeight + weights[i];
@@ -863,13 +856,11 @@ public class Season {
                 //println(totalWeight:5:2);
             }
         }
-        return id;
+        return kn.get(id);
     }
 
     private void retireRandomPlayer() {
-        int id = selectPlayerToRetire();
-
-        Player retiredPlayer = kn[id];
+        Player retiredPlayer = selectPlayerToRetire();
         println("Knight %s has retired at the age of %d", retiredPlayer.getPlayerName(), retiredPlayer.getAge());
         Map<String, Long> trophies = retiredPlayer.getTrophiesByType();
         if (!trophies.isEmpty()) {
@@ -892,13 +883,13 @@ public class Season {
         println();
         println("World Championship");
 
-        int[] buf8 = new int[8];
-        int[] buf16 = new int[16];
+        Player[] buf8 = new Player[8];
+        Player[] buf16 = new Player[16];
 
         List<Player> playersByRating = elo.getPlayersByRating();
-        List<Integer> ro1 = playersByRating.subList(22, 30).stream().map(p -> p.id).collect(toList());
-        List<Integer> ro2 = playersByRating.subList(8, 22).stream().map(p -> p.id).collect(toList());
-        List<Integer> gr = playersByRating.subList(0, 8).stream().map(p -> p.id).collect(toList());
+        List<Player> ro1 = newArrayList(playersByRating.subList(22, 30));
+        List<Player> ro2 = newArrayList(playersByRating.subList(8, 22));
+        List<Player> gr = newArrayList(playersByRating.subList(0, 8));
 
         println();
         println("First Round");
@@ -909,21 +900,21 @@ public class Season {
         for (int i = 0; i <= 3; ++i) {
             for (int j = 0; j <= 1; ++j) {
                 int r = random(2);
-                while (buf8[i + r * 4] != 0) {
+                while (buf8[i + r * 4] != null) {
                     r = random(2);
                 }
                 buf8[i + r * 4] = ro1.get(i * 2 + j);
             }
         }
 
-        ro1 = Arrays.stream(buf8).boxed().collect(toList());
+        ro1 = Arrays.stream(buf8).collect(toList());
 
         println("Group Round");
         println();
 
         playGroupRound(ro1, 0, 2);
 
-        List<Integer> ro1sf = new ArrayList<>(asList(
+        List<Player> ro1sf = new ArrayList<>(asList(
                 ro1.get(0),
                 ro1.get(5),
                 ro1.get(4),
@@ -943,18 +934,18 @@ public class Season {
         for (int i = 0; i <= 3; ++i) {
             for (int j = 0; j <= 3; ++j) {
                 int r = random(4);
-                while (buf16[i + r * 4] != 0) {
+                while (buf16[i + r * 4] != null) {
                     r = random(4);
                 }
                 buf16[i + r * 4] = ro2.get(i * 4 + j);
             }
         }
 
-        ro2 = Arrays.stream(buf16).boxed().collect(toList());
+        ro2 = Arrays.stream(buf16).collect(toList());
 
         println("Group Round");
         println();
-        List<Integer> ro2Winners = playGroupRound(ro2, 0, 2);
+        List<Player> ro2Winners = playGroupRound(ro2, 0, 2);
         gr.addAll(ro2Winners);
 
         println("Final Round");
@@ -962,25 +953,25 @@ public class Season {
         elo.sortPlayers(gr);
         printParticipants(gr);
 
-        buf16 = new int[16];
+        buf16 = new Player[16];
 
         for (int i = 0; i <= 3; ++i) {
             for (int j = 0; j <= 3; ++j) {
                 int r = random(4);
-                while (buf16[i + r * 4] != 0) {
+                while (buf16[i + r * 4] != null) {
                     r = random(4);
                 }
                 buf16[i + r * 4] = gr.get(i * 4 + j);
             }
         }
 
-        gr = Arrays.stream(buf16).boxed().collect(toList());
+        gr = Arrays.stream(buf16).collect(toList());
 
         println("Group Round");
         println();
-        List<Integer> groupRoundWinners = playGroupRound(gr, 0, 2);
+        List<Player> groupRoundWinners = playGroupRound(gr, 0, 2);
 
-        List<Integer> qf = new ArrayList<>(asList(
+        List<Player> qf = new ArrayList<>(asList(
                 groupRoundWinners.get(0),
                 groupRoundWinners.get(9),
                 groupRoundWinners.get(4),
@@ -992,16 +983,16 @@ public class Season {
 
         println("Quarterfinals");
         println();
-        List<Integer> sf = playSeriesPlayoffRound(qf, 4, 0).winners;
+        List<Player> sf = playSeriesPlayoffRound(qf, 4, 0).winners;
 
         println("Semifinals");
         println();
-        List<Integer> f = playSeriesPlayoffRound(sf, 4, 0).winners;
+        List<Player> f = playSeriesPlayoffRound(sf, 4, 0).winners;
 
         println("Final");
         println();
 
-        PlayerSeriesResult r = playSeries(kn[f.get(0)], kn[f.get(1)], 4, 0);
+        PlayerSeriesResult r = playSeries(f.get(0), f.get(1), 4, 0);
         Player wcWinner = r.getWinner();
 
         readln();
@@ -1030,7 +1021,7 @@ public class Season {
     }
 
     private void playLeague(int first, int last, String name, int points) {
-        List<Integer> league = new ArrayList<>(leagues.subList(first - 1, last));
+        List<Player> league = new ArrayList<>(leagues.subList(first - 1, last));
 
         playGroup(league, name, points, 1);
         println();
@@ -1038,29 +1029,29 @@ public class Season {
         int lastp = league.size() - 1;
         if (points != 1) {
             println(name + " - relegation match");
-            PlayerSeriesResult r = playSeries(kn[league.get(lastp - 1)], kn[league.get(lastp)], 3, 0);
-            league.set(lastp - 1, r.getWinner().id);
-            league.set(lastp, r.getLoser().id);
+            PlayerSeriesResult r = playSeries(league.get(lastp - 1), league.get(lastp), 3, 0);
+            league.set(lastp - 1, r.getWinner());
+            league.set(lastp, r.getLoser());
         }
 
         println(name + " - final match");
-        PlayerSeriesResult r = playSeries(kn[league.get(0)], kn[league.get(1)], 3, 0);
-        league.set(0, r.getWinner().id);
-        league.set(1, r.getLoser().id);
+        PlayerSeriesResult r = playSeries(league.get(0), league.get(1), 3, 0);
+        league.set(0, r.getWinner());
+        league.set(1, r.getLoser());
 
         for (int i = first; i <= last; ++i) {
             leagues.set(i - 1, league.get(i - first));
         }
 
         println();
-        println("Knight " + kn[league.get(0)].getPlayerName() + " is the winner of the " + name + "!");
+        println("Knight " + league.get(0).getPlayerName() + " is the winner of the " + name + "!");
         if (points != 1) {
-            println("Knight " + kn[league.get(lastp)].getPlayerName() + " have been relegated.");
+            println("Knight " + league.get(lastp).getPlayerName() + " have been relegated.");
         }
 
         println();
 
-        kn[league.get(0)].addTrophy(name, year);
+        league.get(0).addTrophy(name, year);
     }
 
     private Team makeNationalTeam(Nation nation, boolean mainTeam) {
@@ -1225,7 +1216,7 @@ public class Season {
     }
 
     private void writeLevels(PrintWriter writer) {
-        List<Player> playersByLevel = Arrays.stream(kn)
+        List<Player> playersByLevel = kn.stream()
                 .sorted(comparingInt(Player::getLevel).reversed())
                 .collect(toList());
 
@@ -1240,7 +1231,7 @@ public class Season {
     }
 
     private void writeEffectiveLevels(PrintWriter writer) {
-        List<Player> playersByLevel = Arrays.stream(kn)
+        List<Player> playersByLevel = kn.stream()
                 .sorted(comparingInt(Player::getEffectiveLevel).reversed())
                 .collect(toList());
 
@@ -1256,7 +1247,7 @@ public class Season {
     }
 
     private void writeAges(PrintWriter writer) {
-        List<Player> playersByAge = Arrays.stream(kn)
+        List<Player> playersByAge = kn.stream()
                 .sorted(comparingInt(Player::getAge).reversed())
                 .collect(toList());
 

@@ -32,8 +32,8 @@ public class EloRating {
             return itemDto;
         }
 
-        static Item fromDto(EloRatingDto.ItemDto itemDto, Player[] players) {
-            Item item = new Item(players[itemDto.getPlayerId()]);
+        static Item fromDto(EloRatingDto.ItemDto itemDto, List<Player> players) {
+            Item item = new Item(players.get(itemDto.getPlayerId()));
             item.rating = itemDto.getPoints();
             item.ratingLastYear = itemDto.getPoints();
             return item;
@@ -43,8 +43,8 @@ public class EloRating {
     public EloRating() {
     }
 
-    public void init(Player[] players) {
-        items = Arrays.stream(players)
+    public void init(List<Player> players) {
+        items = players.stream()
                 .map(Item::new)
                 .collect(toList());
 
@@ -60,7 +60,7 @@ public class EloRating {
         return eloRatingDto;
     }
 
-    public static EloRating fromDto(EloRatingDto eloRatingDto, Player[] players) {
+    public static EloRating fromDto(EloRatingDto eloRatingDto, List<Player> players) {
         EloRating eloRating = new EloRating();
         eloRating.items = eloRatingDto.getItems().stream().map(i -> Item.fromDto(i, players)).collect(toList());
         eloRating.normalize();
@@ -97,8 +97,8 @@ public class EloRating {
         return (int) Math.signum(items.get(p1.id).rating - items.get(p2.id).rating);
     }
 
-    public void sortPlayers(List<Integer> players) {
-        players.sort(comparingDouble((Integer id) -> items.get(id).rating).reversed());
+    public void sortPlayers(List<Player> players) {
+        players.sort(comparingDouble((Player p) -> items.get(p.id).rating).reversed());
     }
 
     public void print(PrintWriter writer, boolean withDifs) {

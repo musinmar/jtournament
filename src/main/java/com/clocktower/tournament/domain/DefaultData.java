@@ -2,6 +2,10 @@ package com.clocktower.tournament.domain;
 
 import com.clocktower.tournament.Player;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import static com.clocktower.tournament.domain.Nation.ALMAGEST;
 import static com.clocktower.tournament.domain.Nation.BELLEROFON;
 import static com.clocktower.tournament.domain.Nation.GALILEO;
@@ -13,7 +17,7 @@ import static com.clocktower.tournament.domain.Title.SIR;
 
 public class DefaultData {
 
-    public static Player[] initDefaultPlayers() {
+    public static List<Player> initDefaultPlayers() {
         Player[] kn = new Player[30];
         for (int i = 0; i < kn.length; i++) {
             kn[i] = new Player();
@@ -382,7 +386,7 @@ public class DefaultData {
 
         initDecks(kn);
 
-        return kn;
+        return new ArrayList<>(Arrays.asList(kn));
     }
 
     private static void initDecks(Player[] kn) {
