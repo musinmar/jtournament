@@ -73,6 +73,10 @@ public class Season {
         int roundsWon;
         int gamesWon;
         int gamesLost;
+
+        GroupResult(Player player) {
+            this.player = player;
+        }
     }
 
     public static class PlayerPair {
@@ -417,7 +421,7 @@ public class Season {
                 .collect(toList());
 
         String name = "Cup of " + nation.getName();
-        playGroup(players, name, 0, 1);
+        players = playGroup(players, name, 0, 1);
         println();
 
         players.get(0).addTrophy(name, year);
@@ -429,8 +433,8 @@ public class Season {
         int n = (players.size() + 1) / 4;
         for (int i = 0; i < n; ++i) {
             List<Player> group = new ArrayList<>(players.subList(i * 4, (i + 1) * 4));
-            playGroup(group, "Group " + (i + 1), points, rounds);
-            result.addAll(group);
+            List<Player> groupResult = playGroup(group, "Group " + (i + 1), points, rounds);
+            result.addAll(groupResult);
         }
         println();
         return result;
@@ -478,19 +482,14 @@ public class Season {
         return seriesResult;
     }
 
-    private void playGroup(List<Player> players, String groupName, int points, int rounds) {
+    private List<Player> playGroup(List<Player> players, String groupName, int points, int rounds) {
         println(groupName);
         println();
 
         int len = players.size();
         printParticipants(players);
 
-        GroupResult[] results = new GroupResult[len];
-        for (int i = 0; i < players.size(); i++) {
-            GroupResult result = new GroupResult();
-            result.player = players.get(i);
-            results[i] = result;
-        }
+        List<GroupResult> results = players.stream().map(GroupResult::new).collect(toList());
 
         for (int k = 1; k <= rounds; ++k) {
             if (len == 4) {
@@ -532,10 +531,7 @@ public class Season {
 
                 while (i < len) {
                     if (i % 2 == 1 && i > 1) {
-                        GroupResult[] bufresults = new GroupResult[len];
-                        for (int j = 0; j < len; ++j) {
-                            bufresults[j] = results[j];
-                        }
+                        List<GroupResult> bufresults = newArrayList(results);
                         sortGroupResults(bufresults);
                         println(groupName);
                         printGroupResults(bufresults);
@@ -568,9 +564,7 @@ public class Season {
         println(groupName);
         printGroupResults(results);
 
-        for (int i = 0; i < players.size(); i++) {
-            players.set(i, results[i].player);
-        }
+        return results.stream().map(r -> r.player).collect(toList());
     }
 
     private void printParticipants(List<Player> players) {
@@ -578,8 +572,8 @@ public class Season {
         readln();
     }
 
-    private void sortGroupResults(GroupResult[] results) {
-        Arrays.sort(results, reverseOrder(this::compareGroupResults));
+    private void sortGroupResults(List<GroupResult> results) {
+        results.sort(reverseOrder(this::compareGroupResults));
     }
 
     private int compareGroupResults(GroupResult res1, GroupResult res2) {
@@ -600,9 +594,9 @@ public class Season {
         }
     }
 
-    private void printGroupResults(GroupResult[] results) {
-        int len = results.length;
-        int maxNameLength = Arrays.stream(results)
+    private void printGroupResults(List<GroupResult> results) {
+        int len = results.size();
+        int maxNameLength = results.stream()
                 .map(r -> r.player.getPlayerName())
                 .mapToInt(String::length)
                 .max()
@@ -610,20 +604,21 @@ public class Season {
 
         String formatString = "%d. %-" + (maxNameLength + 1) + "s %2d:%2d  %d";
         for (int i = 0; i < len; i++) {
-            println(String.format(formatString, (i + 1), results[i].player.getPlayerName(),
-                    results[i].gamesWon, results[i].gamesLost, results[i].roundsWon));
+            GroupResult r = results.get(i);
+            println(String.format(formatString, (i + 1), r.player.getPlayerName(),
+                    r.gamesWon, r.gamesLost, r.roundsWon));
         }
         readln();
     }
 
-    private void playGroupMatch(GroupResult[] results, int id1, int id2, int points) {
-        MatchResult<Player> r = playGroupGame(results[id1].player, results[id2].player, points);
-        results[id1].roundsWon += r.rounds.r1;
-        results[id1].gamesWon += r.games.r1;
-        results[id1].gamesLost += r.games.r2;
-        results[id2].roundsWon += r.rounds.r2;
-        results[id2].gamesWon += r.games.r2;
-        results[id2].gamesLost += r.games.r1;
+    private void playGroupMatch(List<GroupResult> results, int id1, int id2, int points) {
+        MatchResult<Player> r = playGroupGame(results.get(id1).player, results.get(id2).player, points);
+        results.get(id1).roundsWon += r.rounds.r1;
+        results.get(id1).gamesWon += r.games.r1;
+        results.get(id1).gamesLost += r.games.r2;
+        results.get(id2).roundsWon += r.rounds.r2;
+        results.get(id2).gamesWon += r.games.r2;
+        results.get(id2).gamesLost += r.games.r1;
         readln();
     }
 
@@ -1018,7 +1013,7 @@ public class Season {
     private void playLeague(int first, int last, String name, int points) {
         List<Player> league = new ArrayList<>(leagues.subList(first - 1, last));
 
-        playGroup(league, name, points, 1);
+        league = playGroup(league, name, points, 1);
         println();
 
         int lastp = league.size() - 1;
