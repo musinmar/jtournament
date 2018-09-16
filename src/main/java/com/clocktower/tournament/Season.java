@@ -9,7 +9,6 @@ import com.clocktower.tournament.simulation.PlayerSeriesResult;
 import com.clocktower.tournament.simulation.PlayoffResult;
 import com.clocktower.tournament.simulation.SimpleResult;
 import com.clocktower.tournament.simulation.Team;
-import com.clocktower.tournament.simulation.TeamPlayoffResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.base.Preconditions;
@@ -287,7 +286,7 @@ public class Season {
         printParticipants(clQualifyingRound1);
         shuffle(clQualifyingRound1, true);
 
-        PlayoffResult clQr1Result = playPlayoffRound(clQualifyingRound1, 2);
+        PlayoffResult<Player> clQr1Result = playPlayoffRound(clQualifyingRound1, 2);
         clQualifyingRound2.addAll(clQr1Result.winners);
         fcQualifyingRound1.addAll(clQr1Result.losers);
 
@@ -298,7 +297,7 @@ public class Season {
         printParticipants(fcQualifyingRound1);
         shuffle(fcQualifyingRound1, true);
 
-        PlayoffResult fcQr1Result = playPlayoffRound(fcQualifyingRound1, 1);
+        PlayoffResult<Player> fcQr1Result = playPlayoffRound(fcQualifyingRound1, 1);
         fcQualifyingRound2.addAll(fcQr1Result.winners);
 
         List<Player> clGroupRound = new ArrayList<>(asList(
@@ -317,7 +316,7 @@ public class Season {
 
         printParticipants(clQualifyingRound2);
         shuffle(clQualifyingRound2, true);
-        PlayoffResult clQr2Result = playPlayoffRound(clQualifyingRound2, 2);
+        PlayoffResult<Player> clQr2Result = playPlayoffRound(clQualifyingRound2, 2);
         clGroupRound.addAll(clQr2Result.winners);
         fcQualifyingRound2.addAll(clQr2Result.losers);
 
@@ -325,7 +324,7 @@ public class Season {
         println();
         printParticipants(fcQualifyingRound2);
         shuffle(fcQualifyingRound2, true);
-        PlayoffResult fcQr2Result = playPlayoffRound(fcQualifyingRound2, 1);
+        PlayoffResult<Player> fcQr2Result = playPlayoffRound(fcQualifyingRound2, 1);
         fcGroupRound.addAll(fcQr2Result.winners);
 
         println("Federations Cup - Group round");
@@ -436,8 +435,8 @@ public class Season {
         return result;
     }
 
-    private PlayoffResult playPlayoffRound(List<Player> players, int points) {
-        PlayoffResult pr = new PlayoffResult();
+    private PlayoffResult<Player> playPlayoffRound(List<Player> players, int points) {
+        PlayoffResult<Player> pr = new PlayoffResult<>();
         int len = players.size();
         for (int i = 0; i < len / 2; ++i) {
             MatchResult<Player> mr = playPlayoffGame(players.get(i * 2), players.get(i * 2 + 1), points);
@@ -449,8 +448,8 @@ public class Season {
         return pr;
     }
 
-    private PlayoffResult playSeriesPlayoffRound(List<Player> players, int wins, int points) {
-        PlayoffResult pr = new PlayoffResult();
+    private PlayoffResult<Player> playSeriesPlayoffRound(List<Player> players, int wins, int points) {
+        PlayoffResult<Player> pr = new PlayoffResult<>();
         int len = players.size();
         for (int i = 0; i < len / 2; ++i) {
             PlayerSeriesResult r = playSeries(players.get(i * 2), players.get(i * 2 + 1), wins, points);
@@ -922,7 +921,7 @@ public class Season {
 
         println("First Round Semifinals");
         println();
-        PlayoffResult ro2Result = playSeriesPlayoffRound(ro1sf, 4, 0);
+        PlayoffResult<Player> ro2Result = playSeriesPlayoffRound(ro1sf, 4, 0);
         ro2.addAll(ro2Result.winners);
 
         println("Second Round");
@@ -1092,7 +1091,7 @@ public class Season {
         ));
         println("First round");
         println();
-        TeamPlayoffResult firstRoundResult = playTeamPlayoffRound(firstRound, NATIONAL_TEAM_MATCH_ROUNDS);
+        PlayoffResult<Team> firstRoundResult = playTeamPlayoffRound(firstRound, NATIONAL_TEAM_MATCH_ROUNDS);
 
         // Quaterfinals
         List<Team> qf = new ArrayList<>(asList(
@@ -1107,15 +1106,15 @@ public class Season {
         ));
         println("Quarterfinals");
         println();
-        TeamPlayoffResult qfResult = playTeamPlayoffRound(qf, NATIONAL_TEAM_MATCH_ROUNDS);
+        PlayoffResult<Team> qfResult = playTeamPlayoffRound(qf, NATIONAL_TEAM_MATCH_ROUNDS);
 
         println("Semifinals");
         println();
-        TeamPlayoffResult sfResult = playTeamPlayoffRound(qfResult.winners, NATIONAL_TEAM_MATCH_ROUNDS);
+        PlayoffResult<Team> sfResult = playTeamPlayoffRound(qfResult.winners, NATIONAL_TEAM_MATCH_ROUNDS);
 
         println("Final");
         println();
-        TeamPlayoffResult fResult = playTeamPlayoffRound(sfResult.winners, NATIONAL_TEAM_MATCH_ROUNDS);
+        PlayoffResult<Team> fResult = playTeamPlayoffRound(sfResult.winners, NATIONAL_TEAM_MATCH_ROUNDS);
 
         Team winner = fResult.winners.get(0);
         println(String.format("%s is the winner of the National World Cup %d", winner.getName(), year));
@@ -1138,8 +1137,8 @@ public class Season {
         println();
     }
 
-    private TeamPlayoffResult playTeamPlayoffRound(List<Team> teams, int rounds) {
-        TeamPlayoffResult pr = new TeamPlayoffResult();
+    private PlayoffResult<Team> playTeamPlayoffRound(List<Team> teams, int rounds) {
+        PlayoffResult<Team> pr = new PlayoffResult<>();
         int len = teams.size() / 2;
         for (int i = 0; i < len; i++) {
             MatchResult<Team> mr = playTeamMatch(teams.get(i * 2), teams.get(i * 2 + 1), rounds);
@@ -1291,15 +1290,15 @@ public class Season {
 
         println("Quarterfinals");
         println();
-        TeamPlayoffResult qfResult = playTeamPlayoffRound(allTeams, NATIONAL_TEAM_MATCH_ROUNDS);
+        PlayoffResult<Team> qfResult = playTeamPlayoffRound(allTeams, NATIONAL_TEAM_MATCH_ROUNDS);
 
         println("Semifinals");
         println();
-        TeamPlayoffResult sfResult = playTeamPlayoffRound(qfResult.winners, NATIONAL_TEAM_MATCH_ROUNDS);
+        PlayoffResult<Team> sfResult = playTeamPlayoffRound(qfResult.winners, NATIONAL_TEAM_MATCH_ROUNDS);
 
         println("Final");
         println();
-        TeamPlayoffResult fResult = playTeamPlayoffRound(sfResult.winners, NATIONAL_TEAM_MATCH_ROUNDS);
+        PlayoffResult<Team> fResult = playTeamPlayoffRound(sfResult.winners, NATIONAL_TEAM_MATCH_ROUNDS);
 
         Team winner = fResult.winners.get(0);
         println(String.format("%s is the winner of the Golden Cup %d", winner.getName(), year));

@@ -1,11 +1,9 @@
 package com.clocktower.tournament.simulation;
 
-import com.clocktower.tournament.Player;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayoffResult {
-    public List<Player> winners = new ArrayList<>();
-    public List<Player> losers = new ArrayList<>();
+public class PlayoffResult<T> {
+    public List<T> winners = new ArrayList<>();
+    public List<T> losers = new ArrayList<>();
 }
