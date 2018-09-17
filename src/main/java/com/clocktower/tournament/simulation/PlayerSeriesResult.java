@@ -1,6 +1,6 @@
 package com.clocktower.tournament.simulation;
 
-import com.clocktower.tournament.Player;
+import com.clocktower.tournament.domain.Player;
 
 public class PlayerSeriesResult {
     private Player player1;

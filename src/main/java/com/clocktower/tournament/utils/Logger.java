@@ -1,4 +1,6 @@
-package com.clocktower.tournament;
+package com.clocktower.tournament.utils;
+
+import com.clocktower.tournament.Settings;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;

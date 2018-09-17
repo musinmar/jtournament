@@ -1,6 +1,6 @@
 package com.clocktower.tournament.simulation;
 
-import com.clocktower.tournament.Player;
+import com.clocktower.tournament.domain.Player;
 
 import java.util.List;
 

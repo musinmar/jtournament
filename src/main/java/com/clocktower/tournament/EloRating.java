@@ -1,10 +1,10 @@
 package com.clocktower.tournament;
 
+import com.clocktower.tournament.domain.Player;
 import com.clocktower.tournament.dto.EloRatingDto;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Comparator.comparingDouble;

@@ -1,6 +1,8 @@
 package com.clocktower.tournament;
 
+import com.clocktower.tournament.domain.Player;
 import com.clocktower.tournament.simulation.SimpleResult;
+import com.clocktower.tournament.utils.Logger;
 
 class SeasonTest {
 

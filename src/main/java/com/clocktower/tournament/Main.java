@@ -2,7 +2,7 @@ package com.clocktower.tournament;
 
 import java.util.Scanner;
 
-import static com.clocktower.tournament.Logger.readln;
+import static com.clocktower.tournament.utils.Logger.readln;
 
 public class Main {
     public static void main(String[] args) {

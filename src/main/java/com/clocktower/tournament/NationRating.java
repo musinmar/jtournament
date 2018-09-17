@@ -1,6 +1,7 @@
 package com.clocktower.tournament;
 
 import com.clocktower.tournament.domain.Nation;
+import com.clocktower.tournament.domain.Player;
 import com.clocktower.tournament.dto.NationRatingDto;
 import com.clocktower.tournament.simulation.SimpleResult;
 import org.apache.commons.lang3.mutable.MutableDouble;
@@ -10,9 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.clocktower.tournament.Logger.print;
-import static com.clocktower.tournament.Logger.println;
-import static com.clocktower.tournament.Logger.readln;
+import static com.clocktower.tournament.utils.Logger.print;
+import static com.clocktower.tournament.utils.Logger.println;
+import static com.clocktower.tournament.utils.Logger.readln;
 import static java.util.Comparator.comparingDouble;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;

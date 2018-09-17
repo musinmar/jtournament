@@ -2,6 +2,7 @@ package com.clocktower.tournament;
 
 import com.clocktower.tournament.domain.DefaultData;
 import com.clocktower.tournament.domain.Nation;
+import com.clocktower.tournament.domain.Player;
 import com.clocktower.tournament.domain.Title;
 import com.clocktower.tournament.dto.SeasonDto;
 import com.clocktower.tournament.simulation.Group;
@@ -10,6 +11,7 @@ import com.clocktower.tournament.simulation.PlayerSeriesResult;
 import com.clocktower.tournament.simulation.PlayoffResult;
 import com.clocktower.tournament.simulation.SimpleResult;
 import com.clocktower.tournament.simulation.Team;
+import com.clocktower.tournament.utils.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.base.Preconditions;
@@ -29,9 +31,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static com.clocktower.tournament.Logger.print;
-import static com.clocktower.tournament.Logger.println;
-import static com.clocktower.tournament.Logger.readln;
+import static com.clocktower.tournament.utils.Logger.print;
+import static com.clocktower.tournament.utils.Logger.println;
+import static com.clocktower.tournament.utils.Logger.readln;
 import static com.clocktower.tournament.domain.Title.COMMON;
 import static com.clocktower.tournament.domain.Title.LORD;
 import static com.clocktower.tournament.domain.Title.SIR;

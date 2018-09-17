@@ -1,9 +1,7 @@
 package com.clocktower.tournament.dto;
 
-import com.clocktower.tournament.NationRating;
 import com.clocktower.tournament.domain.Nation;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class NationRatingDto {

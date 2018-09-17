@@ -1,7 +1,5 @@
 package com.clocktower.tournament.domain;
 
-import com.clocktower.tournament.Player;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

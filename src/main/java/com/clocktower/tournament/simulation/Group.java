@@ -1,12 +1,12 @@
 package com.clocktower.tournament.simulation;
 
 import com.clocktower.tournament.EloRating;
-import com.clocktower.tournament.Player;
+import com.clocktower.tournament.domain.Player;
 
 import java.util.List;
 
-import static com.clocktower.tournament.Logger.println;
-import static com.clocktower.tournament.Logger.readln;
+import static com.clocktower.tournament.utils.Logger.println;
+import static com.clocktower.tournament.utils.Logger.readln;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.reverseOrder;
 import static java.util.stream.Collectors.toList;

@@ -1,8 +1,8 @@
-package com.clocktower.tournament;
+package com.clocktower.tournament.domain;
 
 import org.junit.jupiter.api.Test;
 
-import static com.clocktower.tournament.Player.changeDeckAtPosition;
+import static com.clocktower.tournament.domain.Player.changeDeckAtPosition;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

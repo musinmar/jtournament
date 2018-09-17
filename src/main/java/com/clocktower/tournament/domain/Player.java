@@ -1,9 +1,5 @@
-package com.clocktower.tournament;
+package com.clocktower.tournament.domain;
 
-import com.clocktower.tournament.domain.DeckType;
-import com.clocktower.tournament.domain.Nation;
-import com.clocktower.tournament.domain.Title;
-import com.clocktower.tournament.domain.Trophy;
 import com.clocktower.tournament.dto.PlayerDto;
 import com.clocktower.tournament.utils.IntToRomanConverter;
 import org.apache.commons.lang3.ArrayUtils;
@@ -16,7 +12,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import static com.clocktower.tournament.Logger.println;
+import static com.clocktower.tournament.utils.Logger.println;
 import static com.clocktower.tournament.utils.RandomUtils.random;
 import static java.util.stream.Collectors.counting;
 
