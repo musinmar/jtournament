@@ -325,7 +325,7 @@ public class Season {
 
         println("Federations Cup - Group round");
         println();
-        elo.sortPlayers(fcGroupRound);
+        elo.sortPlayersByRating(fcGroupRound);
         printParticipants(fcGroupRound);
         makeGroups(fcGroupRound);
         List<Player> fcGroupRoundResult = playGroupRound(fcGroupRound, 2, 1);
@@ -338,7 +338,7 @@ public class Season {
 
         println("Champions League - Group round");
         println();
-        elo.sortPlayers(clGroupRound);
+        elo.sortPlayersByRating(clGroupRound);
         printParticipants(clGroupRound);
         makeGroups(clGroupRound);
         List<Player> clGroupRoundResult = playGroupRound(clGroupRound, 4, 1);
@@ -601,8 +601,7 @@ public class Season {
     }
 
     private void updateElo(Player p1, Player p2, MatchResult<Player> mr) {
-        double s = mr.rounds.r1 + mr.rounds.r2;
-        elo.update(p1.id, p2.id, mr.rounds.r1 / s, mr.rounds.r2 / s);
+        elo.updateRatings(p1, p2, mr.rounds);
     }
 
     private void updateExp(Player p1, Player p2, MatchResult<Player> mr) {
@@ -797,7 +796,7 @@ public class Season {
 
         retiredPlayer.restartCareer(true);
         retiredPlayer.setTitle(COMMON);
-        elo.resetPlayer(retiredPlayer);
+        elo.resetRating(retiredPlayer);
 
         println();
         readln();
@@ -852,7 +851,7 @@ public class Season {
         println("Second Round");
         println();
 
-        elo.sortPlayers(ro2);
+        elo.sortPlayersByRating(ro2);
         printParticipants(ro2);
 
         for (int i = 0; i <= 3; ++i) {
@@ -877,7 +876,7 @@ public class Season {
 
         println("Final Round");
         println();
-        elo.sortPlayers(gr);
+        elo.sortPlayersByRating(gr);
         printParticipants(gr);
 
         buf16 = new Player[16];

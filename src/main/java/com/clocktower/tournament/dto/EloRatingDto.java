@@ -12,6 +12,14 @@ public class EloRatingDto {
         private int playerId;
         private double points;
 
+        public ItemDto() {
+        }
+
+        public ItemDto(int playerId, double points) {
+            this.playerId = playerId;
+            this.points = points;
+        }
+
         public int getPlayerId() {
             return playerId;
         }

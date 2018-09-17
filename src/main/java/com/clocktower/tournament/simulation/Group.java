@@ -70,7 +70,7 @@ public class Group {
             } else if (dif1 < dif2) {
                 return -1;
             } else {
-                return eloRating.playerIsBetterThan(res1.player, res2.player);
+                return eloRating.comparePlayersByRating(res1.player, res2.player);
             }
         }
     }
