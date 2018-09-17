@@ -84,10 +84,6 @@ public class EloRating {
         item2.value += calculateRatingChange(rat2, rat1, r2);
     }
 
-    public int comparePlayersByRating(Player p1, Player p2) {
-        return comparingDouble(this::getRating).compare(p1, p2);
-    }
-
     public double getRating(Player player) {
         return ratings.get(player).value;
     }

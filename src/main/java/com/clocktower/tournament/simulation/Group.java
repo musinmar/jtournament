@@ -3,6 +3,7 @@ package com.clocktower.tournament.simulation;
 import com.clocktower.tournament.EloRating;
 import com.clocktower.tournament.domain.Player;
 
+import java.util.Comparator;
 import java.util.List;
 
 import static com.clocktower.tournament.utils.Logger.println;
@@ -54,25 +55,13 @@ public class Group {
     }
 
     private void sortGroupResults(List<GroupResult> results) {
-        results.sort(reverseOrder(this::compareGroupResults));
+        results.sort(reverseOrder(buildGroupResultComparator()));
     }
 
-    private int compareGroupResults(GroupResult res1, GroupResult res2) {
-        if (res1.roundsWon > res2.roundsWon) {
-            return 1;
-        } else if (res1.roundsWon < res2.roundsWon) {
-            return -1;
-        } else {
-            int dif1 = res1.gamesWon - res1.gamesLost;
-            int dif2 = res2.gamesWon - res2.gamesLost;
-            if (dif1 > dif2) {
-                return 1;
-            } else if (dif1 < dif2) {
-                return -1;
-            } else {
-                return eloRating.comparePlayersByRating(res1.player, res2.player);
-            }
-        }
+    private Comparator<GroupResult> buildGroupResultComparator() {
+        return Comparator.comparingDouble((GroupResult gr) -> gr.roundsWon)
+                .thenComparingDouble((GroupResult gr) -> gr.gamesWon - gr.gamesLost)
+                .thenComparingDouble((GroupResult gr) -> eloRating.getRating(gr.player));
     }
 
     private void printGroupResults(String name, List<GroupResult> results) {
