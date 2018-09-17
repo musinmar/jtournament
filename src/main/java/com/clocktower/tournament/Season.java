@@ -4,6 +4,7 @@ import com.clocktower.tournament.domain.DefaultData;
 import com.clocktower.tournament.domain.Nation;
 import com.clocktower.tournament.domain.Title;
 import com.clocktower.tournament.dto.SeasonDto;
+import com.clocktower.tournament.simulation.Group;
 import com.clocktower.tournament.simulation.MatchResult;
 import com.clocktower.tournament.simulation.PlayerSeriesResult;
 import com.clocktower.tournament.simulation.PlayoffResult;
@@ -38,7 +39,6 @@ import static com.clocktower.tournament.utils.RandomUtils.random;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
-import static java.util.Collections.reverseOrder;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 
@@ -67,17 +67,6 @@ public class Season {
 
     private List<Player> leagues;
     //private List<Team> teams;
-
-    public static class GroupResult {
-        Player player;
-        int roundsWon;
-        int gamesWon;
-        int gamesLost;
-
-        GroupResult(Player player) {
-            this.player = player;
-        }
-    }
 
     public static class PlayerPair {
         final Player p1;
@@ -485,40 +474,39 @@ public class Season {
     private List<Player> playGroup(List<Player> players, String groupName, int points, int rounds) {
         println(groupName);
         println();
-
-        int len = players.size();
         printParticipants(players);
 
-        List<GroupResult> results = players.stream().map(GroupResult::new).collect(toList());
+        Group group = new Group(groupName, players, elo);
 
         for (int k = 1; k <= rounds; ++k) {
+            int len = players.size();
             if (len == 4) {
-                playGroupMatch(results, 0, 2, points);
-                playGroupMatch(results, 1, 3, points);
-                playGroupMatch(results, 3, 0, points);
-                playGroupMatch(results, 2, 1, points);
-                playGroupMatch(results, 0, 1, points);
-                playGroupMatch(results, 3, 2, points);
+                playGroupMatch(group, 0, 2, points);
+                playGroupMatch(group, 1, 3, points);
+                playGroupMatch(group, 3, 0, points);
+                playGroupMatch(group, 2, 1, points);
+                playGroupMatch(group, 0, 1, points);
+                playGroupMatch(group, 3, 2, points);
             } else if (len == 6) {
-                playGroupMatch(results, 0, 5, points);
-                playGroupMatch(results, 2, 4, points);
-                playGroupMatch(results, 1, 3, points);
+                playGroupMatch(group, 0, 5, points);
+                playGroupMatch(group, 2, 4, points);
+                playGroupMatch(group, 1, 3, points);
 
-                playGroupMatch(results, 5, 2, points);
-                playGroupMatch(results, 0, 1, points);
-                playGroupMatch(results, 4, 3, points);
+                playGroupMatch(group, 5, 2, points);
+                playGroupMatch(group, 0, 1, points);
+                playGroupMatch(group, 4, 3, points);
 
-                playGroupMatch(results, 4, 5, points);
-                playGroupMatch(results, 3, 0, points);
-                playGroupMatch(results, 1, 2, points);
+                playGroupMatch(group, 4, 5, points);
+                playGroupMatch(group, 3, 0, points);
+                playGroupMatch(group, 1, 2, points);
 
-                playGroupMatch(results, 5, 1, points);
-                playGroupMatch(results, 0, 4, points);
-                playGroupMatch(results, 2, 3, points);
+                playGroupMatch(group, 5, 1, points);
+                playGroupMatch(group, 0, 4, points);
+                playGroupMatch(group, 2, 3, points);
 
-                playGroupMatch(results, 3, 5, points);
-                playGroupMatch(results, 0, 2, points);
-                playGroupMatch(results, 4, 1, points);
+                playGroupMatch(group, 3, 5, points);
+                playGroupMatch(group, 0, 2, points);
+                playGroupMatch(group, 4, 1, points);
             } else {
                 int[] buf = new int[len];
                 int[] buf2 = new int[len];
@@ -528,13 +516,11 @@ public class Season {
                 int halflen = len / 2;
                 for (int i = 1; i < len; ++i) {
                     if (i % 2 == 1 && i > 1) {
-                        List<GroupResult> bufresults = newArrayList(results);
-                        sortGroupResults(bufresults);
-                        printGroupResults(groupName, bufresults);
+                        group.printGroupResults();
                     }
 
                     for (int j = 0; j < halflen; ++j) {
-                        playGroupMatch(results, buf[j], buf[j + halflen], points);
+                        playGroupMatch(group, buf[j], buf[j + halflen], points);
                     }
 
                     buf2[0] = buf[0];
@@ -553,10 +539,8 @@ public class Season {
             }
         }
 
-        sortGroupResults(results);
-        printGroupResults(groupName, results);
-
-        return results.stream().map(r -> r.player).collect(toList());
+        group.printGroupResults();
+        return group.getResult();
     }
 
     private void printParticipants(List<Player> players) {
@@ -564,54 +548,9 @@ public class Season {
         readln();
     }
 
-    private void sortGroupResults(List<GroupResult> results) {
-        results.sort(reverseOrder(this::compareGroupResults));
-    }
-
-    private int compareGroupResults(GroupResult res1, GroupResult res2) {
-        if (res1.roundsWon > res2.roundsWon) {
-            return 1;
-        } else if (res1.roundsWon < res2.roundsWon) {
-            return -1;
-        } else {
-            int dif1 = res1.gamesWon - res1.gamesLost;
-            int dif2 = res2.gamesWon - res2.gamesLost;
-            if (dif1 > dif2) {
-                return 1;
-            } else if (dif1 < dif2) {
-                return -1;
-            } else {
-                return elo.playerIsBetterThan(res1.player, res2.player);
-            }
-        }
-    }
-
-    private void printGroupResults(String name, List<GroupResult> results) {
-        println(name);
-        int len = results.size();
-        int maxNameLength = results.stream()
-                .map(r -> r.player.getPlayerName())
-                .mapToInt(String::length)
-                .max()
-                .orElse(0);
-
-        String formatString = "%d. %-" + (maxNameLength + 1) + "s %2d:%2d  %d";
-        for (int i = 0; i < len; i++) {
-            GroupResult r = results.get(i);
-            println(String.format(formatString, (i + 1), r.player.getPlayerName(),
-                    r.gamesWon, r.gamesLost, r.roundsWon));
-        }
-        readln();
-    }
-
-    private void playGroupMatch(List<GroupResult> results, int id1, int id2, int points) {
-        MatchResult<Player> r = playGroupGame(results.get(id1).player, results.get(id2).player, points);
-        results.get(id1).roundsWon += r.rounds.r1;
-        results.get(id1).gamesWon += r.games.r1;
-        results.get(id1).gamesLost += r.games.r2;
-        results.get(id2).roundsWon += r.rounds.r2;
-        results.get(id2).gamesWon += r.games.r2;
-        results.get(id2).gamesLost += r.games.r1;
+    private void playGroupMatch(Group group, int id1, int id2, int points) {
+        MatchResult<Player> matchResult = playGroupGame(group.getGroupResult(id1).player, group.getGroupResult(id2).player, points);
+        group.applyMatchResult(id1, id2, matchResult);
         readln();
     }
 
