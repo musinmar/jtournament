@@ -834,7 +834,7 @@ public class Season {
         println("Group Round");
         println();
 
-        playGroupRound(ro1, 0, 2);
+        ro1 = playGroupRound(ro1, 0, 2);
 
         List<Player> ro1sf = new ArrayList<>(asList(
                 ro1.get(0),
@@ -844,8 +844,8 @@ public class Season {
 
         println("First Round Semifinals");
         println();
-        PlayoffResult<Player> ro2Result = playSeriesPlayoffRound(ro1sf, 4, 0);
-        ro2.addAll(ro2Result.winners);
+        PlayoffResult<Player> ro1Result = playSeriesPlayoffRound(ro1sf, 4, 0);
+        ro2.addAll(ro1Result.winners);
 
         println("Second Round");
         println();
@@ -867,8 +867,11 @@ public class Season {
 
         println("Group Round");
         println();
-        List<Player> ro2Winners = playGroupRound(ro2, 0, 2);
-        gr.addAll(ro2Winners);
+        List<Player> ro2Result = playGroupRound(ro2, 0, 2);
+        for (int i = 0; i < 4; ++i) {
+            gr.add(ro2Result.get(i * 4));
+            gr.add(ro2Result.get(i * 4 + 1));
+        }
 
         println("Final Round");
         println();
