@@ -21,7 +21,7 @@ public class Player {
     private static final int LEVEL_UP_COEFFICIENT = 3;
     private static final int POINTS_PER_LEVEL = 4;
 
-    public int id;
+    private int id;
 
     private String name;
     private String surname;
@@ -47,6 +47,14 @@ public class Player {
     private int[] deck = new int[20];
 
     public Player() {
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {

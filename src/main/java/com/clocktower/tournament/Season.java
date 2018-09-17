@@ -184,7 +184,7 @@ public class Season {
         SeasonDto seasonDto = new SeasonDto();
         seasonDto.setYear(year);
         seasonDto.setPlayers(kn.stream().map(Player::toDto).collect(toList()));
-        seasonDto.setLeagues(leagues.stream().map(p -> p.id).collect(toList()));
+        seasonDto.setLeagues(leagues.stream().map(Player::getId).collect(toList()));
         seasonDto.setNationRating(nationRating.toDto());
         seasonDto.setEloRating(elo.toDto());
 

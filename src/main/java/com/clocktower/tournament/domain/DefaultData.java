@@ -19,7 +19,7 @@ public class DefaultData {
         Player[] kn = new Player[30];
         for (int i = 0; i < kn.length; i++) {
             kn[i] = new Player();
-            kn[i].id = i;
+            kn[i].setId(i);
         }
 
         kn[dec(1)].setName("Fler");

@@ -41,7 +41,7 @@ public class EloRating {
     public EloRatingDto toDto() {
         EloRatingDto eloRatingDto = new EloRatingDto();
         List<EloRatingDto.ItemDto> itemDtos = ratings.entrySet().stream()
-                .map(e -> new EloRatingDto.ItemDto(e.getKey().id, e.getValue().value))
+                .map(e -> new EloRatingDto.ItemDto(e.getKey().getId(), e.getValue().value))
                 .collect(toList());
         eloRatingDto.setItems(itemDtos);
         return eloRatingDto;
