@@ -949,19 +949,19 @@ public class Season {
     private void playLeague(int first, int last, String name, int points) {
         List<Player> league = new ArrayList<>(leagues.subList(first - 1, last));
 
-        league = playGroup(league, name, points, 1);
+        league = playGroup(league, name, points, 2);
         println();
 
         int lastp = league.size() - 1;
         if (points != 1) {
             println(name + " - relegation match");
-            PlayerSeriesResult r = playSeries(league.get(lastp - 1), league.get(lastp), 3, 0);
+            PlayerSeriesResult r = playSeries(league.get(lastp - 1), league.get(lastp), 4, 0);
             league.set(lastp - 1, r.getWinner());
             league.set(lastp, r.getLoser());
         }
 
         println(name + " - final match");
-        PlayerSeriesResult r = playSeries(league.get(0), league.get(1), 3, 0);
+        PlayerSeriesResult r = playSeries(league.get(0), league.get(1), 4, 0);
         league.set(0, r.getWinner());
         league.set(1, r.getLoser());
 
