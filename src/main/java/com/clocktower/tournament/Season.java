@@ -352,17 +352,17 @@ public class Season {
         println("Federations Cup - Semifinals");
         println("Semifinals");
         println();
-        List<Player> fc_f = playSeriesPlayoffRound(fc_sf, 3, 1).winners;
+        List<Player> fc_f = playSeriesPlayoffRound(fc_sf, 3, 2).winners;
 
         println("Champions League - Semifinal Group");
         println("Semifinals");
         println();
-        List<Player> cl_f = playSeriesPlayoffRound(cl_sf, 3, 2).winners;
+        List<Player> cl_f = playSeriesPlayoffRound(cl_sf, 3, 4).winners;
 
         println("Federations Cup - FINAL");
         println("Final");
         println();
-        PlayerSeriesResult r = playSeries(fc_f.get(0), fc_f.get(1), 3, 1);
+        PlayerSeriesResult r = playSeries(fc_f.get(0), fc_f.get(1), 3, 2);
         Player fcWinner = r.getWinner();
         readln();
         println("Knight " + fcWinner.getPlayerName() + " is the winner of the Federation Cup!");
@@ -371,7 +371,7 @@ public class Season {
         println("Champions League - FINAL");
         println("Final");
         println();
-        r = playSeries(cl_f.get(0), cl_f.get(1), 3, 2);
+        r = playSeries(cl_f.get(0), cl_f.get(1), 3, 4);
         Player clWinner = r.getWinner();
         readln();
         println("Knight " + clWinner.getPlayerName() + " is the winner of the Champions League!");

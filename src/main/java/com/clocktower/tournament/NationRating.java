@@ -14,6 +14,7 @@ import java.util.Map;
 import static com.clocktower.tournament.utils.Logger.print;
 import static com.clocktower.tournament.utils.Logger.println;
 import static com.clocktower.tournament.utils.Logger.readln;
+import static java.util.Comparator.comparing;
 import static java.util.Comparator.comparingDouble;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -24,6 +25,7 @@ public class NationRating {
     private Map<Nation, PointHistoryItem> pointHistory = new HashMap<>();
     private List<Nation> ranking;
     private Map<Nation, MutableDouble> seasonPoints = new HashMap<>();
+    private Map<Player, Double> playerSeasonPoints = new HashMap<>();
 
     private static class PointHistoryItem {
         double[] seasons = new double[SEASON_COUNT];
@@ -117,6 +119,9 @@ public class NationRating {
     public void advanceYear() {
         double sum = seasonPoints.values().stream().mapToDouble(MutableDouble::doubleValue).sum();
         println("Total points received this season: %.2f", sum);
+        playerSeasonPoints.entrySet().stream()
+                .sorted(comparing(e -> e.getKey().getId()))
+                .forEach(e -> println("%s: %.2f", e.getKey().getPlayerName(), e.getValue()));
         println();
 
         int[] countCoefficient = new int[]{5, 5, 5, 4, 4};
@@ -132,13 +137,21 @@ public class NationRating {
 
     public void updateRatings(Player p1, Player p2, SimpleResult r, int points) {
         if (r.r1 > r.r2) {
-            addSeasonPoints(p1.getNation(), points);
+            addSeasonPoints(p1, points);
         } else if (r.r2 > r.r1) {
-            addSeasonPoints(p2.getNation(), points);
+            addSeasonPoints(p2, points);
         } else {
-            addSeasonPoints(p1.getNation(), points / 2.0);
-            addSeasonPoints(p2.getNation(), points / 2.0);
+            addSeasonPoints(p1, points / 2.0);
+            addSeasonPoints(p2, points / 2.0);
         }
+    }
+
+    private void addSeasonPoints(Player p, double points) {
+        if (points == 0) {
+            return;
+        }
+        playerSeasonPoints.put(p, playerSeasonPoints.computeIfAbsent(p, player -> 0.) + points);
+        addSeasonPoints(p.getNation(), points);
     }
 
     private void addSeasonPoints(Nation nation, double points) {
