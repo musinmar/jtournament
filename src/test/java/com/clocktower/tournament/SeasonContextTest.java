@@ -4,8 +4,7 @@ import com.clocktower.tournament.domain.Player;
 import com.clocktower.tournament.simulation.SimpleResult;
 import com.clocktower.tournament.utils.Logger;
 
-class SeasonTest {
-
+class SeasonContextTest {
     //@Test
     void testPlayPenalties() {
         Player p1 = new Player();
@@ -15,7 +14,7 @@ class SeasonTest {
         p2.restartCareer(true);
 
         for (int i = 0; i < 1000; i++) {
-            SimpleResult r = Season.playGamePenalties(p1, p2);
+            SimpleResult r = SeasonContext.playGamePenalties(p1, p2);
             Logger.println(r.r1 + ":" + r.r2);
         }
         Logger.println();

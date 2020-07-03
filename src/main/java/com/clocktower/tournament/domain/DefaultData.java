@@ -384,6 +384,10 @@ public class DefaultData {
 
         initDecks(kn);
 
+        for (Player player : kn) {
+            player.restartCareer(false);
+        }
+
         return new ArrayList<>(Arrays.asList(kn));
     }
 

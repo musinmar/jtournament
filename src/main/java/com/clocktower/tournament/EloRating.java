@@ -31,10 +31,7 @@ public class EloRating {
         }
     }
 
-    public EloRating() {
-    }
-
-    public void init(List<Player> players) {
+    public EloRating(List<Player> players) {
         ratings = players.stream().collect(toMap(identity(), p -> new Rating(AVERAGE_RATING)));
     }
 
@@ -48,7 +45,7 @@ public class EloRating {
     }
 
     public static EloRating fromDto(EloRatingDto eloRatingDto, List<Player> players) {
-        EloRating eloRating = new EloRating();
+        EloRating eloRating = new EloRating(players);
         eloRating.ratings = eloRatingDto.getItems().stream()
                 .collect(toMap(item -> players.get(item.getPlayerId()), item -> new Rating(item.getPoints())));
         eloRating.normalize();

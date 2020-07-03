@@ -7,6 +7,7 @@ import com.clocktower.tournament.domain.Title;
 import com.clocktower.tournament.dto.SeasonDto;
 import com.clocktower.tournament.simulation.Group;
 import com.clocktower.tournament.simulation.MatchResult;
+import com.clocktower.tournament.simulation.PlayerPair;
 import com.clocktower.tournament.simulation.PlayerSeriesResult;
 import com.clocktower.tournament.simulation.PlayoffResult;
 import com.clocktower.tournament.simulation.SimpleResult;
@@ -45,40 +46,21 @@ import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 
 public class Season {
-
-    private static final int PLAYER_COUNT = 30;
-
     private static final String FILE_NAME_SEASON_JSON = "season.json";
     private static final String FILE_NAME_RATING = "rating";
     private static final String FILE_NAME_RATING_CHANGE = "rating change";
     private static final String FILE_NAME_STATS = "stats";
-
-    private static final int NORMAL_TIME_LENGTH = 9;
-    private static final int ADDITIONAL_TIME_LENGTH = 7;
 
     private static final int NATIONAL_TEAM_MATCH_ROUNDS = 1;
 
     private int year;
     private final String FOLDER = "season";
 
-    private List<Player> kn;
-    private EloRating elo = new EloRating();
+    private SeasonContext seasonContext;
 
-    private NationRating nationRating = new NationRating();
     private Map<Nation, List<Player>> nationalCupResults = new HashMap<>();
-
     private List<Player> leagues;
     //private List<Team> teams;
-
-    public static class PlayerPair {
-        final Player p1;
-        final Player p2;
-
-        public PlayerPair(Player p1, Player p2) {
-            this.p1 = p1;
-            this.p2 = p2;
-        }
-    }
 
     public Season() {
     }
@@ -97,8 +79,8 @@ public class Season {
         String seasonLogFileName = makeFilename("season", true, true);
         Logger.setCurrentFilename(seasonLogFileName);
 
-        nationRating.printPointHistory();
-        nationRating.calculateRankingsAndPrint();
+        seasonContext.getNationRating().printPointHistory();
+        seasonContext.getNationRating().calculateRankingsAndPrint();
 
         //playGoldenCup();
 
@@ -122,7 +104,7 @@ public class Season {
         }
 
         saveToFile(makeFilename(FILE_NAME_RATING_CHANGE, true, true),
-                writer -> elo.print(writer, true));
+                writer -> seasonContext.getElo().print(writer, true));
 
         advancePlayersAge();
         if (year % 2 == 0) {
@@ -133,40 +115,33 @@ public class Season {
         adjustPlayerSkillsAfterSeason();
 
         saveToFile(makeFilename(FILE_NAME_RATING, true, true),
-                writer -> elo.print(writer, false));
+                writer -> seasonContext.getElo().print(writer, false));
 
         printStatsToFile();
 
         year += 1;
-        nationRating.advanceYear();
-        nationRating.printPointHistory();
+        seasonContext.getNationRating().advanceYear();
+        seasonContext.getNationRating().printPointHistory();
         save();
 
         Logger.closeCurrentFile();
     }
 
     private void initNewGame() {
-        kn = DefaultData.initDefaultPlayers();
-        for (Player player : kn) {
-            player.restartCareer(false);
-        }
-
-        elo.init(kn);
-
-        leagues = kn.stream()
-                .sorted(comparingInt(Player::getLevel).reversed())
-                .collect(toList());
+        List<Player> players = DefaultData.initDefaultPlayers();
+        seasonContext = new SeasonContext(players);
 
         year = 1;
-
-        nationRating.initDefault();
+        leagues = players.stream()
+                .sorted(comparingInt(Player::getLevel).reversed())
+                .collect(toList());
 
         save();
     }
 
     private List<Team> makeRandomTeams() {
         List<Team> teams = new ArrayList<>();
-        List<Player> players = newArrayList(kn);
+        List<Player> players = newArrayList(seasonContext.getKnights());
         Collections.shuffle(players);
         List<String> names = asList("Irif Eagles", "Linagor Titans", "Alior Centaurs", "Turon Dragons",
                 "Ejmoril Giants", "Reldor Griffons", "Dilion Direwolves", "Telmir Minotaurs");
@@ -183,10 +158,10 @@ public class Season {
     private void saveAsJson() {
         SeasonDto seasonDto = new SeasonDto();
         seasonDto.setYear(year);
-        seasonDto.setPlayers(kn.stream().map(Player::toDto).collect(toList()));
+        seasonDto.setPlayers(seasonContext.getKnights().stream().map(Player::toDto).collect(toList()));
         seasonDto.setLeagues(leagues.stream().map(Player::getId).collect(toList()));
-        seasonDto.setNationRating(nationRating.toDto());
-        seasonDto.setEloRating(elo.toDto());
+        seasonDto.setNationRating(seasonContext.getNationRating().toDto());
+        seasonDto.setEloRating(seasonContext.getElo().toDto());
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -220,10 +195,11 @@ public class Season {
         }
 
         year = seasonDto.getYear();
-        kn = seasonDto.getPlayers().stream().map(Player::fromDto).collect(toList());
-        leagues = seasonDto.getLeagues().stream().map(kn::get).collect(toList());
-        nationRating = NationRating.fromDto(seasonDto.getNationRating());
-        elo = EloRating.fromDto(seasonDto.getEloRating(), kn);
+        List<Player> players = seasonDto.getPlayers().stream().map(Player::fromDto).collect(toList());
+        NationRating nationRating = NationRating.fromDto(seasonDto.getNationRating());
+        EloRating elo = EloRating.fromDto(seasonDto.getEloRating(), players);
+        seasonContext = new SeasonContext(players, elo, nationRating);
+        leagues = seasonDto.getLeagues().stream().map(players::get).collect(toList());
     }
 
     private String makeFilename(String s, boolean withYear, boolean txtExtension) {
@@ -325,7 +301,7 @@ public class Season {
 
         println("Federations Cup - Group round");
         println();
-        elo.sortPlayersByRating(fcGroupRound);
+        seasonContext.getElo().sortPlayersByRating(fcGroupRound);
         printParticipants(fcGroupRound);
         makeGroups(fcGroupRound);
         List<Player> fcGroupRoundResult = playGroupRound(fcGroupRound, 2, 1);
@@ -338,7 +314,7 @@ public class Season {
 
         println("Champions League - Group round");
         println();
-        elo.sortPlayersByRating(clGroupRound);
+        seasonContext.getElo().sortPlayersByRating(clGroupRound);
         printParticipants(clGroupRound);
         makeGroups(clGroupRound);
         List<Player> clGroupRoundResult = playGroupRound(clGroupRound, 4, 1);
@@ -384,7 +360,7 @@ public class Season {
     }
 
     private Player get_player_from(int rank, int pos) {
-        Nation nation = nationRating.getRankedNation(rank - 1);
+        Nation nation = seasonContext.getNationRating().getRankedNation(rank - 1);
         return nationalCupResults.get(nation).get(pos - 1);
     }
 
@@ -407,7 +383,7 @@ public class Season {
     }
 
     private List<Player> playNationalCup(Nation nation) {
-        List<Player> players = kn.stream()
+        List<Player> players = seasonContext.getKnights().stream()
                 .filter(p -> p.getNation() == nation)
                 .collect(toList());
 
@@ -435,7 +411,7 @@ public class Season {
         PlayoffResult<Player> pr = new PlayoffResult<>();
         int len = players.size();
         for (int i = 0; i < len / 2; ++i) {
-            MatchResult<Player> mr = playPlayoffGame(players.get(i * 2), players.get(i * 2 + 1), points);
+            MatchResult<Player> mr = seasonContext.playPlayoffGame(players.get(i * 2), players.get(i * 2 + 1), points);
             pr.winners.add(mr.getWinner());
             pr.losers.add(mr.getLoser());
             readln();
@@ -461,7 +437,7 @@ public class Season {
         PlayerSeriesResult seriesResult = new PlayerSeriesResult(p1, p2);
         SimpleResult r = seriesResult.getResult();
         while (r.getTopScore() != wins) {
-            MatchResult<Player> mr = playPlayoffGame(p1, p2, 0);
+            MatchResult<Player> mr = seasonContext.playPlayoffGame(p1, p2, 0);
             readln();
             if (mr.rounds.r1 > mr.rounds.r2) {
                 r.r1 += 1;
@@ -469,7 +445,7 @@ public class Season {
                 r.r2 += 1;
             }
         }
-        nationRating.updateRatings(p1, p2, r, points);
+        seasonContext.getNationRating().updateRatings(p1, p2, r, points);
         return seriesResult;
     }
 
@@ -478,7 +454,7 @@ public class Season {
         println();
         printParticipants(players);
 
-        Group group = new Group(groupName, players, elo);
+        Group group = new Group(groupName, players, seasonContext.getElo());
 
         for (int k = 1; k <= rounds; ++k) {
             int len = players.size();
@@ -551,123 +527,9 @@ public class Season {
     }
 
     private void playGroupMatch(Group group, int id1, int id2, int points) {
-        MatchResult<Player> matchResult = playGroupGame(group.getGroupResult(id1).player, group.getGroupResult(id2).player, points);
+        MatchResult<Player> matchResult = seasonContext.playGroupGame(group.getGroupResult(id1).player, group.getGroupResult(id2).player, points);
         group.applyMatchResult(id1, id2, matchResult);
         readln();
-    }
-
-    private MatchResult<Player> playGroupGame(Player p1, Player p2, int points) {
-        return playGame(p1, p2, false, points);
-    }
-
-    private MatchResult<Player> playPlayoffGame(Player p1, Player p2, int points) {
-        return playGame(p1, p2, true, points);
-    }
-
-    private MatchResult<Player> playGame(Player p1, Player p2, boolean isPlayoff, int points) {
-        MatchResult<Player> res = new MatchResult<>(p1, p2);
-
-        println(p1.getNameWithNation() + " vs " + p2.getNameWithNation());
-
-        SimpleResult l = playGameRound(p1, p2, NORMAL_TIME_LENGTH);
-        print(l + " ");
-        res.addRoundResult(l, false);
-
-        l = playGameRound(p1, p2, NORMAL_TIME_LENGTH);
-        print("/ " + l + " ");
-        res.addRoundResult(l, false);
-
-        if (isPlayoff) {
-            if (res.rounds.r1 == res.rounds.r2) {
-                l = playGameRound(p1, p2, ADDITIONAL_TIME_LENGTH);
-                print("/ e.t. " + l + " ");
-                res.addRoundResult(l, true);
-            }
-
-            if (res.rounds.r1 == res.rounds.r2) {
-                l = playGamePenalties(p1, p2);
-                print("/ pen. " + l + " ");
-                res.addRoundResult(l, true);
-            }
-        }
-
-        println("( " + res.rounds + " )");
-
-        updateElo(p1, p2, res);
-        updateExp(p1, p2, res);
-        nationRating.updateRatings(p1, p2, res.rounds, points);
-
-        return res;
-    }
-
-    private void updateElo(Player p1, Player p2, MatchResult<Player> mr) {
-        elo.updateRatings(p1, p2, mr.rounds);
-    }
-
-    private void updateExp(Player p1, Player p2, MatchResult<Player> mr) {
-        if (mr.rounds.r1 > mr.rounds.r2) {
-            p1.addExp(p2.getLevel());
-        } else if (mr.rounds.r2 > mr.rounds.r1) {
-            p2.addExp(p1.getLevel());
-        }
-    }
-
-    private static SimpleResult playGameRound(Player p1, Player p2, int len) {
-        int[] d1 = p1.getShuffledDeck();
-        int[] d2 = p2.getShuffledDeck();
-
-        SimpleResult r = new SimpleResult();
-        for (int i = 0; i < len; i++) {
-            if (d1[i] > d2[i]) {
-                ++r.r1;
-            } else if (d1[i] < d2[i]) {
-                ++r.r2;
-            }
-        }
-        return r;
-    }
-
-    static SimpleResult playGamePenalties(Player p1, Player p2) {
-        SimpleResult r = new SimpleResult();
-
-        int round = 0;
-        while (true) {
-            int[] d1 = p1.getShuffledDeck();
-            int[] d2 = p2.getShuffledDeck();
-            for (int i = 0; i < 20; i += 2) {
-                int k1 = 0;
-                int k2 = 0;
-
-                if (d1[i] > d2[i]) {
-                    ++k1;
-                } else {
-                    ++k2;
-                }
-                if (d1[i + 1] < d2[i + 1]) {
-                    ++k2;
-                } else {
-                    ++k1;
-                }
-
-                if (k1 >= k2) {
-                    ++r.r1;
-                }
-                if (k2 >= k1) {
-                    ++r.r2;
-                }
-
-                if (round >= 2 && (r.r1 > r.r2 || r.r1 < r.r2)) {
-                    break;
-                }
-                ++round;
-            }
-
-            if (r.r1 > r.r2 || r.r1 < r.r2) {
-                break;
-            }
-        }
-
-        return r;
     }
 
     private void shuffle(List<Player> a, boolean checkNoSameFederationPairs) {
@@ -689,18 +551,18 @@ public class Season {
     }
 
     private void advancePlayersAge() {
-        kn.forEach(Player::advanceAge);
+        seasonContext.getKnights().forEach(Player::advanceAge);
     }
 
     private void adjustPlayerSkillsAfterSeason() {
-        kn.forEach(Player::applyRandomDeckChanges);
+        seasonContext.getKnights().forEach(Player::applyRandomDeckChanges);
         if (year % 2 == 0) {
             decreaseBestPlayerSkills();
         }
     }
 
     private void decreaseBestPlayerSkills() {
-        Player bestPlayer = elo.getPlayersByRating().get(0);
+        Player bestPlayer = seasonContext.getElo().getPlayersByRating().get(0);
         bestPlayer.decreaseDeck();
         bestPlayer.decreaseDeck();
         println(bestPlayer.getPlayerName() + " has decreased his skill.");
@@ -718,9 +580,9 @@ public class Season {
     private void playMatchForTitle(Title contestedTitle, Title contenderTitle, int allowedHolderCount) {
         List<Player> participants;
 
-        long holderCount = kn.stream().filter(p -> p.getTitle() == contestedTitle).count();
+        long holderCount = seasonContext.getKnights().stream().filter(p -> p.getTitle() == contestedTitle).count();
         if (holderCount >= allowedHolderCount) {
-            List<Player> playersByRating = elo.getPlayersByRating();
+            List<Player> playersByRating = seasonContext.getElo().getPlayersByRating();
             List<Player> playersByRatingReversed = Lists.reverse(playersByRating);
 
             Player holder = playersByRatingReversed.stream()
@@ -733,7 +595,7 @@ public class Season {
 
             participants = asList(holder, contender);
         } else {
-            List<Player> playersByRating = elo.getPlayersByRating();
+            List<Player> playersByRating = seasonContext.getElo().getPlayersByRating();
             participants = playersByRating.stream()
                     .filter(p -> p.getTitle() == contenderTitle)
                     .limit(2)
@@ -759,10 +621,10 @@ public class Season {
     private Player selectPlayerToRetire() {
         final double EXPONENTIAL_FACTOR = 12.0;
 
-        double[] weights = kn.stream().mapToDouble(p -> Math.exp(p.getAge() / EXPONENTIAL_FACTOR)).toArray();
+        double[] weights = seasonContext.getKnights().stream().mapToDouble(p -> Math.exp(p.getAge() / EXPONENTIAL_FACTOR)).toArray();
         double totalWeight = stream(weights).sum();
 
-//        for (int i = 0; i < kn.size(); ++i) {
+//        for (int i = 0; i < seasonContext.getKnights().size(); ++i) {
 //            println("Weight %d: %5.2f", i, weights[i]);
 //        }
 //        println("Total weight: %5.2f", totalWeight);
@@ -770,10 +632,10 @@ public class Season {
         double r = random() * totalWeight;
 //        println("Random number: %5.2f", r);
 
-        for (int i = kn.size() - 1; i >= 0; --i) {
+        for (int i = seasonContext.getKnights().size() - 1; i >= 0; --i) {
             if (totalWeight - weights[i] <= r) {
 //                println("Found interval for weight %d", i);
-                return kn.get(i);
+                return seasonContext.getKnights().get(i);
             } else {
                 totalWeight -= weights[i];
 //                println("Not found interval, next weight: %5.2f", totalWeight);
@@ -796,7 +658,7 @@ public class Season {
 
         retiredPlayer.restartCareer(true);
         retiredPlayer.setTitle(COMMON);
-        elo.resetRating(retiredPlayer);
+        seasonContext.getElo().resetRating(retiredPlayer);
 
         println();
         readln();
@@ -809,7 +671,7 @@ public class Season {
         Player[] buf8 = new Player[8];
         Player[] buf16 = new Player[16];
 
-        List<Player> playersByRating = elo.getPlayersByRating();
+        List<Player> playersByRating = seasonContext.getElo().getPlayersByRating();
         List<Player> ro1 = newArrayList(playersByRating.subList(22, 30));
         List<Player> ro2 = newArrayList(playersByRating.subList(8, 22));
         List<Player> gr = newArrayList(playersByRating.subList(0, 8));
@@ -851,7 +713,7 @@ public class Season {
         println("Second Round");
         println();
 
-        elo.sortPlayersByRating(ro2);
+        seasonContext.getElo().sortPlayersByRating(ro2);
         printParticipants(ro2);
 
         for (int i = 0; i <= 3; ++i) {
@@ -876,7 +738,7 @@ public class Season {
 
         println("Final Round");
         println();
-        elo.sortPlayersByRating(gr);
+        seasonContext.getElo().sortPlayersByRating(gr);
         printParticipants(gr);
 
         buf16 = new Player[16];
@@ -982,7 +844,7 @@ public class Season {
 
     private Team makeNationalTeam(Nation nation, boolean mainTeam) {
         String name = nation.getName() + (mainTeam ? "" : " B");
-        List<Player> playersByRating = elo.getPlayersByRating();
+        List<Player> playersByRating = seasonContext.getElo().getPlayersByRating();
         List<Player> teamMembers = playersByRating.stream()
                 .filter(p -> p.getNation() == nation)
                 .skip(mainTeam ? 0 : 3)
@@ -994,11 +856,11 @@ public class Season {
     private void playNationalWorldCup() {
         List<Team> teams = new ArrayList<>();
         for (int i = 0; i < Nation.COUNT; ++i) {
-            Nation nation = nationRating.getRankedNation(i);
+            Nation nation = seasonContext.getNationRating().getRankedNation(i);
             teams.add(makeNationalTeam(nation, true));
         }
         for (int i = 0; i < Nation.COUNT; ++i) {
-            Nation nation = nationRating.getRankedNation(i);
+            Nation nation = seasonContext.getNationRating().getRankedNation(i);
             teams.add(makeNationalTeam(nation, false));
         }
 
@@ -1098,7 +960,7 @@ public class Season {
         int maxWinCount = teamSize * teamSize * rounds / 2 + 1;
         int counter = 0;
         for (PlayerPair pair : schedule) {
-            MatchResult<Player> mres = playPlayoffGame(pair.p1, pair.p2, 0);
+            MatchResult<Player> mres = seasonContext.playPlayoffGame(pair.p1, pair.p2, 0);
             res.addSubMatchResult(mres.rounds);
             readln();
 
@@ -1142,7 +1004,7 @@ public class Season {
     }
 
     private void writeLevels(PrintWriter writer) {
-        List<Player> playersByLevel = kn.stream()
+        List<Player> playersByLevel = seasonContext.getKnights().stream()
                 .sorted(comparingInt(Player::getLevel).reversed())
                 .collect(toList());
 
@@ -1157,7 +1019,7 @@ public class Season {
     }
 
     private void writeEffectiveLevels(PrintWriter writer) {
-        List<Player> playersByLevel = kn.stream()
+        List<Player> playersByLevel = seasonContext.getKnights().stream()
                 .sorted(comparingInt(Player::getEffectiveLevel).reversed())
                 .collect(toList());
 
@@ -1173,7 +1035,7 @@ public class Season {
     }
 
     private void writeAges(PrintWriter writer) {
-        List<Player> playersByAge = kn.stream()
+        List<Player> playersByAge = seasonContext.getKnights().stream()
                 .sorted(comparingInt(Player::getAge).reversed())
                 .collect(toList());
 
@@ -1190,7 +1052,7 @@ public class Season {
     private void writeTrophies(PrintWriter writer) {
         writer.println("Trophies");
 
-        for (Player player : kn) {
+        for (Player player : seasonContext.getKnights()) {
             Map<String, Long> trophies = player.getTrophiesByType();
             if (trophies.isEmpty()) {
                 continue;
