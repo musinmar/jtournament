@@ -1,5 +1,6 @@
 package com.clocktower.tournament.dto;
 
+import com.clocktower.tournament.domain.CareerStats;
 import com.clocktower.tournament.domain.Deck;
 import com.clocktower.tournament.domain.Nation;
 import com.clocktower.tournament.domain.Title;
@@ -23,6 +24,7 @@ public class PlayerDto {
     private int exp = 0;
 
     private List<Trophy> trophies;
+    private CareerStats careerStats;
 
     private int at;
     private int def;
@@ -183,5 +185,13 @@ public class PlayerDto {
 
     public void setDeck(Deck deck) {
         this.deck = deck;
+    }
+
+    public CareerStats getCareerStats() {
+        return careerStats;
+    }
+
+    public void setCareerStats(CareerStats careerStats) {
+        this.careerStats = careerStats;
     }
 }

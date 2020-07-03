@@ -34,6 +34,7 @@ public class Player {
     private int exp = 0;
 
     private List<Trophy> trophies = new ArrayList<>();
+    private CareerStats careerStats = new CareerStats();
 
     private int at;
     private int def;
@@ -127,6 +128,10 @@ public class Player {
         this.v = v;
     }
 
+    public CareerStats getCareerStats() {
+        return careerStats;
+    }
+
     public void setDeckType(DeckType deckType) {
         this.deckType = deckType;
     }
@@ -215,6 +220,7 @@ public class Player {
         playerDto.setV(v);
         playerDto.setExp(exp);
         playerDto.setTrophies(trophies);
+        playerDto.setCareerStats(careerStats);
         playerDto.setDeckType(new int[]{deckType.getV1(), deckType.getV2()});
         playerDto.setDeck(deck);
         return playerDto;
@@ -239,6 +245,7 @@ public class Player {
         player.v = playerDto.getV();
         player.exp = playerDto.getExp();
         player.trophies = playerDto.getTrophies();
+        player.careerStats = playerDto.getCareerStats() != null ? playerDto.getCareerStats() : new CareerStats();
         player.deckType = new DeckType(playerDto.getDeckType()[0], playerDto.getDeckType()[1]);
         player.deck = playerDto.getDeck();
         return player;

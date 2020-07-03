@@ -81,6 +81,7 @@ public class SeasonContext {
 
         updateElo(p1, p2, res);
         updateExp(p1, p2, res);
+        updateCareerStats(p1, p2, res);
         nationRating.updateRatings(p1, p2, res.rounds, points);
 
         return res;
@@ -96,6 +97,11 @@ public class SeasonContext {
         } else if (mr.rounds.r2 > mr.rounds.r1) {
             p2.addExp(p1.getLevel());
         }
+    }
+
+    private void updateCareerStats(Player p1, Player p2, MatchResult<Player> mr) {
+        p1.getCareerStats().applyMatchResult(mr.rounds);
+        p2.getCareerStats().applyMatchResult(mr.rounds.reversed());
     }
 
     private static SimpleResult playGameRound(Player p1, Player p2, int len) {

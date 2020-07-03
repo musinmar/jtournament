@@ -12,4 +12,11 @@ public class SimpleResult {
     public int getTopScore() {
         return Math.max(r1, r2);
     }
+
+    public SimpleResult reversed() {
+        SimpleResult r = new SimpleResult();
+        r.r1 = r2;
+        r.r2 = r1;
+        return r;
+    }
 }

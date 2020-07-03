@@ -1,5 +1,6 @@
 package com.clocktower.tournament;
 
+import com.clocktower.tournament.domain.CareerStats;
 import com.clocktower.tournament.domain.DefaultData;
 import com.clocktower.tournament.domain.Nation;
 import com.clocktower.tournament.domain.Player;
@@ -647,6 +648,12 @@ public class Season {
     private void retireRandomPlayer() {
         Player retiredPlayer = selectPlayerToRetire();
         println("Knight %s has retired at the age of %d", retiredPlayer.getPlayerName(), retiredPlayer.getAge());
+
+        CareerStats stats = retiredPlayer.getCareerStats();
+        println("Knight's career statistics:");
+        println("Played: %d, Wins: %d, Draws: %d, Losses: %d",
+                stats.getPlayed(), stats.getWins(), stats.getDraws(), stats.getLosses());
+
         Map<String, Long> trophies = retiredPlayer.getTrophiesByType();
         if (!trophies.isEmpty()) {
             println("Knight's achievements are:");
@@ -992,6 +999,8 @@ public class Season {
                     writeAges(writer);
                     writer.println();
                     writeTrophies(writer);
+                    writer.println();
+                    writeCareerStats(writer);
                 });
     }
 
@@ -1061,6 +1070,17 @@ public class Season {
             for (Map.Entry<String, Long> entry : trophies.entrySet()) {
                 writer.println(entry.getKey() + ": " + entry.getValue());
             }
+        }
+    }
+
+    private void writeCareerStats(PrintWriter writer) {
+        writer.println("Career Stats");
+        writer.println();
+
+        for (Player player : seasonContext.getKnights()) {
+            CareerStats cs = player.getCareerStats();
+            writer.println(String.format("%s: P:%d, W:%d, D:%d, L:%d",
+                    player.getPlayerName(), cs.getPlayed(), cs.getWins(), cs.getDraws(), cs.getLosses()));
         }
     }
 
