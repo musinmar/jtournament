@@ -51,4 +51,8 @@ public class Deck {
         ArrayUtils.shuffle(d);
         return d;
     }
+
+    public int sum() {
+        return items.stream().mapToInt(v -> v).sum();
+    }
 }

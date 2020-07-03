@@ -272,6 +272,6 @@ public class Player {
     }
 
     public int getEffectiveLevel() {
-        return deck.getItems().stream().mapToInt(v -> v).sum();
+        return deck.sum();
     }
 }
