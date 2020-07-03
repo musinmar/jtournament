@@ -4,7 +4,6 @@ import com.clocktower.tournament.dto.PlayerDto;
 import com.clocktower.tournament.utils.IntToRomanConverter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -130,6 +129,10 @@ public class Player {
 
     public void setDeckType(DeckType deckType) {
         this.deckType = deckType;
+    }
+
+    public Deck getDeck() {
+        return deck;
     }
 
     public String getSimplePlayerName() {
@@ -268,11 +271,7 @@ public class Player {
         }
     }
 
-    public int[] getShuffledDeck() {
-        return deck.getShuffledItems();
-    }
-
     public int getEffectiveLevel() {
-        return Arrays.stream(deck.getItems()).sum();
+        return deck.getItems().stream().mapToInt(v -> v).sum();
     }
 }

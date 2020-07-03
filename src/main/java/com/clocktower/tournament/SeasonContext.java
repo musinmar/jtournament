@@ -99,8 +99,8 @@ public class SeasonContext {
     }
 
     private static SimpleResult playGameRound(Player p1, Player p2, int len) {
-        int[] d1 = p1.getShuffledDeck();
-        int[] d2 = p2.getShuffledDeck();
+        int[] d1 = p1.getDeck().getShuffledItems();
+        int[] d2 = p2.getDeck().getShuffledItems();
 
         SimpleResult r = new SimpleResult();
         for (int i = 0; i < len; i++) {
@@ -118,8 +118,8 @@ public class SeasonContext {
 
         int round = 0;
         while (true) {
-            int[] d1 = p1.getShuffledDeck();
-            int[] d2 = p2.getShuffledDeck();
+            int[] d1 = p1.getDeck().getShuffledItems();
+            int[] d2 = p2.getDeck().getShuffledItems();
             int length = Math.min(d1.length, d2.length);
             for (int i = 0; i < length; i += 2) {
                 int k1 = 0;

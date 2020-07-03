@@ -4,47 +4,50 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
+import static java.util.Collections.sort;
+import static java.util.Collections.unmodifiableList;
 
 public class Deck {
 
-    public static int STANDARD_SIZE = 20;
-
     @JsonValue
-    private int[] items;
+    private List<Integer> items;
 
-    private Deck(int[] items) {
-        int[] sortedItems = ArrayUtils.clone(items);
-        Arrays.sort(sortedItems);
+    private Deck(List<Integer> items) {
+        var sortedItems = new ArrayList<>(items);
+        sort(sortedItems);
         this.items = sortedItems;
     }
 
     public static Deck newDefaultDeck() {
-        int[] items = new int[]{
+        Integer[] items = new Integer[]{
                 0, 0, 0, 1, 1,
                 1, 1, 2, 2, 2,
                 3, 3, 3, 4, 4,
                 4, 4, 5, 5, 5
         };
-        return new Deck(items);
+        return new Deck(Arrays.asList(items));
     }
 
     @JsonCreator
-    public static Deck from(int[] items) {
+    public static Deck from(List<Integer> items) {
         return new Deck(items);
     }
 
     public void changeAtPosition(int pos, int dif) {
-        items[pos] += dif;
-        Arrays.sort(items);
+        items.set(pos, items.get(pos) + dif);
+        sort(items);
     }
 
-    public int[] getItems() {
-        return items;
+    public List<Integer> getItems() {
+        return unmodifiableList(items);
     }
 
     public int[] getShuffledItems() {
-        int[] d = ArrayUtils.clone(items);
+        int[] d = items.stream().mapToInt(v -> v).toArray();
         ArrayUtils.shuffle(d);
         return d;
     }

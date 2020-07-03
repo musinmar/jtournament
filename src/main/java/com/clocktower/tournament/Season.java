@@ -32,12 +32,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static com.clocktower.tournament.utils.Logger.print;
-import static com.clocktower.tournament.utils.Logger.println;
-import static com.clocktower.tournament.utils.Logger.readln;
 import static com.clocktower.tournament.domain.Title.COMMON;
 import static com.clocktower.tournament.domain.Title.LORD;
 import static com.clocktower.tournament.domain.Title.SIR;
+import static com.clocktower.tournament.utils.Logger.print;
+import static com.clocktower.tournament.utils.Logger.println;
+import static com.clocktower.tournament.utils.Logger.readln;
 import static com.clocktower.tournament.utils.RandomUtils.random;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
@@ -1029,7 +1029,6 @@ public class Season {
         writer.println("Effective Levels");
         for (int i = 0; i < playersByLevel.size(); i++) {
             Player p = playersByLevel.get(i);
-            int effectiveLevel = Arrays.stream(p.getShuffledDeck()).sum();
             writer.println(String.format(formatString, (i + 1), p.getPlayerName(), p.getEffectiveLevel()));
         }
     }
