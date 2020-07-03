@@ -120,7 +120,8 @@ public class SeasonContext {
         while (true) {
             int[] d1 = p1.getShuffledDeck();
             int[] d2 = p2.getShuffledDeck();
-            for (int i = 0; i < 20; i += 2) {
+            int length = Math.min(d1.length, d2.length);
+            for (int i = 0; i < length; i += 2) {
                 int k1 = 0;
                 int k2 = 0;
 

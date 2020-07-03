@@ -1,5 +1,6 @@
 package com.clocktower.tournament.dto;
 
+import com.clocktower.tournament.domain.Deck;
 import com.clocktower.tournament.domain.Nation;
 import com.clocktower.tournament.domain.Title;
 import com.clocktower.tournament.domain.Trophy;
@@ -30,7 +31,7 @@ public class PlayerDto {
     private int v;
 
     private int[] deckType;
-    private int[] deck = new int[20];
+    private Deck deck;
 
     public int getId() {
         return id;
@@ -176,11 +177,11 @@ public class PlayerDto {
         this.deckType = deckType;
     }
 
-    public int[] getDeck() {
+    public Deck getDeck() {
         return deck;
     }
 
-    public void setDeck(int[] deck) {
+    public void setDeck(Deck deck) {
         this.deck = deck;
     }
 }

@@ -2,7 +2,6 @@ package com.clocktower.tournament.domain;
 
 import com.clocktower.tournament.dto.PlayerDto;
 import com.clocktower.tournament.utils.IntToRomanConverter;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,7 +43,7 @@ public class Player {
     private int v;
 
     private DeckType deckType;
-    private int[] deck = new int[20];
+    private Deck deck;
 
     public Player() {
     }
@@ -161,26 +160,7 @@ public class Player {
 
         level = persistentLevel;
 
-        deck[0] = 0;
-        deck[1] = 0;
-        deck[2] = 0;
-        deck[3] = 1;
-        deck[4] = 1;
-        deck[5] = 1;
-        deck[6] = 1;
-        deck[7] = 2;
-        deck[8] = 2;
-        deck[9] = 2;
-        deck[10] = 3;
-        deck[11] = 3;
-        deck[12] = 3;
-        deck[13] = 4;
-        deck[14] = 4;
-        deck[15] = 4;
-        deck[16] = 4;
-        deck[17] = 5;
-        deck[18] = 5;
-        deck[19] = 5;
+        deck = Deck.newDefaultDeck();
 
         if (randomizeDeckKind) {
             deckType = DeckType.createRandom();
@@ -272,34 +252,27 @@ public class Player {
 
     public void increaseDeck() {
         int r = deckType.generateRandomDeckPosition();
-        changeDeckAtPosition(deck, r, 1);
+        deck.changeAtPosition(r, 1);
     }
 
     public void decreaseDeck() {
         int k = deckType.generateRandomDeckPosition();
-        changeDeckAtPosition(deck, k, -1);
+        deck.changeAtPosition(k, -1);
     }
 
     public void applyRandomDeckChanges() {
         for (int i = 1; i <= RANDOM_DECK_CHANGES; ++i) {
             int k = deckType.generateRandomDeckPosition();
             int change = random(2) * 2 - 1;
-            changeDeckAtPosition(deck, k, change);
+            deck.changeAtPosition(k, change);
         }
     }
 
-    static void changeDeckAtPosition(int[] deck, int pos, int dif) {
-        deck[pos] += dif;
-        Arrays.sort(deck);
-    }
-
     public int[] getShuffledDeck() {
-        int[] d = ArrayUtils.clone(deck);
-        ArrayUtils.shuffle(d);
-        return d;
+        return deck.getShuffledItems();
     }
 
     public int getEffectiveLevel() {
-        return Arrays.stream(deck).sum();
+        return Arrays.stream(deck.getItems()).sum();
     }
 }
