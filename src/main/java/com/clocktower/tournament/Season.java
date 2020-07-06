@@ -557,6 +557,8 @@ public class Season {
 
     private void adjustPlayerSkillsAfterSeason() {
         seasonContext.getKnights().forEach(Player::applyRandomDeckChanges);
+        seasonContext.getKnights().forEach(Player::applyDeckAgeAdjustments);
+        println();
         if (year % 2 == 0) {
             decreaseBestPlayerSkills();
         }
@@ -994,8 +996,8 @@ public class Season {
                 writer -> {
                     writeLevels(writer);
                     writer.println();
-//                    writeEffectiveLevels(writer);
-//                    writer.println();
+                    writeEffectiveLevels(writer);
+                    writer.println();
                     writeAges(writer);
                     writer.println();
                     writeTrophies(writer);

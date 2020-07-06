@@ -270,6 +270,13 @@ public class Player {
         deck.changeAtPosition(k, -1);
     }
 
+    public void applyDeckAgeAdjustments() {
+        if (age > 40) {
+            decreaseDeck();
+            println("%s gradually loses his skill", getPlayerName());
+        }
+    }
+
     public void applyRandomDeckChanges() {
         for (int i = 1; i <= RANDOM_DECK_CHANGES; ++i) {
             int k = deckType.generateRandomDeckPosition();
